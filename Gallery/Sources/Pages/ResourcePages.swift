@@ -85,6 +85,14 @@ struct TexturesPage: View {
         let name: String
         let showcase: String
         let style: BackdropStyle
+
+        /// Drawn in code (it costs the app nothing), or a picture shipped in the library.
+        var isDrawn: Bool {
+            switch style {
+            case .texture, .image: false
+            default: true
+            }
+        }
     }
 
     struct Shelf: Sendable {
@@ -92,9 +100,16 @@ struct TexturesPage: View {
         let tiles: [Tile]
     }
 
+    static let drawnIcon = "pencil"
+    static let pictureIcon = "photo"
+
     nonisolated static let drawn: [Texture.Family: [Tile]] = [
         .woods: [Tile(name: ".wood", showcase: "wood", style: .wood)],
-        .metals: [Tile(name: ".busFloor", showcase: "busFloor", style: .busFloor), Tile(name: ".brushedMetal", showcase: "brushedMetal", style: .brushedMetal)]
+        .metals: [
+            Tile(name: ".busFloor", showcase: "busFloor", style: .busFloor()),
+            Tile(name: ".busFloor(45°)", showcase: "busFloor(45°)", style: .busFloor(angle: .degrees(45))),
+            Tile(name: ".brushedMetal", showcase: "brushedMetal", style: .brushedMetal)
+        ]
     ]
 
     nonisolated static let shelves: [Shelf] =
@@ -109,12 +124,13 @@ struct TexturesPage: View {
 
     var body: some View {
         Page("Textures") {
+            Banner(Text("\(Image(systemName: Self.drawnIcon)) drawn in code, free to ship. \(Image(systemName: Self.pictureIcon)) a picture, 10 to 75 KB."))
             ForEach(Self.shelves, id: \.title) { shelf in
                 LabelledGroup(LocalizedStringKey(shelf.title)) {
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 64), spacing: Space.small)], spacing: Space.small) {
                         ForEach(shelf.tiles, id: \.name) { tile in
                             NavigationLink(value: GlassShowcaseRoute(name: tile.showcase)) {
-                                TextureTile(name: tile.name, style: tile.style)
+                                TextureTile(name: tile.name, style: tile.style, icon: Image(systemName: tile.isDrawn ? Self.drawnIcon : Self.pictureIcon))
                             }
                             .buttonStyle(.plain)
                         }
@@ -125,10 +141,11 @@ struct TexturesPage: View {
     }
 }
 
-/// A material's swatch, with its name on a tag.
+/// A material's swatch, with its name on a tag and an icon for how it's made.
 struct TextureTile: View {
     let name: String
     let style: BackdropStyle
+    let icon: Image
 
     var body: some View {
         Tag(Text(verbatim: name))
@@ -136,6 +153,13 @@ struct TextureTile: View {
             .lineLimit(1)
             .minimumScaleFactor(0.6)
             .frame(maxWidth: .infinity, minHeight: 64, alignment: .bottomLeading)
+            .overlay(alignment: .topTrailing) {
+                icon
+                    .font(.caption2)
+                    .foregroundStyle(.inkMuted)
+                    .padding(Space.extraSmall)
+                    .glassCapsule()
+            }
             .padding(Space.extraSmall)
             .background { Backdrop(style) }
             .clipShape(RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))

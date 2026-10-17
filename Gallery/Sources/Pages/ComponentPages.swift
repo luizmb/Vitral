@@ -362,17 +362,14 @@ struct ProgressPage: View {
     }
 }
 
+/// The backdrops that aren't materials (those are on the Textures page): patterns, abstract
+/// colour, and plain. All drawn in code.
 struct BackdropsPage: View {
     nonisolated static let samples: [(name: String, style: BackdropStyle)] = [
         ("grid", .grid()),
         ("grid, zoomed out", .grid(scale: 0.3)),
         ("dots", .dots()),
         ("laserCurves", .laserCurves()),
-        ("wood", .wood),
-        ("brushedMetal", .brushedMetal),
-        ("busFloor", .busFloor),
-        ("paper", .paper),
-        ("texture(.wood)", .texture(.wood)),
         ("mesh", .mesh([.accent, .warning, .success, .danger])),
         ("aurora", .aurora()),
         ("aurora, warm", .aurora([.washPink, .washAmber, .washViolet])),

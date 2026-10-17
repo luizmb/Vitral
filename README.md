@@ -64,7 +64,7 @@ Token colours, Vitral's images (dark wood included) and glass all follow the ove
 | Fields | `FieldText`, `FieldSecure`, `FieldSearch`, `FieldContainer`, with `FieldStatus` |
 | Pickers | `SegmentedControlGlass`, `RadioList`, `StepperJump`, `AppearancePicker` |
 | Feedback | `Banner`, `EmptyState`, `ErrorScreen`, `ProgressOverlay` |
-| Backdrops | `Backdrop`: patterns, materials, textures, aurora, glow, waves, images |
+| Backdrops | `Backdrop`: patterns, drawn materials (`.busFloor(angle:)`, `.wood`, …), textures, aurora, glow, waves, images |
 
 Modifiers that take tokens: `.foregroundStyle(_:)`, `.font(_:)`, `.glassSurface(_:cornerRadius:)`,
 `.glassCapsule(_:)`, `.glassMaterial(_:)`, `.surface(_:cornerRadius:)`, `.appearance(_:)`.

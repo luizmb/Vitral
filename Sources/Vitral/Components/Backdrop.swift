@@ -19,8 +19,9 @@ public enum BackdropStyle: Sendable {
     /// Paper: the backdrop colour with a fine fleck.
     case paper
     /// A bus floor in liquid chrome: three raised bars to a square, each square turned a quarter
-    /// from its neighbours.
-    case busFloor
+    /// from its neighbours. `angle` turns the whole tread (`.degrees(45)` lays it on the
+    /// diagonal); the sheen sweeping across stays where it is.
+    case busFloor(angle: Angle = .zero)
     /// Soft colour fields from a palette, corner to corner.
     case mesh([ColorToken])
     /// Northern lights: curtains of colour over a sky, a pale dawn by day and starry at night.
@@ -69,8 +70,8 @@ public struct Backdrop: View {
             case .paper:
                 Color(.backdrop)
                 PaperFleck()
-            case .busFloor:
-                BusFloor()
+            case let .busFloor(angle):
+                BusFloor(angle: angle)
             case let .mesh(palette):
                 Color(.backdrop)
                 MeshBackdrop(palette: palette)
@@ -301,16 +302,23 @@ struct PaperFleck: View {
 struct BusFloor: View {
     static let square = 30.0
 
+    let angle: Angle
+
     var body: some View {
         ZStack {
             LinearGradient(colors: [Color(.chromeMid), Color(.chromeShadow)], startPoint: .top, endPoint: .bottom)
             Canvas { context, size in
+                let cover = BusFloor.cover(size, turnedBy: angle)
+                var context = context
+                context.translateBy(x: size.width / 2, y: size.height / 2)
+                context.rotate(by: angle)
+                context.translateBy(x: -cover.width / 2, y: -cover.height / 2)
                 let chrome = Gradient(stops: [
                     .init(color: Color(.chromeHighlight), location: 0),
                     .init(color: Color(.chromeMid), location: 0.45),
                     .init(color: Color(.chromeShadow), location: 1)
                 ])
-                for frame in BusFloor.bars(in: size) {
+                for frame in BusFloor.bars(in: cover) {
                     let capsule = Path(roundedRect: frame, cornerRadius: min(frame.width, frame.height) / 2)
                     context.fill(capsule.offsetBy(dx: 0.8, dy: 1.2), with: .color(Color(.chromeShadow)))
                     // Lit across the bar's short side, whichever way it lies.
@@ -340,6 +348,12 @@ struct BusFloor: View {
             .blendMode(.overlay)
         }
         .drawingGroup()
+    }
+
+    /// What the tread has to cover so that, turned, it still fills `size`: `size` itself when it
+    /// isn't turned, else a square as wide as the diagonal.
+    static func cover(_ size: CGSize, turnedBy angle: Angle) -> CGSize {
+        angle == .zero ? size : CGSize(width: hypot(size.width, size.height), height: hypot(size.width, size.height))
     }
 
     /// Every bar's frame: three to a square, across where the square's row and column add up to an

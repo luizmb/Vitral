@@ -16,14 +16,15 @@ enum BackdropCatalogue {
     }
 
     nonisolated static let shelves: [Shelf] =
-        [Shelf(title: "Patterns and materials", entries: BackdropsPage.samples.map { Entry(name: $0.name, style: $0.style) })]
-            + Texture.Family.allCases.map { family in
-                Shelf(
-                    title: family.rawValue,
-                    entries: Texture.allCases.filter { $0.family == family }.map { Entry(name: "texture(.\($0.rawValue))", style: .texture($0)) }
-                )
+        [Shelf(title: "Patterns", entries: BackdropsPage.samples.map { Entry(name: $0.name, style: $0.style) })]
+            + TexturesPage.shelves.map { shelf in
+                Shelf(title: shelf.title, entries: shelf.tiles.map { Entry(name: $0.showcase, style: $0.style) })
             }
             + [Shelf(title: "Wallpapers", entries: Wallpaper.all.map { Entry(name: $0.showcaseName, style: $0.backdrop) })]
+
+    /// The backdrops drawn in code: patterns, and the materials that aren't pictures.
+    nonisolated static let drawn: [String] =
+        BackdropsPage.samples.map(\.name) + TexturesPage.shelves.flatMap(\.tiles).filter(\.isDrawn).map(\.showcase)
 
     nonisolated static let all = shelves.flatMap(\.entries)
 
