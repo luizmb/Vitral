@@ -24,4 +24,6 @@ public enum Glyph: String, CaseIterable, Hashable, Sendable {
     /// Shows or hides a workspace's leading panel (a sidebar) or its trailing one (an inspector).
     case panelLeading = "sidebar.left"
     case panelTrailing = "sidebar.right"
+    /// Shows or hides a workspace's bottom panel (a console).
+    case panelBottom = "rectangle.bottomthird.inset.filled"
 }
