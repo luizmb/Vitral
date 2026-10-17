@@ -9,7 +9,8 @@ public protocol PageKind: Hashable, CaseIterable, Sendable where AllCases: Rando
 
 /// Pages with their segments on top, Xcode's inspector way: tap a segment or swipe the pages, and
 /// the two follow each other. The page is the binding's. Segments show icons, or titles with
-/// `showsTitles`.
+/// `showsTitles`. The pages are the platform's page view, so a swipe always settles on one, even
+/// when the system's back swipe takes the touch over.
 public struct SegmentedPages<Page: PageKind, Content: View>: View {
     @Binding var selection: Page
     let showsTitles: Bool
@@ -19,16 +20,6 @@ public struct SegmentedPages<Page: PageKind, Content: View>: View {
         self._selection = selection
         self.showsTitles = showsTitles
         self.page = page
-    }
-
-    /// A page as a carousel item.
-    struct Item: Identifiable {
-        let id: Page
-    }
-
-    /// The carousel's optional id, over the non-optional selection.
-    var shown: Binding<Page?> {
-        Binding(get: { selection }, set: { page in page.map { selection = $0 } })
     }
 
     public var body: some View {
@@ -41,12 +32,16 @@ public struct SegmentedPages<Page: PageKind, Content: View>: View {
             )
             .padding(Space.medium)
             Hairline()
-            Carousel(Page.allCases.map(Item.init), selection: shown, inset: 0) { item in
-                page(item.id)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            TabView(selection: $selection) {
+                ForEach(Array(Page.allCases), id: \.self) { kind in
+                    page(kind)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                        .tag(kind)
+                }
             }
-            // A carousel lets its neighbours show past its edges; pages stay inside.
-            .clipped()
+            #if os(iOS)
+            .tabViewStyle(.page(indexDisplayMode: .never))
+            #endif
         }
     }
 }
