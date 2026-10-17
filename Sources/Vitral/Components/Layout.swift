@@ -18,13 +18,13 @@ public struct Hairline: View {
 
 /// Glass holding its content, padded.
 public struct Panel<Content: View>: View {
-    let material: GlassToken
+    let material: GlassToken?
     let cornerRadius: Double
     let padding: Double
     let content: Content
 
     public init(
-        material: GlassToken = .regular,
+        material: GlassToken? = nil,
         cornerRadius: Double = Radius.card,
         padding: Double = Space.large,
         @ViewBuilder content: () -> Content
@@ -104,13 +104,16 @@ public struct LabelledGroup<Content: View>: View {
     }
 }
 
-/// A screen's scrolling column over the backdrop, its title in the navigation bar.
+/// A screen's scrolling column over its backdrop (graph paper unless told otherwise), its title in
+/// the navigation bar.
 public struct Page<Content: View>: View {
     let title: LocalizedStringKey
+    let backdrop: BackdropStyle
     let content: Content
 
-    public init(_ title: LocalizedStringKey, @ViewBuilder content: () -> Content) {
+    public init(_ title: LocalizedStringKey, backdrop: BackdropStyle = .grid(), @ViewBuilder content: () -> Content) {
         self.title = title
+        self.backdrop = backdrop
         self.content = content()
     }
 
@@ -124,7 +127,7 @@ public struct Page<Content: View>: View {
             .frame(maxWidth: 720)
             .frame(maxWidth: .infinity)
         }
-        .background(Color(.backdrop).ignoresSafeArea())
+        .background { Backdrop(backdrop) }
         .navigationTitle(Text(title))
     }
 }

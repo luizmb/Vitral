@@ -101,3 +101,10 @@ public extension Image {
         self.init(illustration.rawValue, bundle: .module)
     }
 }
+
+public extension Image {
+    /// One of Vitral's texture tiles, from the package's own assets.
+    init(_ texture: Texture) {
+        self.init("texture-\(texture.rawValue)", bundle: .module)
+    }
+}

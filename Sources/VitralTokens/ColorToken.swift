@@ -90,8 +90,32 @@ public extension ColorToken {
     /// A selected row or segment, lifted off the glass.
     static let selectedSurface = ColorToken(light: RGBA.white.opacity(0.92), dark: RGBA.white.opacity(0.16))
 
+    /// A thin wash of the backdrop colour on clear glass, so text on it stays legible over a busy
+    /// backdrop without the glass going opaque.
+    /// At full strength; `GlassToken.veiled(_:)` takes a fraction of it.
+    static let veil = ColorToken(light: RGBA(white: 0.97), dark: RGBA(white: 0.08))
+
     /// What sits under the glass when nothing else does.
     static let backdrop = ColorToken(light: RGBA(white: 0.965), dark: RGBA(white: 0.09))
+    /// The graph paper's fine lines and its stronger every-fifth lines.
+    static let gridLine = ColorToken(light: RGBA.black.opacity(0.05), dark: RGBA.white.opacity(0.06))
+    static let gridLineMajor = ColorToken(light: RGBA.black.opacity(0.09), dark: RGBA.white.opacity(0.11))
+
+    // Backdrop materials.
+    static let woodBase = ColorToken(light: RGBA(hex: 0xDDBB92), dark: RGBA(hex: 0x3A2A1E))
+    static let woodGrain = ColorToken(light: RGBA(hex: 0x8B5A2B, alpha: 0.30), dark: RGBA(hex: 0xC8935F, alpha: 0.22))
+    static let metalBase = ColorToken(light: RGBA(hex: 0xCDD0D5), dark: RGBA(hex: 0x2B2D31))
+    static let metalStreak = ColorToken(light: RGBA.white.opacity(0.55), dark: RGBA.white.opacity(0.07))
+    static let metalShade = ColorToken(light: RGBA.black.opacity(0.06), dark: RGBA.black.opacity(0.35))
+    /// Laid over a photographic texture or picture: nothing in light mode, a dimming in dark mode,
+    /// so the picture sits with the rest of a dark screen.
+    static let pictureDim = ColorToken(light: RGBA.black.opacity(0), dark: RGBA.black.opacity(0.4))
+
+    // Liquid chrome: a polished, reflective metal.
+    static let chromeHighlight = ColorToken(light: RGBA(hex: 0xFFFFFF, alpha: 0.95), dark: RGBA(hex: 0xE8EDF2, alpha: 0.85))
+    static let chromeMid = ColorToken(light: RGBA(hex: 0xB9C0C8), dark: RGBA(hex: 0x5B636C))
+    static let chromeShadow = ColorToken(light: RGBA(hex: 0x6E7782), dark: RGBA(hex: 0x1B1F24))
+    static let paperFleck = ColorToken(light: RGBA(hex: 0x6B5A40, alpha: 0.22), dark: RGBA.white.opacity(0.12))
 }
 
 public extension RGBA {

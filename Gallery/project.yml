@@ -18,6 +18,9 @@ targets:
     platform: iOS
     sources:
       - path: Sources
+      # The Gallery shows every wallpaper, so it takes them all; another app copies only its own.
+      - path: ../Wallpapers/Images
+        buildPhase: resources
     dependencies:
       - package: Vitral
         product: Vitral
@@ -47,6 +50,8 @@ targets:
           - "__Snapshots__/**"
     dependencies:
       - target: Gallery
+      - package: Vitral
+        product: Vitral
       - package: SnapshotTesting
         product: SnapshotTesting
     settings:
