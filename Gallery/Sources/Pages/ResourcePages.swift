@@ -70,6 +70,7 @@ struct WallpapersPage: View {
                         .padding(.vertical, Space.huge)
                         .background { Backdrop(wallpaper.backdrop) }
                         .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+                        .contentShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
                 }
                 .buttonStyle(.plain)
             }
@@ -109,5 +110,7 @@ struct TextureTile: View {
             .padding(Space.extraSmall)
             .background { Backdrop(.texture(texture)) }
             .clipShape(RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
+            // The backdrop doesn't take touches, so the whole tile is made the target.
+            .contentShape(RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
     }
 }

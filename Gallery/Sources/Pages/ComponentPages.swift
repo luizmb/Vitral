@@ -393,6 +393,7 @@ struct BackdropsPage: View {
                             .padding(.vertical, Space.large)
                             .background { Backdrop(sample.style) }
                             .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+                            .contentShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
                     }
                     .buttonStyle(.plain)
                 }
