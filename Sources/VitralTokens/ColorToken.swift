@@ -90,6 +90,11 @@ public extension ColorToken {
     /// A selected row or segment, lifted off the glass.
     static let selectedSurface = ColorToken(light: RGBA.white.opacity(0.92), dark: RGBA.white.opacity(0.16))
 
+    /// A thin wash of the backdrop colour on clear glass, so text on it stays legible over a busy
+    /// backdrop without the glass going opaque.
+    /// At full strength; `GlassToken.veiled(_:)` takes a fraction of it.
+    static let veil = ColorToken(light: RGBA(white: 0.97), dark: RGBA(white: 0.08))
+
     /// What sits under the glass when nothing else does.
     static let backdrop = ColorToken(light: RGBA(white: 0.965), dark: RGBA(white: 0.09))
     /// The graph paper's fine lines and its stronger every-fifth lines.

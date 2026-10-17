@@ -18,13 +18,13 @@ public struct Hairline: View {
 
 /// Glass holding its content, padded.
 public struct Panel<Content: View>: View {
-    let material: GlassToken
+    let material: GlassToken?
     let cornerRadius: Double
     let padding: Double
     let content: Content
 
     public init(
-        material: GlassToken = .regular,
+        material: GlassToken? = nil,
         cornerRadius: Double = Radius.card,
         padding: Double = Space.large,
         @ViewBuilder content: () -> Content

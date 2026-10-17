@@ -33,6 +33,12 @@ struct GallerySnapshotTests {
         )
     }
 
+    @Test(arguments: MaterialLadder.backdrops.map(\.name))
+    func materials(over name: String) {
+        let style = MaterialLadder.backdrops.first { $0.name == name }?.style ?? .plain
+        snapshot(MaterialLadder(backdrop: style).frame(maxHeight: .infinity).background { Backdrop(style) }, named: "materials-\(name)")
+    }
+
     @Test func home() {
         snapshot(HomePage(), named: "home")
     }
