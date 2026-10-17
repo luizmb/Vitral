@@ -20,8 +20,8 @@ import VitralTokens
     }
 }
 
-@Suite struct InvariantColourTests {
-    @Test(arguments: [ColorToken.black, .charcoal, .white, .cream, .gold, .silver])
+@Suite struct FixedColourTests {
+    @Test(arguments: [ColorToken.fixedBlack, .fixedCharcoal, .fixedWhite, .fixedCream, .fixedGold, .fixedSilver])
     func theSameInLightAndDark(_ token: ColorToken) {
         #expect(token.light == token.dark)
     }

@@ -181,6 +181,10 @@ public struct GlassKnobStyle: KnobStyle {
         case dot
         /// A raised bar across the whole knob, a chicken-head's.
         case handle
+        /// A chrome bead standing out of the knob near its edge, lit on top.
+        case chromeStud
+        /// A chrome dimple pressed into the knob near its edge, shadowed on top.
+        case chromeDimple
     }
 
     let face: Face
@@ -340,6 +344,14 @@ struct GlassKnob: View {
             }
             .shadow(color: Color(.scrim), radius: diameter * 0.04, y: diameter * 0.02)
             .rotationEffect(.degrees(configuration.angle))
+        case .chromeStud, .chromeDimple:
+            ChromeBead(isConcave: style.pointer == .chromeDimple)
+                .frame(width: diameter * 0.14, height: diameter * 0.14)
+                // Placed by angle, not turned with it: the light comes from above, whatever the knob does.
+                .offset(
+                    x: sin(configuration.angle * .pi / 180) * diameter * 0.34,
+                    y: -cos(configuration.angle * .pi / 180) * diameter * 0.34
+                )
         }
     }
 
@@ -426,6 +438,32 @@ struct ChromeDome: View {
             Circle().strokeBorder(Color(.chromeShadow), lineWidth: 1)
         }
         .compositingGroup()
+    }
+}
+
+/// A half sphere of chrome: convex, lit on top with a shadow below; or concave, the other way
+/// round, shadowed on top as light falls into it.
+struct ChromeBead: View {
+    let isConcave: Bool
+
+    var body: some View {
+        ZStack {
+            Circle().fill(
+                LinearGradient(
+                    colors: [Color(.chromeHighlight), Color(.chromeMid), Color(.chromeShadow)],
+                    startPoint: isConcave ? .bottom : .top,
+                    endPoint: isConcave ? .top : .bottom
+                )
+            )
+            Circle()
+                .fill(Color(ColorToken.chromeHighlight.opacity(0.9)))
+                .frame(width: 2, height: 2)
+                .scaleEffect(2)
+                .offset(x: -1.5, y: isConcave ? 2 : -2)
+                .blur(radius: 0.5)
+        }
+        .overlay { Circle().strokeBorder(Color(.chromeShadow), lineWidth: 0.6) }
+        .shadow(color: Color(.scrim), radius: isConcave ? 0 : 1.5, y: isConcave ? 0 : 1)
     }
 }
 

@@ -16,8 +16,11 @@ struct ColoursPage: View {
             tokens: [("counterAccent", .counterAccent), ("counterAccentTop", .counterAccentTop), ("counterAccentBottom", .counterAccentBottom), ("counterAccentGlow", .counterAccentGlow)]
         ),
         ColourGroup(
-            title: "Invariant",
-            tokens: [("black", .black), ("charcoal", .charcoal), ("white", .white), ("cream", .cream), ("gold", .gold), ("silver", .silver)]
+            title: "Fixed, the same in light and dark",
+            tokens: [
+                ("fixedBlack", .fixedBlack), ("fixedCharcoal", .fixedCharcoal), ("fixedWhite", .fixedWhite),
+                ("fixedCream", .fixedCream), ("fixedGold", .fixedGold), ("fixedSilver", .fixedSilver)
+            ]
         ),
         ColourGroup(title: "Tints", tokens: Tint.allCases.flatMap { [("\($0.rawValue).surface", $0.surface), ("\($0.rawValue).ink", $0.ink)] }),
         ColourGroup(title: "Feedback", tokens: [("info", .info), ("infoSurface", .infoSurface), ("success", .success), ("successSurface", .successSurface), ("warning", .warning), ("warningSurface", .warningSurface), ("danger", .danger), ("dangerSurface", .dangerSurface)]),
