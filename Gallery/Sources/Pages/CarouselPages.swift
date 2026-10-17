@@ -8,13 +8,14 @@ struct CarouselCard: Identifiable, Sendable {
     let title: String
     let subtitle: String
     let tags: [String]
+    let art: BackdropStyle
 
     static let all = [
-        CarouselCard(id: 0, title: "U-234 Inhalation", subtitle: "ICRP 137, Type S", tags: ["Nuclear", "Inhalation"]),
-        CarouselCard(id: 1, title: "Cs-137 Ingestion", subtitle: "ICRP 137", tags: ["Nuclear", "Ingestion"]),
-        CarouselCard(id: 2, title: "I-131 Thyroid", subtitle: "Blocked with KI", tags: ["Iodine", "Thyroid"]),
-        CarouselCard(id: 3, title: "Pu-239 Wound", subtitle: "NCRP 156", tags: ["Wound", "Actinide"]),
-        CarouselCard(id: 4, title: "H-3 Water", subtitle: "Whole body", tags: ["Tritium"])
+        CarouselCard(id: 0, title: "U-234 Inhalation", subtitle: "ICRP 137, Type S", tags: ["Nuclear", "Inhalation"], art: .aurora()),
+        CarouselCard(id: 1, title: "Cs-137 Ingestion", subtitle: "ICRP 137", tags: ["Nuclear", "Ingestion"], art: .glow()),
+        CarouselCard(id: 2, title: "I-131 Thyroid", subtitle: "Blocked with KI", tags: ["Iodine", "Thyroid"], art: .texture(.denim)),
+        CarouselCard(id: 3, title: "Pu-239 Wound", subtitle: "NCRP 156", tags: ["Wound", "Actinide"], art: .busFloor(angle: .degrees(45))),
+        CarouselCard(id: 4, title: "H-3 Water", subtitle: "Whole body", tags: ["Tritium"], art: .waves(.washTeal))
     ]
 }
 
@@ -45,6 +46,13 @@ struct CarouselSample: View {
             Carousel(CarouselCard.all, selection: $selection, style: style) { card in
                 Card(LocalizedStringKey(card.title), subtitle: LocalizedStringKey(card.subtitle)) {
                     TagCloud(card.tags.map { LocalizedStringKey($0) })
+                }
+                .header {
+                    // The artwork drifts behind the card as it pages: .parallaxLayer().
+                    Backdrop(card.art)
+                        .parallaxLayer()
+                        .frame(height: 90)
+                        .clipShape(RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
                 }
             }
             PageDots(CarouselCard.all.map(\.id), selection: $selection)
