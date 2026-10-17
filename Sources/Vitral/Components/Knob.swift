@@ -160,6 +160,8 @@ public struct GlassKnobStyle: KnobStyle {
         case texture(Texture)
         /// A flat colour, round in the middle of the glass.
         case colour(ColorToken)
+        /// Polished chrome, domed: a vintage amp's silver knob.
+        case chrome
     }
 
     /// Where the numbers go.
@@ -294,6 +296,8 @@ struct GlassKnob: View {
                 .overlay { Circle().strokeBorder(Color(.hairline), lineWidth: 1) }
         case let .colour(colour):
             Circle().fill(Color(colour)).frame(width: diameter, height: diameter)
+        case .chrome:
+            ChromeDome().frame(width: diameter, height: diameter)
         }
     }
 
@@ -366,6 +370,40 @@ struct GlassKnob: View {
                     y: -cos(configuration.angle(of: mark) * .pi / 180) * radius
                 )
         }
+    }
+}
+
+/// Polished chrome, domed: the metal's reflections turning round it, and a bright highlight up and
+/// to the left where the light catches the dome.
+struct ChromeDome: View {
+    var body: some View {
+        ZStack {
+            Circle().fill(
+                AngularGradient(
+                    colors: [.chromeHighlight, .chromeMid, .chromeShadow, .chromeMid, .chromeHighlight, .chromeMid, .chromeShadow, .chromeMid, .chromeHighlight].map { Color($0) },
+                    center: .center
+                )
+            )
+            Circle().fill(
+                RadialGradient(
+                    colors: [Color(.chromeHighlight), Color(ColorToken.chromeHighlight.opacity(0))],
+                    center: UnitPoint(x: 0.35, y: 0.3),
+                    startRadius: 0,
+                    endRadius: 60
+                )
+            )
+            .blendMode(.screen)
+            Circle().fill(
+                RadialGradient(
+                    colors: [.clear, Color(ColorToken.chromeShadow.opacity(0.55))],
+                    center: .center,
+                    startRadius: 20,
+                    endRadius: 70
+                )
+            )
+            Circle().strokeBorder(Color(.chromeShadow), lineWidth: 1)
+        }
+        .compositingGroup()
     }
 }
 

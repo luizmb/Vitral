@@ -4,6 +4,9 @@ import VitralTokens
 
 /// Knobs in every look, each turning a value the model keeps.
 struct KnobsPage: View {
+    /// An amp's black: black in any light, unlike the ink, which turns light at night.
+    static let black = ColorToken(.black)
+
     @Environment(GalleryModel.self) private var model
 
     var body: some View {
@@ -48,7 +51,7 @@ struct KnobsPage: View {
                     Knob(
                         value: $model.knobSoldano,
                         scale: ValueScale(1 ... 11, step: 1, precision: 0),
-                        style: GlassKnobStyle(face: .colour(.ink), faceSize: 0.5, numbers: .inside, pointer: .dot, showsArc: false),
+                        style: GlassKnobStyle(face: .colour(Self.black), faceSize: 0.5, numbers: .inside, pointer: .dot, showsArc: false),
                         label: Text("Preamp")
                     )
                 }
@@ -61,7 +64,7 @@ struct KnobsPage: View {
                     endAngle: 150,
                     style: GlassKnobStyle(
                         face: .colour(.washAmber), marks: 11, numbers: .outside, showsArc: false,
-                        markColour: .washAmber, numberColour: .washAmber, pointerColour: .ink
+                        markColour: .washAmber, numberColour: .washAmber, pointerColour: Self.black
                     ),
                     label: Text("Presence")
                 )
@@ -73,7 +76,7 @@ struct KnobsPage: View {
                     startAngle: -150,
                     endAngle: 150,
                     style: GlassKnobStyle(
-                        face: .colour(.ink), faceSize: 1, numbers: .inside, numberCount: 10, pointer: .dot, showsArc: false,
+                        face: .colour(Self.black), faceSize: 1, numbers: .inside, numberCount: 10, pointer: .dot, showsArc: false,
                         numberColour: .onAccent, pointerColour: .onAccent
                     ),
                     label: Text("Treble")
@@ -86,10 +89,23 @@ struct KnobsPage: View {
                     startAngle: -150,
                     endAngle: 150,
                     style: GlassKnobStyle(
-                        face: .colour(.ink), faceSize: 0.9, marks: 21, numbers: .outside, pointer: .line, showsArc: false,
+                        face: .colour(Self.black), faceSize: 0.9, marks: 21, numbers: .outside, pointer: .line, showsArc: false,
                         markColour: .onAccent, numberColour: .onAccent, pointerColour: .onAccent
                     ),
                     label: Text("Gain")
+                )
+            }
+            AmpPanel("A chrome dome: polished silver, a small dot", backdrop: .texture(.slate)) {
+                Knob(
+                    value: $model.knobChrome,
+                    scale: ValueScale(0 ... 10, step: 0.5, precision: 0),
+                    startAngle: -150,
+                    endAngle: 150,
+                    style: GlassKnobStyle(
+                        face: .chrome, faceSize: 1, marks: 11, numbers: .outside, pointer: .dot, showsArc: false,
+                        markColour: .onAccent, numberColour: .onAccent, pointerColour: Self.black
+                    ),
+                    label: Text("Bass")
                 )
             }
             LabelledGroup("JogDial: endless, in steps of 15°") {
