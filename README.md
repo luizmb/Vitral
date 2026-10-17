@@ -90,6 +90,7 @@ illustration for a state, use a symbol.
 | Selection | `Checkbox`, `ToggleSwitch`, `SelectionMark` |
 | Layout | `Page`, `Panel`, `PanelList`, `Row` (`.trailing`, `.disclosure`, `.rowState`), `LabelledGroup`, `SectionLabel`, `Hairline` |
 | Dials | `Knob` (`.circular`, `.vertical(dragStart:)`; any start and end angle), `KnobStyle`, `GlassKnobStyle`, `JogDial`, `ValueScale` (range, step, precision, taper) |
+| Faders | `Fader` (horizontal or vertical; `.absolute` or `.relative(dragStart:)`; `centre`, `detents`, `resetValue`; labels on any side or inside), `FaderStyle`, `GlassFaderStyle`, `ConsoleFaderStyle` |
 | Lists | `GlassList` (the platform list on the backdrop), `GlassSection`, `RowState`, `.rowActions([RowAction])` |
 | Tags and colour | `Tag`, `TagCloud`, `FlowLayout`, `Swatch`, `SwatchStack`, `Stat` |
 | Cards | `Card` with optional `.header { }` and `.footer { }`, `CardAdd` |

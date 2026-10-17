@@ -78,3 +78,17 @@ import VitralTokens
         #expect(DialGeometry.turn(from: -170, to: 170) == -20)
     }
 }
+
+@Suite struct TrackGeometryTests {
+    @Test func positionsAndFractionsRoundTrip() {
+        #expect(TrackGeometry.position(of: 0.5, length: 220, thumb: 20, reversed: false) == 110)
+        #expect(TrackGeometry.fraction(at: 110, length: 220, thumb: 20, reversed: false) == 0.5)
+        #expect(TrackGeometry.fraction(at: 10, length: 220, thumb: 20, reversed: true) == 1)
+        #expect(TrackGeometry.fraction(at: -50, length: 220, thumb: 20, reversed: false) == 0)
+    }
+
+    @Test func detentsPullWhenClose() {
+        #expect(TrackGeometry.snapped(0.51, to: [0.5]) == 0.5)
+        #expect(TrackGeometry.snapped(0.6, to: [0.5]) == 0.6)
+    }
+}

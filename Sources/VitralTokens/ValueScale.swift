@@ -163,3 +163,33 @@ public enum DialGeometry {
         delta > 180 ? delta - 360 : delta < -180 ? delta + 360 : delta
     }
 }
+
+/// The geometry of a track a thumb slides along: positions measured from the track's start (the
+/// left of a horizontal one, the top of a vertical one), where the thumb's centre can travel
+/// between half a thumb from each end.
+public enum TrackGeometry {
+    /// How far the thumb's centre travels.
+    public static func travel(length: Double, thumb: Double) -> Double {
+        max(length - thumb, 1)
+    }
+
+    /// Where the thumb's centre is for `fraction`; `reversed` runs the values the other way
+    /// (a vertical track, its lowest value at the bottom).
+    public static func position(of fraction: Double, length: Double, thumb: Double, reversed: Bool) -> Double {
+        thumb / 2 + travel(length: length, thumb: thumb) * (reversed ? 1 - fraction : fraction)
+    }
+
+    /// The fraction a touch at `position` asks for.
+    public static func fraction(at position: Double, length: Double, thumb: Double, reversed: Bool) -> Double {
+        oriented(min(max((position - thumb / 2) / travel(length: length, thumb: thumb), 0), 1), reversed: reversed)
+    }
+
+    static func oriented(_ fraction: Double, reversed: Bool) -> Double {
+        reversed ? 1 - fraction : fraction
+    }
+
+    /// `fraction`, pulled onto the nearest of `detents` when within `reach` of it.
+    public static func snapped(_ fraction: Double, to detents: [Double], reach: Double = 0.025) -> Double {
+        detents.min { abs($0 - fraction) < abs($1 - fraction) }.flatMap { abs($0 - fraction) <= reach ? $0 : nil } ?? fraction
+    }
+}
