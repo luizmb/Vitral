@@ -107,6 +107,10 @@ public extension ColorToken {
     static let metalBase = ColorToken(light: RGBA(hex: 0xCDD0D5), dark: RGBA(hex: 0x2B2D31))
     static let metalStreak = ColorToken(light: RGBA.white.opacity(0.55), dark: RGBA.white.opacity(0.07))
     static let metalShade = ColorToken(light: RGBA.black.opacity(0.06), dark: RGBA.black.opacity(0.35))
+    /// Laid over a photographic texture or picture: nothing in light mode, a dimming in dark mode,
+    /// so the picture sits with the rest of a dark screen.
+    static let pictureDim = ColorToken(light: RGBA.black.opacity(0), dark: RGBA.black.opacity(0.4))
+
     // Liquid chrome: a polished, reflective metal.
     static let chromeHighlight = ColorToken(light: RGBA(hex: 0xFFFFFF, alpha: 0.95), dark: RGBA(hex: 0xE8EDF2, alpha: 0.85))
     static let chromeMid = ColorToken(light: RGBA(hex: 0xB9C0C8), dark: RGBA(hex: 0x5B636C))

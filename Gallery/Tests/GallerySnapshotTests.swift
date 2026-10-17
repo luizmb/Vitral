@@ -39,6 +39,18 @@ struct GallerySnapshotTests {
         snapshot(MaterialLadder(backdrop: style).frame(maxHeight: .infinity).background { Backdrop(style) }, named: "materials-\(name)")
     }
 
+    @Test(arguments: Wallpaper.all.map(\.name))
+    func wallpaper(_ name: String) {
+        let wallpaper = Wallpaper.all.first { $0.name == name }
+        snapshot(
+            Card(LocalizedStringKey(wallpaper?.title ?? name), subtitle: LocalizedStringKey(wallpaper?.credit ?? ""))
+                .padding(Space.extraLarge)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background { Backdrop(wallpaper?.backdrop ?? .plain) },
+            named: "wallpaper-\(name)"
+        )
+    }
+
     @Test func home() {
         snapshot(HomePage(), named: "home")
     }

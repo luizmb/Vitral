@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import Vitral
 import VitralTokens
 
@@ -28,6 +29,43 @@ struct ImagesPage: View {
                         Panel { IllustrationView(illustration).frame(maxWidth: .infinity) }
                     }
                 }
+            }
+        }
+    }
+}
+
+/// One photo from the repository's `Wallpapers` folder, with its credit (see
+/// `Wallpapers/CREDITS.md`).
+struct Wallpaper: Sendable {
+    let name: String
+    let title: String
+    let credit: String
+
+    nonisolated static let all = [
+        Wallpaper(name: "earthrise", title: "Earthrise", credit: "Apollo 8 crew, NASA, public domain"),
+        Wallpaper(name: "blueMarble", title: "The Blue Marble", credit: "Apollo 17 crew, NASA, public domain"),
+        Wallpaper(name: "aurora", title: "Earth's limb with an aurora", credit: "Expedition 58 crew, NASA, public domain"),
+        Wallpaper(name: "orbitalSunrise", title: "An orbital sunrise", credit: "Expedition 71 crew, NASA, public domain")
+    ]
+
+    var image: Image {
+        Image(uiImage: UIImage(named: "\(name).jpg") ?? UIImage())
+    }
+
+    var backdrop: BackdropStyle {
+        .image(image)
+    }
+}
+
+struct WallpapersPage: View {
+    var body: some View {
+        Page("Wallpapers") {
+            ForEach(Wallpaper.all, id: \.name) { wallpaper in
+                Card(LocalizedStringKey(wallpaper.title), subtitle: LocalizedStringKey(wallpaper.credit))
+                    .padding(Space.extraLarge)
+                    .padding(.vertical, Space.huge)
+                    .background { Backdrop(wallpaper.backdrop) }
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
             }
         }
     }

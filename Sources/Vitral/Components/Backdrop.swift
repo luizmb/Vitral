@@ -23,6 +23,11 @@ public enum BackdropStyle: Sendable {
     case busFloor
     /// Soft colour fields from a palette, corner to corner.
     case mesh([ColorToken])
+    /// One of Vitral's textures, tiled.
+    case texture(Texture)
+    /// A picture: tiled at its own size (a texture), or filling the space and cropped (a photo).
+    /// Vitral ships none; an app brings its own (see the repository's `Wallpapers`).
+    case image(Image, tiled: Bool = false)
     /// The backdrop colour alone.
     case plain
 }
@@ -63,6 +68,19 @@ public struct Backdrop: View {
             case let .mesh(palette):
                 Color(.backdrop)
                 MeshBackdrop(palette: palette)
+            case let .texture(texture):
+                Image(texture).resizable(resizingMode: .tile)
+                Color(.pictureDim)
+            case let .image(image, tiled):
+                Color(.backdrop)
+                if tiled {
+                    image.resizable(resizingMode: .tile)
+                } else {
+                    image.resizable().scaledToFill()
+                        .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
+                        .clipped()
+                }
+                Color(.pictureDim)
             case .plain:
                 Color(.backdrop)
             }

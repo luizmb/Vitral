@@ -372,6 +372,15 @@ struct BackdropsPage: View {
         ("brushedMetal", .brushedMetal),
         ("busFloor", .busFloor),
         ("paper", .paper),
+        ("texture(.oak)", .texture(.oak)),
+        ("texture(.walnut)", .texture(.walnut)),
+        ("texture(.marble)", .texture(.marble)),
+        ("texture(.metalPlate)", .texture(.metalPlate)),
+        ("texture(.concrete)", .texture(.concrete)),
+        ("texture(.leather)", .texture(.leather)),
+        ("texture(.denim)", .texture(.denim)),
+        ("texture(.cotton)", .texture(.cotton)),
+        ("texture(.granite)", .texture(.granite)),
         ("mesh", .mesh([.accent, .warning, .success, .danger])),
         ("plain", .plain)
     ]
