@@ -54,9 +54,11 @@ public struct ButtonLabel: View {
 /// shows a spinner and takes no taps.
 public struct ButtonPrimary: View {
     let label: ButtonLabel
+    let finish: SurfaceFinish?
     let action: @MainActor () -> Void
 
     @Environment(\.accent) private var accent
+    @Environment(\.controlFinish) private var controlFinish
 
     public init(
         _ title: LocalizedStringKey,
@@ -64,24 +66,35 @@ public struct ButtonPrimary: View {
         size: ButtonSize = .large,
         fillsWidth: Bool = false,
         isBusy: Bool = false,
+        finish: SurfaceFinish? = nil,
         action: @escaping @MainActor () -> Void
     ) {
         self.label = ButtonLabel(title, icon: icon, size: size, fillsWidth: fillsWidth, isBusy: isBusy)
+        self.finish = finish
         self.action = action
     }
 
     public var body: some View {
-        Button(action: action) { label }
-            .disabled(label.isBusy)
-            .buttonStyle(.glassProminent)
-            .tint(Color(accent.base))
+        if let finish = finish ?? controlFinish {
+            Button(action: action) { label }
+                .disabled(label.isBusy)
+                .buttonStyle(FinishButtonStyle(finish: finish))
+        } else {
+            Button(action: action) { label }
+                .disabled(label.isBusy)
+                .buttonStyle(.glassProminent)
+                .tint(Color(accent.base))
+        }
     }
 }
 
 /// Any other action: clear glass.
 public struct ButtonSecondary: View {
     let label: ButtonLabel
+    let finish: SurfaceFinish?
     let action: @MainActor () -> Void
+
+    @Environment(\.controlFinish) private var controlFinish
 
     public init(
         _ title: LocalizedStringKey,
@@ -89,16 +102,58 @@ public struct ButtonSecondary: View {
         size: ButtonSize = .large,
         fillsWidth: Bool = false,
         isBusy: Bool = false,
+        finish: SurfaceFinish? = nil,
         action: @escaping @MainActor () -> Void
     ) {
         self.label = ButtonLabel(title, icon: icon, size: size, fillsWidth: fillsWidth, isBusy: isBusy)
+        self.finish = finish
         self.action = action
     }
 
+    /// Under an Aqua finish a secondary button is Aqua's silver gel, as on the Mac; any other
+    /// finish it takes as it is.
+    var resolvedFinish: SurfaceFinish? {
+        finish ?? controlFinish.map { shared in
+            if case .aqua = shared { .aqua(.fixedSilver) } else { shared }
+        }
+    }
+
     public var body: some View {
-        Button(action: action) { label }
-            .disabled(label.isBusy)
-            .buttonStyle(.glass)
-            .foregroundStyle(.ink)
+        if let finish = resolvedFinish {
+            Button(action: action) { label }
+                .disabled(label.isBusy)
+                .buttonStyle(FinishButtonStyle(finish: finish))
+        } else {
+            Button(action: action) { label }
+                .disabled(label.isBusy)
+                .buttonStyle(.glass)
+                .foregroundStyle(.ink)
+        }
+    }
+}
+
+/// A button made of a finish: a capsule of it, the label in the light ink on a colour or the
+/// dark ink otherwise, pressing in a little.
+struct FinishButtonStyle: ButtonStyle {
+    let finish: SurfaceFinish
+
+    /// The light ink on a colour, black on chrome or silver, the ink (dark by day, light at night)
+    /// on glass or a texture.
+    var ink: ColorToken {
+        finish.tone == .fixedSilver || finish == .chrome
+            ? .fixedBlack
+            : finish.isColoured ? .onAccent : .ink
+    }
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .foregroundStyle(ink)
+            // The label leaves the glass style its vertical padding; this finish adds the same.
+            .padding(.vertical, Space.medium / 2)
+            .padding(.horizontal, Space.medium)
+            .finish(finish, in: Capsule())
+            .scaleEffect(configuration.isPressed ? 0.96 : 1)
+            .brightness(configuration.isPressed ? -0.06 : 0)
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
     }
 }
