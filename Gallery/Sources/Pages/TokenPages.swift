@@ -11,10 +11,10 @@ struct ColoursPage: View {
     private static let groups = [
         ColourGroup(title: "Ink", tokens: [("ink", .ink), ("inkMuted", .inkMuted), ("inkFaint", .inkFaint), ("onAccent", .onAccent)]),
         ColourGroup(title: "Accent", tokens: [("accent", .accent), ("accentTop", .accentTop), ("accentBottom", .accentBottom), ("accentGlow", .accentGlow)]),
-        ColourGroup(title: "Feedback", tokens: [("warning", .warning), ("warningSurface", .warningSurface), ("danger", .danger), ("dangerSurface", .dangerSurface)]),
+        ColourGroup(title: "Feedback", tokens: [("info", .info), ("infoSurface", .infoSurface), ("success", .success), ("successSurface", .successSurface), ("warning", .warning), ("warningSurface", .warningSurface), ("danger", .danger), ("dangerSurface", .dangerSurface)]),
         ColourGroup(
             title: "Surfaces",
-            tokens: [("neutralSurface", .neutralSurface), ("selectedSurface", .selectedSurface), ("backdrop", .backdrop), ("hairline", .hairline), ("outline", .outline)]
+            tokens: [("neutralSurface", .neutralSurface), ("selectedSurface", .selectedSurface), ("backdrop", .backdrop), ("gridLine", .gridLine), ("gridLineMajor", .gridLineMajor), ("hairline", .hairline), ("outline", .outline)]
         )
     ]
 

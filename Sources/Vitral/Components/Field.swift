@@ -20,7 +20,7 @@ public enum FieldKeyboard: Hashable, Sendable {
 ///
 /// Several messages fit a validation that collects every failure (`Validation<T, [E]>`): map the
 /// errors to `Text` and pass them all.
-public enum FieldStatus {
+public enum FieldStatus: Sendable {
     case normal
     case success([Text])
     case warning([Text])

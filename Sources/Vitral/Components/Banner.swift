@@ -3,7 +3,7 @@ import VitralTokens
 
 /// How a banner looks: a preset for each kind of message, each with its colour and icon, or
 /// `custom` with every part chosen.
-public enum BannerStyle {
+public enum BannerStyle: Sendable {
     /// Something to know.
     case info
     /// Something that worked.

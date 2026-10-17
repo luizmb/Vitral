@@ -26,7 +26,7 @@ enum GallerySection: String, CaseIterable, Hashable {
         switch self {
         case .tokens: [.colours, .spacing, .radii, .sizes, .type, .materials]
         case .resources: [.icons, .images]
-        case .components: [.buttons, .selection, .pickers, .fields, .banners, .lists, .tags, .cards, .emptyStates, .progress]
+        case .components: [.backdrops, .buttons, .selection, .pickers, .fields, .banners, .lists, .tags, .cards, .emptyStates, .progress]
         }
     }
 
@@ -44,7 +44,7 @@ enum GallerySection: String, CaseIterable, Hashable {
 enum GalleryPage: String, CaseIterable, Hashable {
     case colours, spacing, radii, sizes, type, materials
     case icons, images
-    case buttons, selection, pickers, fields, banners, lists, tags, cards, emptyStates, progress
+    case backdrops, buttons, selection, pickers, fields, banners, lists, tags, cards, emptyStates, progress
 
     var title: LocalizedStringKey {
         switch self {
@@ -56,6 +56,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .materials: "Materials"
         case .icons: "Icons"
         case .images: "Images"
+        case .backdrops: "Backdrops"
         case .buttons: "Buttons"
         case .selection: "Checkboxes and toggles"
         case .pickers: "Pickers"
@@ -79,6 +80,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .materials: "Regular, clear, tinted glass"
         case .icons: "Glyphs, by role"
         case .images: "Illustrations for empty and error states"
+        case .backdrops: "Graph paper, dots, laser curves, wood, metal, bus floor, paper, mesh"
         case .buttons: "ButtonPrimary, ButtonSecondary, ActionBar"
         case .pickers: "SegmentedControlGlass, RadioList, StepperJump"
         case .fields: "FieldText, FieldSecure, FieldSearch"
@@ -103,6 +105,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .materials: MaterialsPage()
         case .icons: IconsPage()
         case .images: ImagesPage()
+        case .backdrops: BackdropsPage()
         case .buttons: ButtonsPage()
         case .selection: SelectionPage()
         case .pickers: PickersPage()

@@ -361,3 +361,32 @@ struct ProgressPage: View {
         }
     }
 }
+
+struct BackdropsPage: View {
+    nonisolated static let samples: [(name: String, style: BackdropStyle)] = [
+        ("grid", .grid()),
+        ("grid, zoomed out", .grid(scale: 0.3)),
+        ("dots", .dots()),
+        ("laserCurves", .laserCurves()),
+        ("wood", .wood),
+        ("brushedMetal", .brushedMetal),
+        ("busFloor", .busFloor),
+        ("paper", .paper),
+        ("mesh", .mesh([.accent, .warning, .success, .danger])),
+        ("plain", .plain)
+    ]
+
+    var body: some View {
+        Page("Backdrops") {
+            ForEach(Self.samples, id: \.name) { sample in
+                LabelledGroup(LocalizedStringKey(sample.name)) {
+                    Panel { TagCloud(["Glass", "over", "the", "backdrop"]) }
+                        .padding(Space.extraLarge)
+                        .padding(.vertical, Space.large)
+                        .background { Backdrop(sample.style) }
+                        .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+                }
+            }
+        }
+    }
+}

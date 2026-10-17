@@ -47,6 +47,8 @@ targets:
           - "__Snapshots__/**"
     dependencies:
       - target: Gallery
+      - package: Vitral
+        product: Vitral
       - package: SnapshotTesting
         product: SnapshotTesting
     settings:

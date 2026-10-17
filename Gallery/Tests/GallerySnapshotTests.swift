@@ -3,6 +3,8 @@ import SnapshotTesting
 import SwiftUI
 import Testing
 import UIKit
+import Vitral
+import VitralTokens
 
 /// Every Gallery page in light and dark, drawn from the app's own window: glass only renders in a
 /// real window, which is why these run hosted in the Gallery app.
@@ -17,6 +19,18 @@ struct GallerySnapshotTests {
     @Test(arguments: GalleryPage.allCases)
     func page(_ page: GalleryPage) {
         snapshot(page.view, named: page.rawValue)
+    }
+
+    @Test(arguments: BackdropsPage.samples.map(\.name))
+    func backdrop(_ name: String) {
+        let style = BackdropsPage.samples.first { $0.name == name }?.style ?? .plain
+        snapshot(
+            Panel { TagCloud(["Glass", "over", "the", "backdrop"]) }
+                .padding(Space.extraLarge)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background { Backdrop(style) },
+            named: "backdrop-\(name)"
+        )
     }
 
     @Test func home() {
