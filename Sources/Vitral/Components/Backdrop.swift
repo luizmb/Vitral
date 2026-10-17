@@ -70,7 +70,9 @@ public struct Backdrop: View {
                 MeshBackdrop(palette: palette)
             case let .texture(texture):
                 Image(texture).resizable(resizingMode: .tile)
-                Color(.pictureDim)
+                if !texture.followsAppearance {
+                    Color(.pictureDim)
+                }
             case let .image(image, tiled):
                 Color(.backdrop)
                 if tiled {

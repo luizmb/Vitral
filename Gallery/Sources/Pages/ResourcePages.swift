@@ -70,3 +70,26 @@ struct WallpapersPage: View {
         }
     }
 }
+
+struct TexturesPage: View {
+    var body: some View {
+        Page("Textures") {
+            ForEach(Texture.Family.allCases, id: \.self) { family in
+                LabelledGroup(LocalizedStringKey(family.rawValue)) {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 64), spacing: Space.small)], spacing: Space.small) {
+                        ForEach(Texture.allCases.filter { $0.family == family }, id: \.self) { texture in
+                            Tag(Text(verbatim: texture.rawValue))
+                                .font(.caption2)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.6)
+                                .frame(maxWidth: .infinity, minHeight: 64, alignment: .bottomLeading)
+                                .padding(Space.extraSmall)
+                                .background { Backdrop(.texture(texture)) }
+                                .clipShape(RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
