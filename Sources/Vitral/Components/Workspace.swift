@@ -117,11 +117,26 @@ public struct Workspace<Leading: View, Content: View, Trailing: View, Bottom: Vi
                 .onChange(of: bottom?.isOpen) { _, isOpen in
                     if exclusive || resolved == .sheet, isOpen == true { close(.leading, .trailing) }
                 }
+                // Turning into sheets (a rotation, a split view, a resized window) with several
+                // open keeps one.
+                .onChange(of: resolved, initial: true) { _, mode in
+                    if exclusive || mode == .sheet { keepOne() }
+                }
         }
         .coordinateSpace(.named(Self.space))
         .animation(animation, value: leading?.isOpen)
         .animation(animation, value: trailing?.isOpen)
         .animation(animation, value: bottom?.isOpen)
+    }
+
+    /// Closes all open panels but one: the inspector first (usually what was just reached for),
+    /// then the sidebar, then the bottom panel.
+    func keepOne() {
+        if trailing?.isOpen == true {
+            close(.leading, .bottom)
+        } else if leading?.isOpen == true {
+            close(.bottom)
+        }
     }
 
     func close(_ sides: PanelSide...) {
@@ -159,12 +174,14 @@ public struct Workspace<Leading: View, Content: View, Trailing: View, Bottom: Vi
                     if let leading, leading.isOpen {
                         floatingSide(leading, side: .leading, width: size.width)
                     }
+                    // Fills the space between the sides, so they keep to their edges.
                     VStack(spacing: 0) {
                         Spacer(minLength: 0)
                         if let bottom, bottom.isOpen {
                             floatingBottom(bottom, height: size.height)
                         }
                     }
+                    .frame(maxWidth: .infinity)
                     if let trailing, trailing.isOpen {
                         floatingSide(trailing, side: .trailing, width: size.width)
                     }
@@ -176,10 +193,10 @@ public struct Workspace<Leading: View, Content: View, Trailing: View, Bottom: Vi
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .sheet(isPresented: anySheet) {
                     // One sheet for every panel: opening another swaps what's in it.
-                    if leading?.isOpen == true {
-                        leading.map { sheet($0.body) }
-                    } else if trailing?.isOpen == true {
+                    if trailing?.isOpen == true {
                         trailing.map { sheet($0.body) }
+                    } else if leading?.isOpen == true {
+                        leading.map { sheet($0.body) }
                     } else {
                         bottom.map { sheet($0.body) }
                     }
