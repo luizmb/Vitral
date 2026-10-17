@@ -362,39 +362,3 @@ struct ProgressPage: View {
     }
 }
 
-/// The backdrops that aren't materials (those are on the Textures page): patterns, abstract
-/// colour, and plain. All drawn in code.
-struct BackdropsPage: View {
-    nonisolated static let samples: [(name: String, style: BackdropStyle)] = [
-        ("grid", .grid()),
-        ("grid, zoomed out", .grid(scale: 0.3)),
-        ("dots", .dots()),
-        ("laserCurves", .laserCurves()),
-        ("mesh", .mesh([.accent, .warning, .success, .danger])),
-        ("aurora", .aurora()),
-        ("aurora, warm", .aurora([.washPink, .washAmber, .washViolet])),
-        ("glow", .glow()),
-        ("glow, sunset", .glow([.washAmber, .washPink, .danger])),
-        ("waves", .waves()),
-        ("waves, violet", .waves(.washViolet)),
-        ("plain", .plain)
-    ]
-
-    var body: some View {
-        Page("Backdrops") {
-            ForEach(Self.samples, id: \.name) { sample in
-                LabelledGroup(LocalizedStringKey(sample.name)) {
-                    NavigationLink(value: GlassShowcaseRoute(name: sample.name)) {
-                        Panel { TagCloud(["Glass", "over", "the", "backdrop"]) }
-                            .padding(Space.extraLarge)
-                            .padding(.vertical, Space.large)
-                            .background { Backdrop(sample.style) }
-                            .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
-                            .contentShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-        }
-    }
-}

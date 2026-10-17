@@ -2,64 +2,9 @@ import SwiftUI
 import Vitral
 import VitralTokens
 
-/// Every backdrop the Gallery can put glass on: the patterns and materials, every texture, and
-/// the wallpapers.
-enum BackdropCatalogue {
-    struct Entry: Sendable {
-        let name: String
-        let style: BackdropStyle
-    }
-
-    struct Shelf: Sendable {
-        let title: String
-        let entries: [Entry]
-    }
-
-    nonisolated static let shelves: [Shelf] =
-        [Shelf(title: "Patterns", entries: BackdropsPage.samples.map { Entry(name: $0.name, style: $0.style) })]
-            + TexturesPage.shelves.map { shelf in
-                Shelf(title: shelf.title, entries: shelf.tiles.map { Entry(name: $0.showcase, style: $0.style) })
-            }
-            + [Shelf(title: "Wallpapers", entries: Wallpaper.all.map { Entry(name: $0.showcaseName, style: $0.backdrop) })]
-
-    /// The backdrops drawn in code: patterns, and the materials that aren't pictures.
-    nonisolated static let drawn: [String] =
-        BackdropsPage.samples.map(\.name) + TexturesPage.shelves.flatMap(\.tiles).filter(\.isDrawn).map(\.showcase)
-
-    nonisolated static let all = shelves.flatMap(\.entries)
-
-    static func style(named name: String) -> BackdropStyle {
-        all.first { $0.name == name }?.style ?? .plain
-    }
-}
-
 /// Where a backdrop's glass showcase is, in the navigation.
 struct GlassShowcaseRoute: Hashable {
     let name: String
-}
-
-/// Every backdrop, one row each, leading to its showcase.
-struct GlassEverywherePage: View {
-    var body: some View {
-        Page("Glass everywhere") {
-            ForEach(BackdropCatalogue.shelves, id: \.title) { shelf in
-                LabelledGroup(LocalizedStringKey(shelf.title)) {
-                    PanelList {
-                        ForEach(shelf.entries, id: \.name) { entry in
-                            NavigationLink(value: GlassShowcaseRoute(name: entry.name)) {
-                                Row(LocalizedStringKey(entry.name), showsDisclosure: true) {
-                                    Backdrop(entry.style)
-                                        .frame(width: Size.hitTarget, height: Size.hitTarget)
-                                        .clipShape(RoundedRectangle(cornerRadius: Radius.small, style: .continuous))
-                                }
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
 
 /// One backdrop under the same components at every glass, from clear to regular.
