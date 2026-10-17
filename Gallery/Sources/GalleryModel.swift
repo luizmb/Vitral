@@ -29,6 +29,7 @@ final class GalleryModel {
     var knobFender = 6.0
     var knobMesa = 4.0
     var knobChrome = 5.0
+    var knobChromeStud = 3.0
     var knobSoldano = 11.0
     var knobHandle = 5.0
     var knobFrequency = 1000.0

@@ -103,15 +103,15 @@ public extension ColorToken {
     /// Tints the glass of an `Overlay`, dimming what's underneath.
     static let scrim = ColorToken(light: RGBA.black.opacity(0.18), dark: RGBA.black.opacity(0.45))
 
-    // Invariant: the same in light and dark, for what is one colour in the world (an amp's black
-    // knob, white print on a panel, gold leaf). The ink and surfaces follow the appearance; these
-    // never do.
-    static let black = ColorToken(RGBA(hex: 0x0B0B0C))
-    static let charcoal = ColorToken(RGBA(hex: 0x2A2B2E))
-    static let white = ColorToken(RGBA(hex: 0xFAFAF7))
-    static let cream = ColorToken(RGBA(hex: 0xEFE4CC))
-    static let gold = ColorToken(RGBA(hex: 0xD9A441))
-    static let silver = ColorToken(RGBA(hex: 0xC4C8CE))
+    // Fixed: the same in light and dark, for what is one colour in the world (an amp's black knob,
+    // white print on a panel, gold leaf). The `fixed` prefix sets them apart from the semantic
+    // colours (ink, surfaces, accent), which follow the appearance; these never do.
+    static let fixedBlack = ColorToken(RGBA(hex: 0x0B0B0C))
+    static let fixedCharcoal = ColorToken(RGBA(hex: 0x2A2B2E))
+    static let fixedWhite = ColorToken(RGBA(hex: 0xFAFAF7))
+    static let fixedCream = ColorToken(RGBA(hex: 0xEFE4CC))
+    static let fixedGold = ColorToken(RGBA(hex: 0xD9A441))
+    static let fixedSilver = ColorToken(RGBA(hex: 0xC4C8CE))
 
     /// A list row's surface: frosted white by day, a lifted grey at night, the backdrop showing
     /// through both.

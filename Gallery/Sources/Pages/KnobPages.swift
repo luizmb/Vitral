@@ -48,7 +48,7 @@ struct KnobsPage: View {
                     Knob(
                         value: $model.knobSoldano,
                         scale: ValueScale(1 ... 11, precision: 1),
-                        style: GlassKnobStyle(face: .colour(.black), faceSize: 0.5, numbers: .inside, numberStep: 1, pointer: .dot, showsArc: false, showsValue: true),
+                        style: GlassKnobStyle(face: .colour(.fixedBlack), faceSize: 0.5, numbers: .inside, numberStep: 1, pointer: .dot, showsArc: false, showsValue: true),
                         label: Text("Preamp")
                     )
                 }
@@ -60,8 +60,8 @@ struct KnobsPage: View {
                     startAngle: -150,
                     endAngle: 150,
                     style: GlassKnobStyle(
-                        face: .colour(.gold), marks: 11, numbers: .outside, numberStep: 1, showsArc: false, showsValue: true,
-                        markColour: .gold, numberColour: .gold, valueColour: .gold, pointerColour: .black
+                        face: .colour(.fixedGold), marks: 11, numbers: .outside, numberStep: 1, showsArc: false, showsValue: true,
+                        markColour: .fixedGold, numberColour: .fixedGold, valueColour: .fixedGold, pointerColour: .fixedBlack
                     ),
                     label: Text("Presence")
                 )
@@ -73,8 +73,8 @@ struct KnobsPage: View {
                     startAngle: -150,
                     endAngle: 150,
                     style: GlassKnobStyle(
-                        face: .colour(.black), faceSize: 1, numbers: .inside, numberStep: 1, pointer: .dot, showsArc: false, showsValue: true,
-                        numberColour: .white, pointerColour: .white
+                        face: .colour(.fixedBlack), faceSize: 1, numbers: .inside, numberStep: 1, pointer: .dot, showsArc: false, showsValue: true,
+                        numberColour: .fixedWhite, pointerColour: .fixedWhite
                     ),
                     label: Text("Treble")
                 )
@@ -86,23 +86,36 @@ struct KnobsPage: View {
                     startAngle: -150,
                     endAngle: 150,
                     style: GlassKnobStyle(
-                        face: .colour(.black), faceSize: 0.9, marks: 21, numbers: .outside, numberStep: 1, pointer: .line, showsArc: false, showsValue: true,
-                        markColour: .white, numberColour: .white, valueColour: .white, pointerColour: .white
+                        face: .colour(.fixedBlack), faceSize: 0.9, marks: 21, numbers: .outside, numberStep: 1, pointer: .line, showsArc: false, showsValue: true,
+                        markColour: .fixedWhite, numberColour: .fixedWhite, valueColour: .fixedWhite, pointerColour: .fixedWhite
                     ),
                     label: Text("Gain")
                 )
             }
-            AmpPanel("A chrome dome: polished silver, a small dot", backdrop: .texture(.slate)) {
+            AmpPanel("A chrome dome with a chrome dimple", backdrop: .texture(.slate)) {
                 Knob(
                     value: $model.knobChrome,
                     scale: ValueScale(0 ... 10, precision: 2),
                     startAngle: -150,
                     endAngle: 150,
                     style: GlassKnobStyle(
-                        face: .chrome, faceSize: 1, marks: 11, numbers: .outside, numberStep: 1, pointer: .dot, showsArc: false, showsValue: true,
-                        markColour: .white, numberColour: .white, valueColour: .white, pointerColour: .black
+                        face: .chrome, faceSize: 1, marks: 11, numbers: .outside, numberStep: 1, pointer: .chromeDimple, showsArc: false, showsValue: true,
+                        markColour: .fixedWhite, numberColour: .fixedWhite, valueColour: .fixedWhite, pointerColour: .fixedBlack
                     ),
                     label: Text("Bass")
+                )
+            }
+            AmpPanel("A chrome dome with a chrome stud", backdrop: .texture(.leatherRed)) {
+                Knob(
+                    value: $model.knobChromeStud,
+                    scale: ValueScale(0 ... 10, precision: 2),
+                    startAngle: -150,
+                    endAngle: 150,
+                    style: GlassKnobStyle(
+                        face: .chrome, faceSize: 1, marks: 11, numbers: .outside, numberStep: 1, pointer: .chromeStud, showsArc: false,
+                        markColour: .fixedCream, numberColour: .fixedCream, valueColour: .fixedCream
+                    ),
+                    label: Text("Treble")
                 )
             }
             LabelledGroup("JogDial: endless, in steps of 15°") {
