@@ -9,12 +9,15 @@ public enum TagStyle: Hashable, Sendable {
     case tinted(ColorToken)
     /// Filled with the colour: something chosen.
     case filled(ColorToken)
+    /// One of the tints: its ink on its pastel surface.
+    case tint(Tint)
 
     var foreground: ColorToken {
         switch self {
         case .plain: .inkMuted
         case let .tinted(color): color
         case .filled: .onAccent
+        case let .tint(tint): tint.ink
         }
     }
 
@@ -23,6 +26,7 @@ public enum TagStyle: Hashable, Sendable {
         case .plain: .neutralSurface
         case let .tinted(color): color.opacity(0.18)
         case let .filled(color): color
+        case let .tint(tint): tint.surface
         }
     }
 }
@@ -63,6 +67,8 @@ public struct TagToggle: View {
     let icon: Image?
     @Binding var isOn: Bool
 
+    @Environment(\.accent) private var accent
+
     public init(_ title: LocalizedStringKey, icon: Image? = nil, isOn: Binding<Bool>) {
         self.title = title
         self.icon = icon
@@ -71,7 +77,7 @@ public struct TagToggle: View {
 
     public var body: some View {
         Button { isOn.toggle() } label: {
-            Tag(title, icon: icon, style: isOn ? .filled(.accent) : .plain)
+            Tag(title, icon: icon, style: isOn ? .filled(accent.base) : .plain)
                 .frame(minHeight: Size.controlSmall)
                 .contentShape(Capsule())
         }

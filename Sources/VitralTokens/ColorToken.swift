@@ -75,6 +75,11 @@ public extension ColorToken {
     static let accentTop = ColorToken(light: RGBA(hex: 0x46A3FF), dark: RGBA(hex: 0x5FB0FF))
     static let accentBottom = ColorToken(light: RGBA(hex: 0x0A63D8), dark: RGBA(hex: 0x1F6FD6))
     static let accentGlow = ColorToken(light: RGBA(hex: 0x0A74F0, alpha: 0.45), dark: RGBA(hex: 0x2882FF, alpha: 0.55))
+    /// The accent's warm opposite, coral: see `AccentToken.counter`.
+    static let counterAccent = ColorToken(light: RGBA(hex: 0xE8602C), dark: RGBA(hex: 0xFF8F5E))
+    static let counterAccentTop = ColorToken(light: RGBA(hex: 0xFF8A57), dark: RGBA(hex: 0xFFA47C))
+    static let counterAccentBottom = ColorToken(light: RGBA(hex: 0xD64E1C), dark: RGBA(hex: 0xE56A38))
+    static let counterAccentGlow = ColorToken(light: RGBA(hex: 0xE8602C, alpha: 0.45), dark: RGBA(hex: 0xFF7A45, alpha: 0.55))
 
     // Feedback.
     static let warning = ColorToken(light: RGBA(hex: 0xB8730A), dark: RGBA(hex: 0xFFB55A))
@@ -94,6 +99,9 @@ public extension ColorToken {
     /// backdrop without the glass going opaque.
     /// At full strength; `GlassToken.veiled(_:)` takes a fraction of it.
     static let veil = ColorToken(light: RGBA(white: 0.97), dark: RGBA(white: 0.08))
+
+    /// Tints the glass of an `Overlay`, dimming what's underneath.
+    static let scrim = ColorToken(light: RGBA.black.opacity(0.18), dark: RGBA.black.opacity(0.45))
 
     /// What sits under the glass when nothing else does.
     static let backdrop = ColorToken(light: RGBA(white: 0.965), dark: RGBA(white: 0.09))
