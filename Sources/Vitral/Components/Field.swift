@@ -14,37 +14,110 @@ public enum FieldKeyboard: Hashable, Sendable {
     case url
 }
 
+/// What a field says about its input. Anything but `normal` tints the glass, colours the border,
+/// shows its icon at the end, and lists its messages under the field. No messages, no label: the
+/// colour and icon alone still say it.
+///
+/// Several messages fit a validation that collects every failure (`Validation<T, [E]>`): map the
+/// errors to `Text` and pass them all.
+public enum FieldStatus {
+    case normal
+    case success([Text])
+    case warning([Text])
+    case error([Text])
+
+    public static func success(_ message: Text) -> FieldStatus { .success([message]) }
+    public static func warning(_ message: Text) -> FieldStatus { .warning([message]) }
+    public static func error(_ message: Text) -> FieldStatus { .error([message]) }
+
+    /// The banner preset with the same colours and icon, so a field and a banner saying the same
+    /// thing look alike.
+    var style: BannerStyle? {
+        switch self {
+        case .normal: nil
+        case .success: .success
+        case .warning: .warning
+        case .error: .error
+        }
+    }
+
+    var messages: [Text] {
+        switch self {
+        case .normal: []
+        case let .success(messages), let .warning(messages), let .error(messages): messages
+        }
+    }
+}
+
 /// What every field sits in: glass at control height, an optional icon before the input and an
-/// optional suffix after it.
+/// optional suffix after it, and its status (colours, icon, messages).
 public struct FieldContainer<Input: View>: View {
     let icon: Image?
     let suffix: Text?
+    let status: FieldStatus
     let input: Input
 
-    public init(icon: Image? = nil, suffix: Text? = nil, @ViewBuilder input: () -> Input) {
+    public init(icon: Image? = nil, suffix: Text? = nil, status: FieldStatus = .normal, @ViewBuilder input: () -> Input) {
         self.icon = icon
         self.suffix = suffix
+        self.status = status
         self.input = input()
     }
 
     public var body: some View {
-        HStack(spacing: Space.small) {
-            icon.foregroundStyle(.inkMuted)
-            input
-                .font(.body)
-                .foregroundStyle(.ink)
-            suffix
-                .font(.detail)
-                .foregroundStyle(.inkFaint)
+        VStack(alignment: .leading, spacing: Space.extraSmall) {
+            HStack(spacing: Space.small) {
+                icon.foregroundStyle(.inkMuted)
+                input
+                    .font(.body)
+                    .foregroundStyle(.ink)
+                suffix
+                    .font(.detail)
+                    .foregroundStyle(.inkFaint)
+                status.style.map { style in
+                    style.icon
+                        .foregroundStyle(style.foreground)
+                        .accessibilityHidden(true)
+                }
+            }
+            .padding(.horizontal, Space.medium + Space.extraSmall)
+            .frame(minHeight: Size.hitTarget)
+            .glassSurface(GlassToken.regular.tinted(status.style?.background), cornerRadius: Radius.medium)
+            .overlay {
+                status.style.map { style in
+                    RoundedRectangle(cornerRadius: Radius.medium, style: .continuous)
+                        .strokeBorder(Color(style.foreground), lineWidth: 1.5)
+                }
+            }
+            FieldMessages(status: status)
         }
-        .padding(.horizontal, Space.medium + Space.extraSmall)
-        .frame(minHeight: Size.hitTarget)
-        .glassSurface(cornerRadius: Radius.medium)
+    }
+}
+
+/// A field's messages, one line each in its status colour.
+public struct FieldMessages: View {
+    let status: FieldStatus
+
+    public init(status: FieldStatus) {
+        self.status = status
+    }
+
+    public var body: some View {
+        status.style.map { style in
+            VStack(alignment: .leading, spacing: Space.hairline) {
+                ForEach(Array(status.messages.enumerated()), id: \.offset) { _, message in
+                    message
+                }
+            }
+            .font(TypeToken.detail.weight(.medium))
+            .foregroundStyle(style.foreground)
+            .padding(.horizontal, Space.medium)
+        }
     }
 }
 
 /// A line of text to type. `onEndEditing` fires when the field loses focus: the place to format
-/// what was typed, so nothing is rewritten under the cursor while typing.
+/// (and validate) what was typed, so nothing is rewritten under the cursor while typing.
 public struct FieldText: View {
     let placeholder: LocalizedStringKey
     @Binding var text: String
@@ -52,6 +125,7 @@ public struct FieldText: View {
     let suffix: Text?
     let keyboard: FieldKeyboard
     let isMonospaced: Bool
+    let status: FieldStatus
     let onEndEditing: @MainActor () -> Void
 
     public init(
@@ -61,8 +135,10 @@ public struct FieldText: View {
         suffix: Text? = nil,
         keyboard: FieldKeyboard = .text,
         isMonospaced: Bool = false,
+        status: FieldStatus = .normal,
         onEndEditing: @escaping @MainActor () -> Void = {}
     ) {
+        self.status = status
         self.placeholder = placeholder
         self._text = text
         self.icon = icon
@@ -73,7 +149,7 @@ public struct FieldText: View {
     }
 
     public var body: some View {
-        FieldContainer(icon: icon, suffix: suffix) {
+        FieldContainer(icon: icon, suffix: suffix, status: status) {
             TextField(placeholder, text: $text, onEditingChanged: { editing in if !editing { onEndEditing() } })
                 .fontDesign(isMonospaced ? .monospaced : .default)
                 .keyboard(keyboard)
@@ -86,15 +162,17 @@ public struct FieldSecure: View {
     let placeholder: LocalizedStringKey
     @Binding var text: String
     let icon: Image?
+    let status: FieldStatus
 
-    public init(_ placeholder: LocalizedStringKey, text: Binding<String>, icon: Image? = Image(.lock)) {
+    public init(_ placeholder: LocalizedStringKey, text: Binding<String>, icon: Image? = Image(.lock), status: FieldStatus = .normal) {
         self.placeholder = placeholder
         self._text = text
         self.icon = icon
+        self.status = status
     }
 
     public var body: some View {
-        FieldContainer(icon: icon) {
+        FieldContainer(icon: icon, status: status) {
             SecureField(placeholder, text: $text)
                 .textContentType(.password)
         }

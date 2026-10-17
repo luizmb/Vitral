@@ -145,6 +145,8 @@ struct TagsPage: View {
                         }
                         SwatchStack([.accent, .warning, .danger])
                         SwatchStack([.accent, .accentTop, .warning, .danger, .inkMuted, .ink, .inkFaint, .accentBottom])
+                        SwatchStack(items: [SwatchItem(.accent, label: "HH"), SwatchItem(.danger, label: "BB"), SwatchItem(.warning, label: "TN")], diameter: 38)
+                        SwatchStack(items: [], diameter: 38)
                     }
                 }
             }
@@ -163,6 +165,9 @@ struct TagsPage: View {
 struct CardsPage: View {
     var body: some View {
         Page("Cards") {
+            LabelledGroup("CardAdd") {
+                CardAdd("New blank model") {}
+            }
             LabelledGroup("Title and subtitle") {
                 Card("Validation", subtitle: "Model to validate the software")
             }
@@ -256,6 +261,19 @@ struct FieldsPage: View {
                     }
                 }
             }
+            LabelledGroup("Statuses") {
+                Panel {
+                    VStack(spacing: Space.medium) {
+                        FieldText("Email", text: .constant("luiz@ios.lu"), keyboard: .email, status: .success(Text("Looks right.")))
+                        FieldText("Step", text: .constant("0,0001"), suffix: Text(verbatim: "d"), keyboard: .decimal, isMonospaced: true, status: .warning(Text("Small steps take longer.")))
+                        FieldText("Tolerance", text: .constant("abc"), isMonospaced: true, status: .error([
+                            Text("Must be a number."),
+                            Text("Must be between 1e-14 and 1e-2.")
+                        ]))
+                        FieldText("Name", text: .constant(""), status: .error([]))
+                    }
+                }
+            }
             LabelledGroup("FieldSecure") {
                 Panel {
                     FieldSecure("Personal access token", text: .constant("ghp_secret"))
@@ -276,16 +294,69 @@ struct FieldsPage: View {
 struct BannersPage: View {
     var body: some View {
         Page("Banners") {
-            LabelledGroup("Tones") {
+            LabelledGroup("Presets") {
                 VStack(spacing: Space.medium) {
-                    Banner("Calculated in 0.4 s.")
-                    Banner("RK4 at this step may be unstable.", tone: .warning)
-                    Banner("The solver stopped at day 412.", tone: .danger)
+                    Banner("Calculated in 0.4 s.", style: .info)
+                    Banner("Saved to GitHub.", style: .success)
+                    Banner("RK4 at this step may be unstable.", style: .warning)
+                    Banner("The solver stopped at day 412.", style: .error)
+                    Banner("Times are in days.", style: .neutral)
                 }
             }
+            LabelledGroup("Custom") {
+                Banner(
+                    "Recording: every change is kept.",
+                    style: .custom(foreground: .accent, background: ColorToken.accent.opacity(0.12), icon: Image(systemName: "record.circle"))
+                )
+            }
             LabelledGroup("With an action") {
-                Banner("This file changed on disk while you were editing it.", tone: .warning)
+                Banner("This file changed on disk while you were editing it.", style: .warning)
                     .trailing { ButtonSecondary("Reload", size: .small) {} }
+            }
+        }
+    }
+}
+
+struct EmptyStatesPage: View {
+    var body: some View {
+        Page("Empty and error states") {
+            LabelledGroup("EmptyState with an illustration and an action") {
+                Panel {
+                    EmptyState("No models yet", message: Text("Make one from scratch, or import a file."), illustration: .empty)
+                        .actions { ButtonPrimary("New model", icon: Image(.add)) {} }
+                }
+            }
+            LabelledGroup("EmptyState with a symbol") {
+                Panel {
+                    EmptyState("Nothing selected", message: Text("Tap a track to edit it here."), icon: Image(systemName: "hand.tap"))
+                }
+            }
+            LabelledGroup("ErrorScreen with retry") {
+                Panel {
+                    ErrorScreen("Couldn't sync", message: Text("GitHub didn't answer for \(30) seconds."), illustration: .offline) {}
+                }
+            }
+            LabelledGroup("ErrorScreen without retry") {
+                Panel {
+                    ErrorScreen("This file can't be read", message: Text("It isn't a model Vitral knows."))
+                }
+            }
+        }
+    }
+}
+
+struct ProgressPage: View {
+    var body: some View {
+        Page("Progress") {
+            LabelledGroup("ProgressOverlay with a fraction") {
+                Card("Highway to Hell", subtitle: "AC/DC")
+                    .frame(height: 220)
+                    .progressOverlay(ProgressOverlay("Importing 3 of 12", detail: Text(verbatim: "Highway to Hell.wav"), fraction: 0.25))
+            }
+            LabelledGroup("ProgressOverlay without one") {
+                Card("Pushing", subtitle: "feature/new-article")
+                    .frame(height: 220)
+                    .progressOverlay(ProgressOverlay("Pushing to GitHub"))
             }
         }
     }

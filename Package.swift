@@ -10,7 +10,7 @@ let tokens: [Target] = [
 
 // SwiftUI components on the tokens: Apple platforms only, so left out elsewhere.
 #if canImport(Darwin)
-let components: [Target] = [.target(name: "Vitral", dependencies: ["VitralTokens"])]
+let components: [Target] = [.target(name: "Vitral", dependencies: ["VitralTokens"], resources: [.process("Resources")])]
 let componentProducts: [Product] = [.library(name: "Vitral", targets: ["Vitral"])]
 #else
 let components: [Target] = []

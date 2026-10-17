@@ -11,6 +11,7 @@ public enum Glyph: String, CaseIterable, Hashable, Sendable {
     case warning = "exclamationmark.triangle"
     case error = "exclamationmark.octagon"
     case info = "info.circle"
+    case success = "checkmark.circle"
     case retry = "arrow.clockwise"
     case play = "play.fill"
     case search = "magnifyingglass"

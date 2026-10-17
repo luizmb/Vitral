@@ -26,7 +26,7 @@ enum GallerySection: String, CaseIterable, Hashable {
         switch self {
         case .tokens: [.colours, .spacing, .radii, .sizes, .type, .materials]
         case .resources: [.icons, .images]
-        case .components: [.buttons, .selection, .pickers, .fields, .banners, .lists, .tags, .cards]
+        case .components: [.buttons, .selection, .pickers, .fields, .banners, .lists, .tags, .cards, .emptyStates, .progress]
         }
     }
 
@@ -44,7 +44,7 @@ enum GallerySection: String, CaseIterable, Hashable {
 enum GalleryPage: String, CaseIterable, Hashable {
     case colours, spacing, radii, sizes, type, materials
     case icons, images
-    case buttons, selection, pickers, fields, banners, lists, tags, cards
+    case buttons, selection, pickers, fields, banners, lists, tags, cards, emptyStates, progress
 
     var title: LocalizedStringKey {
         switch self {
@@ -64,6 +64,8 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .lists: "Panels and rows"
         case .tags: "Tags and swatches"
         case .cards: "Cards"
+        case .emptyStates: "Empty and error states"
+        case .progress: "Progress"
         }
     }
 
@@ -76,7 +78,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .type: "Dynamic Type styles"
         case .materials: "Regular, clear, tinted glass"
         case .icons: "Glyphs, by role"
-        case .images: "Illustrations"
+        case .images: "Illustrations for empty and error states"
         case .buttons: "ButtonPrimary, ButtonSecondary, ActionBar"
         case .pickers: "SegmentedControlGlass, RadioList, StepperJump"
         case .fields: "FieldText, FieldSecure, FieldSearch"
@@ -84,7 +86,9 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .selection: "Checkbox, ToggleSwitch, SelectionMark"
         case .lists: "Panel, PanelList, Row, SectionLabel"
         case .tags: "Tag, TagToggle, TagCloud, Swatch, SwatchStack, Stat"
-        case .cards: "Card, with header and footer"
+        case .cards: "Card, with header and footer; CardAdd"
+        case .emptyStates: "EmptyState, ErrorScreen"
+        case .progress: "ProgressOverlay"
         }
     }
 
@@ -107,6 +111,8 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .lists: ListsPage()
         case .tags: TagsPage()
         case .cards: CardsPage()
+        case .emptyStates: EmptyStatesPage()
+        case .progress: ProgressPage()
         }
     }
 }

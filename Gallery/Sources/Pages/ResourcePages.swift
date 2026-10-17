@@ -22,7 +22,13 @@ struct IconsPage: View {
 struct ImagesPage: View {
     var body: some View {
         Page("Images") {
-            Card("No images yet", subtitle: "Illustrations arrive with the error screen.")
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: Space.large)], spacing: Space.large) {
+                ForEach(Illustration.allCases, id: \.self) { illustration in
+                    LabelledGroup(LocalizedStringKey(String(describing: illustration))) {
+                        Panel { IllustrationView(illustration).frame(maxWidth: .infinity) }
+                    }
+                }
+            }
         }
     }
 }

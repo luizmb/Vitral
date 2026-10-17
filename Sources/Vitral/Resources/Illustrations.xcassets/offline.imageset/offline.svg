@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+  <!-- A cloud of glass pieces, cut through: no connection. -->
+  <path d="M44 108 C26 108 20 86 36 78 C34 56 60 46 72 60 C80 40 112 42 114 66 C134 64 142 92 124 104 C122 106 120 108 116 108 Z" fill="#3B9BFF" fill-opacity="0.18" stroke="#8C8C99" stroke-opacity="0.6" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M52 70 L70 64 L74 84 Z" fill="#FFB55A" fill-opacity="0.45"/>
+  <path d="M86 62 L106 70 L92 86 Z" fill="#34C27A" fill-opacity="0.4"/>
+  <path d="M40 132 L124 40" stroke="#FF6B5A" stroke-opacity="0.8" stroke-width="6" stroke-linecap="round"/>
+</svg>

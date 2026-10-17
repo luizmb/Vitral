@@ -1,46 +1,64 @@
 import SwiftUI
 import VitralTokens
 
-/// How serious a banner is: which colours and default icon it takes.
-public enum BannerTone: Hashable, Sendable {
-    case neutral, warning, danger
+/// How a banner looks: a preset for each kind of message, each with its colour and icon, or
+/// `custom` with every part chosen.
+public enum BannerStyle {
+    /// Something to know.
+    case info
+    /// Something that worked.
+    case success
+    /// Something to watch.
+    case warning
+    /// Something that went wrong.
+    case error
+    /// Quiet: a note in ink, no colour of its own.
+    case neutral
+    case custom(foreground: ColorToken, background: ColorToken, icon: Image)
 
     var foreground: ColorToken {
         switch self {
-        case .neutral: .inkMuted
+        case .info: .info
+        case .success: .success
         case .warning: .warning
-        case .danger: .danger
+        case .error: .danger
+        case .neutral: .inkMuted
+        case let .custom(foreground, _, _): foreground
         }
     }
 
     var background: ColorToken {
         switch self {
-        case .neutral: .neutralSurface
+        case .info: .infoSurface
+        case .success: .successSurface
         case .warning: .warningSurface
-        case .danger: .dangerSurface
+        case .error: .dangerSurface
+        case .neutral: .neutralSurface
+        case let .custom(_, background, _): background
         }
     }
 
-    var glyph: Glyph {
+    var icon: Image {
         switch self {
-        case .neutral: .info
-        case .warning: .warning
-        case .danger: .error
+        case .info, .neutral: Image(.info)
+        case .success: Image(.success)
+        case .warning: Image(.warning)
+        case .error: Image(Glyph.error)
+        case let .custom(_, _, icon): icon
         }
     }
 }
 
-/// A message across the content: something to know (neutral), to watch (warning) or that went
-/// wrong (danger). Anything to do about it goes after the message with `.trailing { }`.
+/// A message across the content, styled by what kind of message it is. Anything to do about it
+/// goes after the message with `.trailing { }`.
 public struct Banner<Trailing: View>: View {
-    let tone: BannerTone
-    let icon: Image
+    let style: BannerStyle
     let message: Text
     let trailing: Trailing
 
     public var body: some View {
         HStack(spacing: Space.small) {
-            icon
+            style.icon
                 .font(.subheadline.weight(.medium))
                 .accessibilityHidden(true)
             message
@@ -49,26 +67,26 @@ public struct Banner<Trailing: View>: View {
             Spacer(minLength: 0)
             trailing
         }
-        .foregroundStyle(tone.foreground)
+        .foregroundStyle(style.foreground)
         .padding(.horizontal, Space.medium + Space.hairline)
         .padding(.vertical, Space.medium)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .surface(tone.background, cornerRadius: Radius.medium)
+        .surface(style.background, cornerRadius: Radius.medium)
         .accessibilityElement(children: .combine)
     }
 
     /// Puts `trailing` (a button, usually) after the message.
     public func trailing<NewTrailing: View>(@ViewBuilder _ trailing: () -> NewTrailing) -> Banner<NewTrailing> {
-        Banner<NewTrailing>(tone: tone, icon: icon, message: message, trailing: trailing())
+        Banner<NewTrailing>(style: style, message: message, trailing: trailing())
     }
 }
 
 public extension Banner where Trailing == EmptyView {
-    init(_ message: LocalizedStringKey, tone: BannerTone = .neutral, icon: Image? = nil) {
-        self.init(Text(message), tone: tone, icon: icon)
+    init(_ message: LocalizedStringKey, style: BannerStyle = .info) {
+        self.init(Text(message), style: style)
     }
 
-    init(_ message: Text, tone: BannerTone = .neutral, icon: Image? = nil) {
-        self.init(tone: tone, icon: icon ?? Image(tone.glyph), message: message, trailing: EmptyView())
+    init(_ message: Text, style: BannerStyle = .info) {
+        self.init(style: style, message: message, trailing: EmptyView())
     }
 }

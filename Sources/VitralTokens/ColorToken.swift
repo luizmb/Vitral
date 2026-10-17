@@ -81,6 +81,10 @@ public extension ColorToken {
     static let warningSurface = ColorToken(light: RGBA(hex: 0xF09614, alpha: 0.13), dark: RGBA(hex: 0xFF9628, alpha: 0.12))
     static let danger = ColorToken(light: RGBA(hex: 0xCC3322), dark: RGBA(hex: 0xFF8A7A))
     static let dangerSurface = ColorToken(light: RGBA(hex: 0xE63C28, alpha: 0.12), dark: RGBA(hex: 0xFF503C, alpha: 0.14))
+    static let success = ColorToken(light: RGBA(hex: 0x1E8A4C), dark: RGBA(hex: 0x5FD38D))
+    static let successSurface = ColorToken(light: RGBA(hex: 0x28A85E, alpha: 0.12), dark: RGBA(hex: 0x3CC878, alpha: 0.14))
+    static let info = ColorToken(light: RGBA(hex: 0x0A63D8), dark: RGBA(hex: 0x6FB4FF))
+    static let infoSurface = ColorToken(light: RGBA(hex: 0x0A74F0, alpha: 0.10), dark: RGBA(hex: 0x3B9BFF, alpha: 0.14))
     static let neutralSurface = ColorToken(light: RGBA.black.opacity(0.045), dark: RGBA.white.opacity(0.05))
 
     /// A selected row or segment, lifted off the glass.
