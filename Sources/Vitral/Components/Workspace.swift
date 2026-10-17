@@ -92,6 +92,7 @@ public struct WorkspacePanel<Body: View> {
 public struct Workspace<Leading: View, Content: View, Trailing: View, Bottom: View>: View {
     let mode: WorkspaceMode?
     let exclusive: Bool
+    let closeLabel: LocalizedStringKey
     let content: Content
     let leading: WorkspacePanel<Leading>?
     let trailing: WorkspacePanel<Trailing>?
@@ -299,8 +300,28 @@ public struct Workspace<Leading: View, Content: View, Trailing: View, Bottom: Vi
             .shadow(color: Color(.scrim), radius: Space.large, y: Space.extraSmall)
     }
 
+    /// A panel in the sheet, with a close button over it: an iPhone on its side shows the sheet
+    /// at full height, with no grabber and nothing behind to tap, and a panel that scrolls takes
+    /// the drag that would dismiss it.
     func sheet<Panel: View>(_ panel: Panel) -> some View {
         panel
+            .safeAreaInset(edge: .top, spacing: 0) {
+                HStack {
+                    Spacer()
+                    Button {
+                        withAnimation(animation) { close(.leading, .trailing, .bottom) }
+                    } label: {
+                        Image(.close)
+                            .font(.body.weight(.semibold))
+                            .frame(width: Size.controlSmall, height: Size.controlSmall)
+                    }
+                    .buttonStyle(.glass)
+                    .buttonBorderShape(.circle)
+                    .accessibilityLabel(Text(closeLabel))
+                }
+                .padding(.horizontal, Space.medium)
+                .padding(.top, Space.medium)
+            }
             .presentationDetents([.fraction(1 / 3), .fraction(2 / 3), .large])
             .presentationBackgroundInteraction(.enabled(upThrough: .fraction(2 / 3)))
             .presentationContentInteraction(.scrolls)
@@ -357,9 +378,11 @@ public extension Workspace where Leading == EmptyView, Trailing == EmptyView, Bo
     ///   - mode: forces how panels show; `nil` picks it from the width.
     ///   - exclusive: one panel at a time, opening one closing the others (it turns their bindings
     ///     off): docked panels forced onto an iPhone then never squeeze the content.
-    init(mode: WorkspaceMode? = nil, exclusive: Bool = false, @ViewBuilder content: () -> Content) {
+    ///   - closeLabel: what VoiceOver says for the close button on a panel's sheet.
+    init(mode: WorkspaceMode? = nil, exclusive: Bool = false, closeLabel: LocalizedStringKey = "Close", @ViewBuilder content: () -> Content) {
         self.mode = mode
         self.exclusive = exclusive
+        self.closeLabel = closeLabel
         self.content = content()
         self.leading = nil
         self.trailing = nil
@@ -379,6 +402,7 @@ public extension Workspace {
         Workspace<Panel, Content, Trailing, Bottom>(
             mode: mode,
             exclusive: exclusive,
+            closeLabel: closeLabel,
             content: self.content,
             leading: WorkspacePanel(isPresented: isPresented, size: width, range: range, body: content()),
             trailing: trailing,
@@ -397,6 +421,7 @@ public extension Workspace {
         Workspace<Leading, Content, Panel, Bottom>(
             mode: mode,
             exclusive: exclusive,
+            closeLabel: closeLabel,
             content: self.content,
             leading: leading,
             trailing: WorkspacePanel(isPresented: isPresented, size: width, range: range, body: content()),
@@ -415,6 +440,7 @@ public extension Workspace {
         Workspace<Leading, Content, Trailing, Panel>(
             mode: mode,
             exclusive: exclusive,
+            closeLabel: closeLabel,
             content: self.content,
             leading: leading,
             trailing: trailing,
