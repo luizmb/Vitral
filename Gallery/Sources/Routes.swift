@@ -17,7 +17,7 @@ enum GallerySection: String, CaseIterable, Hashable {
     var subtitle: LocalizedStringKey {
         switch self {
         case .tokens: "The values everything is built from: colours, spacing, radii, sizes, type and glass."
-        case .resources: "Icons and images that ship with Vitral."
+        case .resources: "Icons and images that ship with Vitral, and wallpapers an app can take."
         case .components: "Stateless SwiftUI views, small ones composed into bigger ones."
         }
     }
@@ -25,8 +25,8 @@ enum GallerySection: String, CaseIterable, Hashable {
     var pages: [GalleryPage] {
         switch self {
         case .tokens: [.colours, .spacing, .radii, .sizes, .type, .materials]
-        case .resources: [.icons, .images]
-        case .components: [.buttons, .selection, .lists, .tags, .cards]
+        case .resources: [.icons, .images, .textures, .wallpapers]
+        case .components: [.backdrops, .buttons, .selection, .pickers, .fields, .banners, .lists, .tags, .cards, .emptyStates, .progress]
         }
     }
 
@@ -43,8 +43,8 @@ enum GallerySection: String, CaseIterable, Hashable {
 /// Every page of the Gallery.
 enum GalleryPage: String, CaseIterable, Hashable {
     case colours, spacing, radii, sizes, type, materials
-    case icons, images
-    case buttons, selection, lists, tags, cards
+    case icons, images, textures, wallpapers
+    case backdrops, buttons, selection, pickers, fields, banners, lists, tags, cards, emptyStates, progress
 
     var title: LocalizedStringKey {
         switch self {
@@ -56,11 +56,19 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .materials: "Materials"
         case .icons: "Icons"
         case .images: "Images"
+        case .textures: "Textures"
+        case .wallpapers: "Wallpapers"
+        case .backdrops: "Backdrops"
         case .buttons: "Buttons"
         case .selection: "Checkboxes and toggles"
+        case .pickers: "Pickers"
+        case .fields: "Fields"
+        case .banners: "Banners"
         case .lists: "Panels and rows"
         case .tags: "Tags and swatches"
         case .cards: "Cards"
+        case .emptyStates: "Empty and error states"
+        case .progress: "Progress"
         }
     }
 
@@ -73,12 +81,20 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .type: "Dynamic Type styles"
         case .materials: "Regular, clear, tinted glass"
         case .icons: "Glyphs, by role"
-        case .images: "Illustrations"
-        case .buttons: "ButtonPrimary, ButtonSecondary"
+        case .images: "Illustrations for empty and error states"
+        case .textures: "Woods, stones, fabrics and metal, tiled"
+        case .wallpapers: "Photos an app copies in; not in the library"
+        case .backdrops: "Patterns, materials, textures, mesh"
+        case .buttons: "ButtonPrimary, ButtonSecondary, ActionBar"
+        case .pickers: "SegmentedControlGlass, RadioList, StepperJump"
+        case .fields: "FieldText, FieldSecure, FieldSearch"
+        case .banners: "Banner, in three tones"
         case .selection: "Checkbox, ToggleSwitch, SelectionMark"
         case .lists: "Panel, PanelList, Row, SectionLabel"
-        case .tags: "Tag, TagCloud, Swatch, SwatchStack, Stat"
-        case .cards: "Card, with header and footer"
+        case .tags: "Tag, TagToggle, TagCloud, Swatch, SwatchStack, Stat"
+        case .cards: "Card, with header and footer; CardAdd"
+        case .emptyStates: "EmptyState, ErrorScreen"
+        case .progress: "ProgressOverlay"
         }
     }
 
@@ -93,11 +109,19 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .materials: MaterialsPage()
         case .icons: IconsPage()
         case .images: ImagesPage()
+        case .textures: TexturesPage()
+        case .wallpapers: WallpapersPage()
+        case .backdrops: BackdropsPage()
         case .buttons: ButtonsPage()
         case .selection: SelectionPage()
+        case .pickers: PickersPage()
+        case .fields: FieldsPage()
+        case .banners: BannersPage()
         case .lists: ListsPage()
         case .tags: TagsPage()
         case .cards: CardsPage()
+        case .emptyStates: EmptyStatesPage()
+        case .progress: ProgressPage()
         }
     }
 }

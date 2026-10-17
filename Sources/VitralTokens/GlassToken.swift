@@ -31,6 +31,12 @@ public struct GlassToken: Hashable, Sendable {
 public extension GlassToken {
     static let regular = GlassToken(.regular)
     static let clear = GlassToken(.clear)
+    /// Clear glass behind a veil of the backdrop colour, `amount` strong (0 ... 1): a dial between
+    /// `clear` (0) and nearly opaque (1). Vitral's default is `veiled(0.45)`: the backdrop shows
+    /// through, the text on it still reads.
+    static func veiled(_ amount: Double = 0.45) -> GlassToken {
+        GlassToken(.clear, tint: ColorToken.veil.opacity(min(1, max(0, amount))))
+    }
     /// Regular glass with a light accent tint: something active or chosen.
     static let active = GlassToken(.regular, tint: ColorToken.accent.opacity(0.18))
 }

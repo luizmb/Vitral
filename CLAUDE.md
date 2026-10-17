@@ -22,8 +22,12 @@ xcodebuild test -project VitralGallery.xcodeproj -scheme Gallery \
 ```
 
 xcsift has reported success on an Xcode build whose compiler crashed. For Gallery builds, grep
-for `BUILD SUCCEEDED` / `TEST SUCCEEDED` instead. Record snapshots by deleting the reference
-and running the tests twice (glass needs a frame to settle on a first capture).
+for `BUILD SUCCEEDED` / `TEST SUCCEEDED` instead.
+
+Recording snapshots: run the tests once, then record on a second run with
+`TEST_RUNNER_SNAPSHOT_TESTING_RECORD=all xcodebuild test …`, then run again to check. A reference
+taken on the first run in a process can catch glass or images before they settle. Don't
+pre-render by swapping the window's root controller: it leaks appearance into later captures.
 
 ## Component rules
 

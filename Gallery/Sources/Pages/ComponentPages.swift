@@ -14,6 +14,7 @@ struct ButtonsPage: View {
                         ButtonPrimary("Calculate", icon: Image(.play), fillsWidth: true) {}
                         ButtonPrimary("Medium", size: .medium) {}
                         ButtonPrimary("Small", size: .small) {}
+                        ButtonPrimary("Saving", fillsWidth: true, isBusy: true) {}
                         ButtonPrimary("Disabled", fillsWidth: true) {}.disabled(true)
                     }
                 }
@@ -24,6 +25,7 @@ struct ButtonsPage: View {
                         ButtonSecondary("Try again", icon: Image(.retry), fillsWidth: true) {}
                         ButtonSecondary("Medium", size: .medium) {}
                         ButtonSecondary("Small", size: .small) {}
+                        ButtonSecondary("Pulling", fillsWidth: true, isBusy: true) {}
                         ButtonSecondary("Disabled", fillsWidth: true) {}.disabled(true)
                     }
                 }
@@ -33,6 +35,7 @@ struct ButtonsPage: View {
                     ActionBar {
                         ActionBarButton("Edit", icon: Image(systemName: "pencil"), accessibilityLabel: "Edit") {}
                         ActionBarButton("Run", icon: Image(.play), accessibilityLabel: "Run") {}
+                        ActionBarButton("Build", icon: Image(systemName: "hammer"), accessibilityLabel: "Build", isBusy: true) {}
                         ActionBarButton(icon: Image(systemName: "trash"), accessibilityLabel: "Delete", role: .destructive) {}
                     }
                 }
@@ -112,6 +115,26 @@ struct TagsPage: View {
                     TagCloud(["Nuclear", "Dosimetry", "ICRP 137", "Inhalation", "Type S", "48 compartments", "Plasma"])
                 }
             }
+            LabelledGroup("Tag styles") {
+                Panel {
+                    TagCloud {
+                        Tag("Plain")
+                        Tag("Tinted", icon: Image(systemName: "guitars"), style: .tinted(.accent))
+                        Tag("Warning", style: .tinted(.warning))
+                        Tag("Filled", style: .filled(.accent))
+                    }
+                }
+            }
+            LabelledGroup("TagToggle") {
+                Panel {
+                    TagCloud {
+                        TagToggle("#swift", isOn: .constant(true))
+                        TagToggle("#fp", isOn: .constant(true))
+                        TagToggle("#ios", isOn: .constant(false))
+                        TagToggle("#design", isOn: .constant(false))
+                    }
+                }
+            }
             LabelledGroup("Swatch and SwatchStack") {
                 Panel {
                     VStack(alignment: .leading, spacing: Space.medium) {
@@ -122,6 +145,8 @@ struct TagsPage: View {
                         }
                         SwatchStack([.accent, .warning, .danger])
                         SwatchStack([.accent, .accentTop, .warning, .danger, .inkMuted, .ink, .inkFaint, .accentBottom])
+                        SwatchStack(items: [SwatchItem(.accent, label: "HH"), SwatchItem(.danger, label: "BB"), SwatchItem(.warning, label: "TN")], diameter: 38)
+                        SwatchStack(items: [], diameter: 38)
                     }
                 }
             }
@@ -140,6 +165,9 @@ struct TagsPage: View {
 struct CardsPage: View {
     var body: some View {
         Page("Cards") {
+            LabelledGroup("CardAdd") {
+                CardAdd("New blank model") {}
+            }
             LabelledGroup("Title and subtitle") {
                 Card("Validation", subtitle: "Model to validate the software")
             }
@@ -170,6 +198,194 @@ struct CardsPage: View {
                         ActionBarButton(icon: Image(systemName: "doc.on.doc"), accessibilityLabel: "Duplicate") {}
                         ActionBarButton(icon: Image(systemName: "trash"), accessibilityLabel: "Delete", role: .destructive) {}
                     }
+                }
+            }
+        }
+    }
+}
+
+enum Method: Hashable, Sendable {
+    case birchall, rungeKutta4, rungeKutta45
+}
+
+enum ChartScale: Hashable, Sendable {
+    case linear, logarithmic
+}
+
+struct PickersPage: View {
+    var body: some View {
+        Page("Pickers") {
+            LabelledGroup("SegmentedControlGlass") {
+                Panel {
+                    VStack(spacing: Space.medium) {
+                        SegmentedControlGlass(selection: .constant(ChartScale.logarithmic), options: [
+                            ChoiceOption(ChartScale.linear, title: "Linear"),
+                            ChoiceOption(ChartScale.logarithmic, title: "Logarithmic")
+                        ])
+                        SegmentedControlGlass(selection: .constant(Method.birchall), options: [
+                            ChoiceOption(Method.birchall, icon: Image(systemName: "function"), accessibilityLabel: "Birchall"),
+                            ChoiceOption(Method.rungeKutta4, icon: Image(systemName: "4.circle"), accessibilityLabel: "Runge-Kutta 4"),
+                            ChoiceOption(Method.rungeKutta45, icon: Image(systemName: "waveform.path"), accessibilityLabel: "Runge-Kutta 45")
+                        ])
+                    }
+                }
+            }
+            LabelledGroup("RadioList") {
+                RadioList(selection: .constant(Method.birchall), options: [
+                    ChoiceOption(Method.birchall, title: "Birchall", detail: Text(verbatim: "exact")),
+                    ChoiceOption(Method.rungeKutta4, title: "Runge-Kutta 4", detail: Text(verbatim: "fixed step")),
+                    ChoiceOption(Method.rungeKutta45, title: "Runge-Kutta 45", detail: Text(verbatim: "adaptive"))
+                ])
+            }
+            LabelledGroup("StepperJump") {
+                Panel {
+                    VStack(spacing: Space.medium) {
+                        StepperJump(value: .constant(200), fine: 1, coarse: 20)
+                        StepperJump(value: .constant(1), fine: 1, coarse: 20)
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct FieldsPage: View {
+    var body: some View {
+        Page("Fields") {
+            LabelledGroup("FieldText") {
+                Panel {
+                    VStack(spacing: Space.medium) {
+                        FieldText("Name", text: .constant(""))
+                        FieldText("Name", text: .constant("U-234 Inhalation"))
+                        FieldText("Step", text: .constant("0,001"), suffix: Text(verbatim: "d"), keyboard: .decimal, isMonospaced: true)
+                    }
+                }
+            }
+            LabelledGroup("Statuses") {
+                Panel {
+                    VStack(spacing: Space.medium) {
+                        FieldText("Email", text: .constant("luiz@ios.lu"), keyboard: .email, status: .success(Text("Looks right.")))
+                        FieldText("Step", text: .constant("0,0001"), suffix: Text(verbatim: "d"), keyboard: .decimal, isMonospaced: true, status: .warning(Text("Small steps take longer.")))
+                        FieldText("Tolerance", text: .constant("abc"), isMonospaced: true, status: .error([
+                            Text("Must be a number."),
+                            Text("Must be between 1e-14 and 1e-2.")
+                        ]))
+                        FieldText("Name", text: .constant(""), status: .error([]))
+                    }
+                }
+            }
+            LabelledGroup("FieldSecure") {
+                Panel {
+                    FieldSecure("Personal access token", text: .constant("ghp_secret"))
+                }
+            }
+            LabelledGroup("FieldSearch") {
+                Panel {
+                    VStack(spacing: Space.medium) {
+                        FieldSearch("Name, artist or tag", text: .constant(""))
+                        FieldSearch("Name, artist or tag", text: .constant("Highway"))
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct BannersPage: View {
+    var body: some View {
+        Page("Banners") {
+            LabelledGroup("Presets") {
+                VStack(spacing: Space.medium) {
+                    Banner("Calculated in 0.4 s.", style: .info)
+                    Banner("Saved to GitHub.", style: .success)
+                    Banner("RK4 at this step may be unstable.", style: .warning)
+                    Banner("The solver stopped at day 412.", style: .error)
+                    Banner("Times are in days.", style: .neutral)
+                }
+            }
+            LabelledGroup("Custom") {
+                Banner(
+                    "Recording: every change is kept.",
+                    style: .custom(foreground: .accent, background: ColorToken.accent.opacity(0.12), icon: Image(systemName: "record.circle"))
+                )
+            }
+            LabelledGroup("With an action") {
+                Banner("This file changed on disk while you were editing it.", style: .warning)
+                    .trailing { ButtonSecondary("Reload", size: .small) {} }
+            }
+        }
+    }
+}
+
+struct EmptyStatesPage: View {
+    var body: some View {
+        Page("Empty and error states") {
+            LabelledGroup("EmptyState with an illustration and an action") {
+                Panel {
+                    EmptyState("No models yet", message: Text("Make one from scratch, or import a file."), illustration: .empty)
+                        .actions { ButtonPrimary("New model", icon: Image(.add)) {} }
+                }
+            }
+            LabelledGroup("EmptyState with a symbol") {
+                Panel {
+                    EmptyState("Nothing selected", message: Text("Tap a track to edit it here."), icon: Image(systemName: "hand.tap"))
+                }
+            }
+            LabelledGroup("ErrorScreen with retry") {
+                Panel {
+                    ErrorScreen("Couldn't sync", message: Text("GitHub didn't answer for \(30) seconds."), illustration: .offline) {}
+                }
+            }
+            LabelledGroup("ErrorScreen without retry") {
+                Panel {
+                    ErrorScreen("This file can't be read", message: Text("It isn't a model Vitral knows."))
+                }
+            }
+        }
+    }
+}
+
+struct ProgressPage: View {
+    var body: some View {
+        Page("Progress") {
+            LabelledGroup("ProgressOverlay with a fraction") {
+                Card("Highway to Hell", subtitle: "AC/DC")
+                    .frame(height: 220)
+                    .progressOverlay(ProgressOverlay("Importing 3 of 12", detail: Text(verbatim: "Highway to Hell.wav"), fraction: 0.25))
+            }
+            LabelledGroup("ProgressOverlay without one") {
+                Card("Pushing", subtitle: "feature/new-article")
+                    .frame(height: 220)
+                    .progressOverlay(ProgressOverlay("Pushing to GitHub"))
+            }
+        }
+    }
+}
+
+struct BackdropsPage: View {
+    nonisolated static let samples: [(name: String, style: BackdropStyle)] = [
+        ("grid", .grid()),
+        ("grid, zoomed out", .grid(scale: 0.3)),
+        ("dots", .dots()),
+        ("laserCurves", .laserCurves()),
+        ("wood", .wood),
+        ("brushedMetal", .brushedMetal),
+        ("busFloor", .busFloor),
+        ("paper", .paper),
+        ("texture(.wood)", .texture(.wood)),
+        ("mesh", .mesh([.accent, .warning, .success, .danger])),
+        ("plain", .plain)
+    ]
+
+    var body: some View {
+        Page("Backdrops") {
+            ForEach(Self.samples, id: \.name) { sample in
+                LabelledGroup(LocalizedStringKey(sample.name)) {
+                    Panel { TagCloud(["Glass", "over", "the", "backdrop"]) }
+                        .padding(Space.extraLarge)
+                        .padding(.vertical, Space.large)
+                        .background { Backdrop(sample.style) }
+                        .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
                 }
             }
         }

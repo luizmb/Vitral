@@ -94,3 +94,17 @@ public extension Image {
         self.init(systemName: glyph.rawValue)
     }
 }
+
+public extension Image {
+    /// One of Vitral's illustrations, from the package's own assets.
+    init(_ illustration: Illustration) {
+        self.init(illustration.rawValue, bundle: .module)
+    }
+}
+
+public extension Image {
+    /// One of Vitral's texture tiles, from the package's own assets.
+    init(_ texture: Texture) {
+        self.init("texture-\(texture.rawValue)", bundle: .module)
+    }
+}

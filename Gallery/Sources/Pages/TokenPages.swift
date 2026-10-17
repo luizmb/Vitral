@@ -11,10 +11,10 @@ struct ColoursPage: View {
     private static let groups = [
         ColourGroup(title: "Ink", tokens: [("ink", .ink), ("inkMuted", .inkMuted), ("inkFaint", .inkFaint), ("onAccent", .onAccent)]),
         ColourGroup(title: "Accent", tokens: [("accent", .accent), ("accentTop", .accentTop), ("accentBottom", .accentBottom), ("accentGlow", .accentGlow)]),
-        ColourGroup(title: "Feedback", tokens: [("warning", .warning), ("warningSurface", .warningSurface), ("danger", .danger), ("dangerSurface", .dangerSurface)]),
+        ColourGroup(title: "Feedback", tokens: [("info", .info), ("infoSurface", .infoSurface), ("success", .success), ("successSurface", .successSurface), ("warning", .warning), ("warningSurface", .warningSurface), ("danger", .danger), ("dangerSurface", .dangerSurface)]),
         ColourGroup(
             title: "Surfaces",
-            tokens: [("neutralSurface", .neutralSurface), ("selectedSurface", .selectedSurface), ("backdrop", .backdrop), ("hairline", .hairline), ("outline", .outline)]
+            tokens: [("neutralSurface", .neutralSurface), ("selectedSurface", .selectedSurface), ("backdrop", .backdrop), ("gridLine", .gridLine), ("gridLineMajor", .gridLineMajor), ("hairline", .hairline), ("outline", .outline)]
         )
     ]
 
@@ -129,19 +129,44 @@ struct TypePage: View {
 }
 
 struct MaterialsPage: View {
-    private static let entries: [(name: String, token: GlassToken)] = [
-        ("regular", .regular), ("clear", .clear), ("active", .active), ("regular, tinted warning", GlassToken.regular.tinted(.warningSurface))
+    /// From clear to regular, the veil the dial in between.
+    nonisolated static let ladder: [(name: String, token: GlassToken)] = [
+        ("clear", .clear),
+        ("veiled(0.2)", .veiled(0.2)),
+        ("veiled(0.45), the default", .veiled()),
+        ("veiled(0.7)", .veiled(0.7)),
+        ("regular", .regular)
     ]
 
     var body: some View {
         Page("Materials") {
-            ForEach(Self.entries, id: \.name) { entry in
-                LabelledGroup(LocalizedStringKey(entry.name)) {
-                    Panel(material: entry.token) {
-                        TagCloud(["Glass", "over", "the", "backdrop"])
-                    }
+            ForEach(MaterialLadder.backdrops, id: \.name) { backdrop in
+                LabelledGroup(LocalizedStringKey("Over \(backdrop.name)")) {
+                    MaterialLadder(backdrop: backdrop.style)
+                        .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
                 }
             }
+            LabelledGroup("active") {
+                Panel(material: .active) { TagCloud(["Chosen", "glass"]) }
+            }
         }
+    }
+}
+
+/// Every rung from clear to regular, over one backdrop.
+struct MaterialLadder: View {
+    nonisolated static let backdrops: [(name: String, style: BackdropStyle)] = [("graph paper", .grid()), ("the bus floor", .busFloor), ("wood", .wood)]
+
+    let backdrop: BackdropStyle
+
+    var body: some View {
+        VStack(spacing: Space.small) {
+            ForEach(MaterialsPage.ladder, id: \.name) { entry in
+                Row(LocalizedStringKey(entry.name), subtitle: "Glass over the backdrop")
+                    .glassSurface(entry.token, cornerRadius: Radius.medium)
+            }
+        }
+        .padding(Space.medium)
+        .background { Backdrop(backdrop) }
     }
 }
