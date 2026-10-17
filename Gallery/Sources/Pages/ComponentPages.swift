@@ -352,11 +352,13 @@ struct ProgressPage: View {
                 Card("Highway to Hell", subtitle: "AC/DC")
                     .frame(height: 220)
                     .progressOverlay(ProgressOverlay("Importing 3 of 12", detail: Text(verbatim: "Highway to Hell.wav"), fraction: 0.25))
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
             }
             LabelledGroup("ProgressOverlay without one") {
                 Card("Pushing", subtitle: "feature/new-article")
                     .frame(height: 220)
                     .progressOverlay(ProgressOverlay("Pushing to GitHub"))
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
             }
         }
     }

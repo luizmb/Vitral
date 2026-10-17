@@ -100,6 +100,9 @@ public extension ColorToken {
     /// At full strength; `GlassToken.veiled(_:)` takes a fraction of it.
     static let veil = ColorToken(light: RGBA(white: 0.97), dark: RGBA(white: 0.08))
 
+    /// Laid over a screen that has to wait (`ProgressOverlay`): it dims what's underneath.
+    static let scrim = ColorToken(light: RGBA.black.opacity(0.18), dark: RGBA.black.opacity(0.45))
+
     /// What sits under the glass when nothing else does.
     static let backdrop = ColorToken(light: RGBA(white: 0.965), dark: RGBA(white: 0.09))
     /// The graph paper's fine lines and its stronger every-fifth lines.
