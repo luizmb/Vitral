@@ -48,7 +48,7 @@ enum WorkspaceModeChoice: String, CaseIterable, Hashable, Sendable {
 
     var subtitle: LocalizedStringKey {
         switch self {
-        case .automatic: "Docked when wide, floating at middle widths, sheets when narrow"
+        case .automatic: "Docked when wide, floating at middle widths, sheets when narrow; a sidebar, an inspector and a console"
         case .docked: "Workspace(mode: .docked): columns beside the content"
         case .dockedExclusive: "Workspace(mode: .docked, exclusive: true): opening one closes the other"
         case .floating: "Workspace(mode: .floating): glass panels over the content"
@@ -97,7 +97,10 @@ struct WorkspaceSample: View {
         .trailing(isPresented: $model.showsInspector, width: $model.inspectorWidth, pages: $model.inspectorPage) { page in
             WorkspaceInspector(page: page)
         }
-        .workspaceToolbar(leading: $model.showsSidebar, trailing: $model.showsInspector)
+        .bottom(isPresented: $model.showsConsole, height: $model.consoleHeight) {
+            WorkspaceConsole()
+        }
+        .workspaceToolbar(leading: $model.showsSidebar, trailing: $model.showsInspector, bottom: $model.showsConsole)
         .navigationTitle(route.choice.title)
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -114,6 +117,28 @@ struct WorkspaceCanvas: View {
         .padding(Space.large)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background { Backdrop(.grid()) }
+    }
+}
+
+/// The sample's bottom panel: a log.
+struct WorkspaceConsole: View {
+    static let log = """
+        18:42:07  Solving U-234 inhalation, 12 compartments
+        18:42:07  Step 1e-3 d, tolerance 1e-9
+        18:42:08  Lungs → Blood  2.1e-4 Bq
+        18:42:08  Blood → Liver  6.8e-5 Bq
+        18:42:09  Done in 1.84 s
+        """
+
+    var body: some View {
+        ScrollView([.vertical, .horizontal]) {
+            Text(verbatim: Self.log)
+                .font(.codeSmall)
+                .foregroundStyle(.inkMuted)
+                .textSelection(.enabled)
+                .padding(Space.medium)
+        }
+        .defaultScrollAnchor(.topLeading)
     }
 }
 

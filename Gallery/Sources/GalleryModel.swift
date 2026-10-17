@@ -11,8 +11,10 @@ final class GalleryModel {
     var flipPage: Int? = 0
     var showsSidebar = false
     var showsInspector = false
-    var sidebarWidth = PanelWidth.sidebar.ideal
-    var inspectorWidth = PanelWidth.inspector.ideal
+    var showsConsole = false
+    var sidebarWidth = PanelSize.sidebar.ideal
+    var inspectorWidth = PanelSize.inspector.ideal
+    var consoleHeight = PanelSize.console.ideal
     var inspectorPage = DemoInspectorPage.properties
     var segmentedPage = DemoInspectorPage.properties
 }
