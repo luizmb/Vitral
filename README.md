@@ -94,7 +94,8 @@ illustration for a state, use a symbol.
 | Fields | `FieldText`, `FieldSecure`, `FieldSearch`, `FieldContainer`, with `FieldStatus` |
 | Pickers | `SegmentedControlGlass`, `RadioList`, `StepperJump`, `AppearancePicker` |
 | Feedback | `Banner`, `EmptyState`, `ErrorScreen`, `ProgressPanel` |
-| Paging | `Carousel` (`.slide`, `.flip`), `PageDots` |
+| Paging | `Carousel` (`.slide`, `.flip`), `PageDots` (the native page control on iOS), `SegmentedPages` |
+| Workspace | `Workspace` (`.leading`, `.trailing`, optionally with `pages:`), `PanelToggle`, `.workspaceToolbar`, `.panelAnimation`, `.panelTransition` |
 | Code | `CodeBlock`, `CodeSpan`, `SyntaxTheme` (`.neon`), `TypeToken.code` |
 | Overlays | `Overlay` (glass over what's behind, content at a placement), `.overlay(isPresented:)`, `.overlay(item:)`, `.progressOverlay(_:)` |
 | Backdrops | `Backdrop`: patterns, drawn materials (`.busFloor(angle:)`, `.wood`, …), textures, aurora, glow, waves, images |

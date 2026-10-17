@@ -34,17 +34,21 @@ public struct Carousel<Item: Identifiable, Content: View>: View where Item.ID: S
     @Binding var selection: Item.ID?
     let items: [Item]
     let style: CarouselStyle
+    let inset: Double
     let content: (Item) -> Content
 
+    /// - Parameter inset: the space kept on each side of a page.
     public init(
         _ items: [Item],
         selection: Binding<Item.ID?>,
         style: CarouselStyle = .slide,
+        inset: Double = Space.large,
         @ViewBuilder content: @escaping (Item) -> Content
     ) {
         self.items = items
         self._selection = selection
         self.style = style
+        self.inset = inset
         self.content = content
     }
 
@@ -53,7 +57,7 @@ public struct Carousel<Item: Identifiable, Content: View>: View where Item.ID: S
             LazyHStack(spacing: 0) {
                 ForEach(items) { item in
                     content(item)
-                        .padding(.horizontal, Space.large)
+                        .padding(.horizontal, inset)
                         .containerRelativeFrame(.horizontal)
                         .scrollTransition(axis: .horizontal) { page, phase in
                             page

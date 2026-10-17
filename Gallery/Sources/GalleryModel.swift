@@ -1,4 +1,5 @@
 import Observation
+import Vitral
 import VitralTokens
 
 /// The Gallery's state, held by the app (its boundary): the appearance switch's choice and the
@@ -8,4 +9,10 @@ final class GalleryModel {
     var appearance = Appearance.system
     var carouselPage: Int? = 0
     var flipPage: Int? = 0
+    var showsSidebar = false
+    var showsInspector = false
+    var sidebarWidth = PanelWidth.sidebar.ideal
+    var inspectorWidth = PanelWidth.inspector.ideal
+    var inspectorPage = DemoInspectorPage.properties
+    var segmentedPage = DemoInspectorPage.properties
 }
