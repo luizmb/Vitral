@@ -21,6 +21,18 @@ final class GalleryModel {
     var compartments = DemoCompartment.all
     var selectedCompartment: DemoCompartment.ID?
     var editMode = EditMode.inactive
+    var knobGain = 0.4
+    var knobVolume = 0.6
+    var knobVolumeStart: Double?
+    var knobTexture = 0.3
+    var knobMarshall = 7.0
+    var knobFender = 6.0
+    var knobMesa = 4.0
+    var knobSoldano = 11.0
+    var knobHandle = 5.0
+    var knobFrequency = 1000.0
+    var jogRotation = 0.0
+    var jogTouch: Double?
 
     // What the list reports, applied here as a store's reducer would.
 

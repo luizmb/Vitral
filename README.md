@@ -89,6 +89,7 @@ illustration for a state, use a symbol.
 | Buttons | `ButtonPrimary`, `ButtonSecondary`, `ButtonLabel`, `ActionBar`, `ActionBarButton` |
 | Selection | `Checkbox`, `ToggleSwitch`, `SelectionMark` |
 | Layout | `Page`, `Panel`, `PanelList`, `Row` (`.trailing`, `.disclosure`, `.rowState`), `LabelledGroup`, `SectionLabel`, `Hairline` |
+| Dials | `Knob` (`.circular`, `.vertical(dragStart:)`; any start and end angle), `KnobStyle`, `GlassKnobStyle`, `JogDial`, `ValueScale` (range, step, precision, taper) |
 | Lists | `GlassList` (the platform list on the backdrop), `GlassSection`, `RowState`, `.rowActions([RowAction])` |
 | Tags and colour | `Tag`, `TagCloud`, `FlowLayout`, `Swatch`, `SwatchStack`, `Stat` |
 | Cards | `Card` with optional `.header { }` and `.footer { }`, `CardAdd` |
