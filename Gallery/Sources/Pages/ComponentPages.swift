@@ -374,6 +374,12 @@ struct BackdropsPage: View {
         ("paper", .paper),
         ("texture(.wood)", .texture(.wood)),
         ("mesh", .mesh([.accent, .warning, .success, .danger])),
+        ("aurora", .aurora()),
+        ("aurora, warm", .aurora([.washPink, .washAmber, .washViolet])),
+        ("glow", .glow()),
+        ("glow, sunset", .glow([.washAmber, .washPink, .danger])),
+        ("waves", .waves()),
+        ("waves, violet", .waves(.washViolet)),
         ("plain", .plain)
     ]
 

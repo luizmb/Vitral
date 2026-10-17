@@ -116,6 +116,18 @@ public extension ColorToken {
     static let chromeMid = ColorToken(light: RGBA(hex: 0xB9C0C8), dark: RGBA(hex: 0x5B636C))
     static let chromeShadow = ColorToken(light: RGBA(hex: 0x6E7782), dark: RGBA(hex: 0x1B1F24))
     static let paperFleck = ColorToken(light: RGBA(hex: 0x6B5A40, alpha: 0.22), dark: RGBA.white.opacity(0.12))
+
+    // Washes: the saturated hues the abstract backdrops (aurora, glow, waves) are painted in.
+    static let washGreen = ColorToken(light: RGBA(hex: 0x2EBF8A), dark: RGBA(hex: 0x3DF5A8))
+    static let washTeal = ColorToken(light: RGBA(hex: 0x1FA3C7), dark: RGBA(hex: 0x2FD0E8))
+    static let washViolet = ColorToken(light: RGBA(hex: 0x7F5CF0), dark: RGBA(hex: 0x9B6BFF))
+    static let washPink = ColorToken(light: RGBA(hex: 0xEE6FAE), dark: RGBA(hex: 0xFF5FA8))
+    static let washAmber = ColorToken(light: RGBA(hex: 0xF4A63A), dark: RGBA(hex: 0xFFB347))
+    /// The sky an aurora hangs in, top and horizon: a pale dawn in light mode, night in dark mode.
+    static let skyTop = ColorToken(light: RGBA(hex: 0xDDE5F2), dark: RGBA(hex: 0x03060E))
+    static let skyHorizon = ColorToken(light: RGBA(hex: 0xF5F3EE), dark: RGBA(hex: 0x0C1424))
+    /// Stars: none by day.
+    static let star = ColorToken(light: RGBA.white.opacity(0), dark: RGBA.white.opacity(0.7))
 }
 
 public extension RGBA {
