@@ -68,7 +68,8 @@ public struct Carousel<Item: Identifiable, Content: View>: View where Item.ID: S
             }
             .scrollTargetLayout()
         }
-        .scrollTargetBehavior(.paging)
+        // Aligned to the pages themselves, not the view's width, so a swipe always rests on one.
+        .scrollTargetBehavior(.viewAligned(limitBehavior: .always))
         .scrollPosition(id: $selection)
         .scrollIndicators(.hidden)
         .scrollClipDisabled()
