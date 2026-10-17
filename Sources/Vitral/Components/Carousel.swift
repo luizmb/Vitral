@@ -1,5 +1,8 @@
 import SwiftUI
 import VitralTokens
+#if canImport(UIKit)
+import UIKit
+#endif
 
 /// How a carousel's pages move.
 public enum CarouselStyle: Hashable, Sendable {
@@ -68,30 +71,38 @@ public struct Carousel<Item: Identifiable, Content: View>: View where Item.ID: S
     }
 }
 
-/// A dot per page on a glass capsule, the current one filled with the accent: where you are in
-/// a carousel, and a way to jump. VoiceOver reads it as one adjustable control.
+/// Where you are in a carousel, and a way to move: the platform's page control. On iOS it is
+/// UIKit's own (`UIPageControl`): dots that grow under the finger, a drag across them scrubs
+/// through the pages, a tap steps one, and VoiceOver reads it as an adjustable control. Elsewhere,
+/// dots on a glass capsule. Stateless: the page is the binding's, set with animation so the
+/// carousel follows.
 public struct PageDots<ID: Hashable & Sendable>: View {
     @Binding var selection: ID?
     let ids: [ID]
-    let label: (Int, Int) -> Text
 
     @Environment(\.accent) private var accent
 
-    /// - Parameter label: what VoiceOver says for page `index` (from 1) of `count`.
-    public init(_ ids: [ID], selection: Binding<ID?>, label: @escaping (Int, Int) -> Text = { Text("Page \($0) of \($1)") }) {
+    public init(_ ids: [ID], selection: Binding<ID?>) {
         self.ids = ids
         self._selection = selection
-        self.label = label
     }
 
     var index: Int {
         ids.firstIndex { $0 == selection } ?? 0
     }
 
+    func select(_ page: Int) {
+        withAnimation { selection = ids[min(max(page, 0), ids.count - 1)] }
+    }
+
     public var body: some View {
+        #if canImport(UIKit)
+        NativePageControl(count: ids.count, current: index, current: accent.base, other: .inkFaint, onChange: select)
+            .fixedSize()
+        #else
         HStack(spacing: Space.small) {
-            ForEach(ids, id: \.self) { id in
-                Button { selection = id } label: {
+            ForEach(Array(ids.enumerated()), id: \.offset) { page, id in
+                Button { select(page) } label: {
                     Circle()
                         .fill(id == selection ? Color(accent.base) : Color(.inkFaint))
                         .frame(width: Space.small, height: Space.small)
@@ -104,14 +115,59 @@ public struct PageDots<ID: Hashable & Sendable>: View {
         .padding(.horizontal, Space.small)
         .padding(.vertical, Space.extraSmall)
         .glassCapsule()
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(label(index + 1, ids.count))
-        .accessibilityAdjustableAction { direction in
-            switch direction {
-            case .increment: selection = ids[min(index + 1, ids.count - 1)]
-            case .decrement: selection = ids[max(index - 1, 0)]
-            @unknown default: break
-            }
+        #endif
+    }
+}
+
+#if canImport(UIKit)
+/// UIKit's page control, showing `current` of `count` and reporting the page the user moves to.
+struct NativePageControl: UIViewRepresentable {
+    let count: Int
+    let current: Int
+    let currentColour: ColorToken
+    let otherColour: ColorToken
+    let onChange: @MainActor (Int) -> Void
+
+    init(count: Int, current: Int, current currentColour: ColorToken, other otherColour: ColorToken, onChange: @escaping @MainActor (Int) -> Void) {
+        self.count = count
+        self.current = current
+        self.currentColour = currentColour
+        self.otherColour = otherColour
+        self.onChange = onChange
+    }
+
+    func makeCoordinator() -> Relay {
+        Relay(onChange: onChange)
+    }
+
+    func makeUIView(context: Context) -> UIPageControl {
+        let control = UIPageControl()
+        // The platform's capsule behind the dots, so they read over any backdrop.
+        control.backgroundStyle = .prominent
+        control.addTarget(context.coordinator, action: #selector(Relay.changed(_:)), for: .valueChanged)
+        return control
+    }
+
+    func updateUIView(_ control: UIPageControl, context: Context) {
+        context.coordinator.onChange = onChange
+        control.numberOfPages = count
+        control.currentPage = current
+        control.currentPageIndicatorTintColor = UIColor(Color(currentColour))
+        control.pageIndicatorTintColor = UIColor(Color(otherColour))
+    }
+
+    /// Passes UIKit's value-changed event on to the latest `onChange`; it holds no page of its own.
+    @MainActor
+    final class Relay: NSObject {
+        var onChange: @MainActor (Int) -> Void
+
+        init(onChange: @escaping @MainActor (Int) -> Void) {
+            self.onChange = onChange
+        }
+
+        @objc func changed(_ control: UIPageControl) {
+            onChange(control.currentPage)
         }
     }
 }
+#endif

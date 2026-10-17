@@ -2,19 +2,19 @@ import SwiftUI
 import Vitral
 import VitralTokens
 
-/// One card of the samples: a material and what it's made of.
+/// One card of the samples.
 struct CarouselCard: Identifiable, Sendable {
     let id: Int
     let title: String
     let subtitle: String
-    let backdrop: BackdropStyle
+    let tags: [String]
 
     static let all = [
-        CarouselCard(id: 0, title: "Bus floor", subtitle: "Drawn in code", backdrop: .busFloor()),
-        CarouselCard(id: 1, title: "Denim", subtitle: "A photo, tiled", backdrop: .texture(.denim)),
-        CarouselCard(id: 2, title: "Waves", subtitle: "Generated", backdrop: .waves()),
-        CarouselCard(id: 3, title: "Cherry", subtitle: "Mahogany at night", backdrop: .texture(.wood)),
-        CarouselCard(id: 4, title: "Aurora", subtitle: "Starry at night", backdrop: .aurora())
+        CarouselCard(id: 0, title: "U-234 Inhalation", subtitle: "ICRP 137, Type S", tags: ["Nuclear", "Inhalation"]),
+        CarouselCard(id: 1, title: "Cs-137 Ingestion", subtitle: "ICRP 137", tags: ["Nuclear", "Ingestion"]),
+        CarouselCard(id: 2, title: "I-131 Thyroid", subtitle: "Blocked with KI", tags: ["Iodine", "Thyroid"]),
+        CarouselCard(id: 3, title: "Pu-239 Wound", subtitle: "NCRP 156", tags: ["Wound", "Actinide"]),
+        CarouselCard(id: 4, title: "H-3 Water", subtitle: "Whole body", tags: ["Tritium"])
     ]
 }
 
@@ -35,6 +35,7 @@ struct CarouselPage: View {
     }
 }
 
+/// Glass cards paging over one backdrop, which stays where it is; the dots under them.
 struct CarouselSample: View {
     @Binding var selection: Int?
     let style: CarouselStyle
@@ -43,15 +44,13 @@ struct CarouselSample: View {
         VStack(spacing: Space.medium) {
             Carousel(CarouselCard.all, selection: $selection, style: style) { card in
                 Card(LocalizedStringKey(card.title), subtitle: LocalizedStringKey(card.subtitle)) {
-                    TagCloud(["Glass", "over", "the", "card"])
+                    TagCloud(card.tags.map { LocalizedStringKey($0) })
                 }
-                .padding(Space.large)
-                .frame(height: 220)
-                .background { Backdrop(card.backdrop) }
-                .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
             }
-            .padding(.horizontal, -Space.large)
             PageDots(CarouselCard.all.map(\.id), selection: $selection)
         }
+        .padding(.vertical, Space.extraLarge)
+        .background { Backdrop(.waves()) }
+        .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
     }
 }
