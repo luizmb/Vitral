@@ -8,6 +8,13 @@ import VitralTokens
 struct ButtonsPage: View {
     var body: some View {
         Page("Buttons") {
+            LabelledGroup("Pill") {
+                HStack(spacing: Space.medium) {
+                    Pill { Label("12 compartments", systemImage: "circle.grid.2x2").padding(.horizontal, Space.medium).frame(height: Size.controlMedium) }
+                    Pill(isActive: true, action: {}) { Image(systemName: "link").frame(width: Size.controlMedium, height: Size.controlMedium) }
+                    Pill(action: {}) { Image(systemName: "plus").frame(width: Size.controlMedium, height: Size.controlMedium) }
+                }
+            }
             LabelledGroup("ButtonPrimary") {
                 Panel {
                     VStack(alignment: .leading, spacing: Space.medium) {
