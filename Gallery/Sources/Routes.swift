@@ -26,7 +26,7 @@ enum GallerySection: String, CaseIterable, Hashable {
         switch self {
         case .tokens: [.colours, .spacing, .radii, .sizes, .type, .materials]
         case .resources: [.icons, .images, .textures, .wallpapers]
-        case .components: [.appearance, .tints, .code, .carousel, .backdrops, .buttons, .selection, .pickers, .fields, .banners, .lists, .tags, .cards, .emptyStates, .progress, .overlays, .workspace]
+        case .components: [.appearance, .tints, .code, .carousel, .glassList, .backdrops, .buttons, .selection, .pickers, .fields, .banners, .lists, .tags, .cards, .emptyStates, .progress, .overlays, .workspace]
         }
     }
 
@@ -44,7 +44,7 @@ enum GallerySection: String, CaseIterable, Hashable {
 enum GalleryPage: String, CaseIterable, Hashable {
     case colours, spacing, radii, sizes, type, materials
     case icons, images, textures, wallpapers
-    case appearance, tints, code, carousel, backdrops, buttons, selection, pickers, fields, banners, lists, tags, cards, emptyStates, progress, overlays, workspace
+    case appearance, tints, code, carousel, glassList, backdrops, buttons, selection, pickers, fields, banners, lists, tags, cards, emptyStates, progress, overlays, workspace
 
     var title: LocalizedStringKey {
         switch self {
@@ -62,6 +62,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .tints: "Tints and accents"
         case .code: "Code"
         case .carousel: "Carousel"
+        case .glassList: "GlassList"
         case .backdrops: "Backdrops"
         case .buttons: "Buttons"
         case .selection: "Checkboxes and toggles"
@@ -94,6 +95,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .tints: "Tint, .accent(.counter)"
         case .code: "CodeBlock, SyntaxTheme, .code"
         case .carousel: "Carousel, PageDots, SegmentedPages"
+        case .glassList: "GlassList, GlassSection, Row, RowAction"
         case .backdrops: "Textures and wallpapers together"
         case .buttons: "ButtonPrimary, ButtonSecondary, ActionBar"
         case .pickers: "SegmentedControlGlass, RadioList, StepperJump"
@@ -127,6 +129,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .tints: TintsPage()
         case .code: CodePage()
         case .carousel: CarouselPage()
+        case .glassList: GlassListPage()
         case .backdrops: BackdropsPage()
         case .buttons: ButtonsPage()
         case .selection: SelectionPage()

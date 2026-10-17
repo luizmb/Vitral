@@ -1,4 +1,5 @@
 import Observation
+import SwiftUI
 import Vitral
 import VitralTokens
 
@@ -17,4 +18,25 @@ final class GalleryModel {
     var consoleHeight = PanelSize.console.ideal
     var inspectorPage = DemoInspectorPage.properties
     var segmentedPage = DemoInspectorPage.properties
+    var compartments = DemoCompartment.all
+    var selectedCompartment: DemoCompartment.ID?
+    var editMode = EditMode.inactive
+
+    // What the list reports, applied here as a store's reducer would.
+
+    func delete(at offsets: IndexSet) {
+        compartments.remove(atOffsets: offsets)
+    }
+
+    func delete(_ id: DemoCompartment.ID) {
+        compartments.removeAll { $0.id == id }
+    }
+
+    func move(from offsets: IndexSet, to destination: Int) {
+        compartments.move(fromOffsets: offsets, toOffset: destination)
+    }
+
+    func toggleFiring(_ id: DemoCompartment.ID) {
+        compartments = compartments.map { $0.id == id ? $0.firing(!$0.isFiring) : $0 }
+    }
 }

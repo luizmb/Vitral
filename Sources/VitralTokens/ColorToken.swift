@@ -103,6 +103,10 @@ public extension ColorToken {
     /// Tints the glass of an `Overlay`, dimming what's underneath.
     static let scrim = ColorToken(light: RGBA.black.opacity(0.18), dark: RGBA.black.opacity(0.45))
 
+    /// A list row's surface: frosted white by day, a lifted grey at night, the backdrop showing
+    /// through both.
+    static let listRow = ColorToken(light: RGBA.white.opacity(0.72), dark: RGBA.white.opacity(0.09))
+
     /// What sits under the glass when nothing else does.
     static let backdrop = ColorToken(light: RGBA(white: 0.965), dark: RGBA(white: 0.09))
     /// The graph paper's fine lines and its stronger every-fifth lines.
