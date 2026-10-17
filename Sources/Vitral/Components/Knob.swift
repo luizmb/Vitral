@@ -188,19 +188,26 @@ public struct GlassKnobStyle: KnobStyle {
     let marks: Int?
     let numbers: Numbers
     let numberCount: Int
+    let numberStep: Double?
     let pointer: Pointer
     let showsArc: Bool
     let showsValue: Bool
     let markColour: ColorToken
     let numberColour: ColorToken
+    let valueColour: ColorToken
     let pointerColour: ColorToken?
 
     /// - Parameters:
     ///   - faceSize: how much of the knob the face covers, 0 ... 1: a small one leaves a ring of
     ///     glass round it (where numbers inside go), 1 is a whole skirt (numbers go on it).
     ///   - marks: dashes round the knob, this many (`nil` for none).
-    ///   - numberCount: the most numbers written (the scale's steps when they fit).
-    ///   - markColour, numberColour: the dashes' and numbers' colour, for the panel they sit on.
+    ///   - numberCount: the most numbers written (the scale's steps when they fit), when there's
+    ///     no `numberStep`.
+    ///   - numberStep: a number every this much (1 for 0, 1, 2 … 10), written with the decimals
+    ///     it needs. It only labels the knob: the value keeps the scale's step and precision, so a
+    ///     knob numbered 1 to 10 can rest at 7.35.
+    ///   - markColour, numberColour, valueColour: the dashes', numbers' and readout's colour, for
+    ///     the panel they sit on.
     ///   - pointerColour: the pointer's colour; the accent when `nil`.
     public init(
         face: Face = .glass,
@@ -208,11 +215,13 @@ public struct GlassKnobStyle: KnobStyle {
         marks: Int? = nil,
         numbers: Numbers = .none,
         numberCount: Int = 11,
+        numberStep: Double? = nil,
         pointer: Pointer = .line,
         showsArc: Bool = true,
         showsValue: Bool = false,
         markColour: ColorToken = .inkFaint,
         numberColour: ColorToken = .inkMuted,
+        valueColour: ColorToken = .ink,
         pointerColour: ColorToken? = nil
     ) {
         self.face = face
@@ -220,11 +229,13 @@ public struct GlassKnobStyle: KnobStyle {
         self.marks = marks
         self.numbers = numbers
         self.numberCount = numberCount
+        self.numberStep = numberStep
         self.pointer = pointer
         self.showsArc = showsArc
         self.showsValue = showsValue
         self.markColour = markColour
         self.numberColour = numberColour
+        self.valueColour = valueColour
         self.pointerColour = pointerColour
     }
 
@@ -260,9 +271,10 @@ struct GlassKnob: View {
                 }
                 if style.showsValue {
                     Text(verbatim: configuration.formatted)
-                        .font(.system(size: ring * 0.12, weight: .semibold, design: .monospaced))
-                        .foregroundStyle(.ink)
-                        .offset(y: ring * 0.5 + ring * 0.04)
+                        .font(.system(size: ring * 0.11, weight: .semibold, design: .monospaced))
+                        .foregroundStyle(style.valueColour)
+                        // Under the knob; with numbers outside, in the gap between the last and the first.
+                        .offset(y: style.numbers == .outside ? side / 2 - outer / 2 : ring * 0.5 + ring * 0.04)
                 }
             }
             .frame(width: proxy.size.width, height: proxy.size.height)
@@ -360,9 +372,19 @@ struct GlassKnob: View {
         }
     }
 
+    /// The values that get a number.
+    var numbered: [Double] {
+        style.numberStep.map { configuration.scale.marks(every: $0) } ?? configuration.scale.marks(limit: style.numberCount)
+    }
+
+    /// A number as written: with its step's decimals, or the scale's precision.
+    func label(_ mark: Double) -> String {
+        style.numberStep.map { configuration.scale.formatted(mark, places: ValueScale.decimals(of: $0)) } ?? configuration.scale.formatted(mark)
+    }
+
     func numbers(radius: Double, size: Double) -> some View {
-        ForEach(configuration.scale.marks(limit: style.numberCount), id: \.self) { mark in
-            Text(verbatim: configuration.scale.formatted(mark))
+        ForEach(numbered, id: \.self) { mark in
+            Text(verbatim: label(mark))
                 .font(.system(size: size, weight: .semibold, design: .rounded))
                 .foregroundStyle(style.numberColour)
                 .offset(

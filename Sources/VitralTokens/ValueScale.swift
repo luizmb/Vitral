@@ -73,6 +73,24 @@ public struct ValueScale: Hashable, Sendable {
             : (0 ..< max(limit, 2)).map { value(at: Double($0) / Double(max(limit, 2) - 1)) }
     }
 
+    /// Values for marks every `interval` from the lowest to the highest (the highest included
+    /// when it lands on one).
+    public func marks(every interval: Double) -> [Double] {
+        interval > 0
+            ? (0 ... Int(((span / interval) + 1e-9).rounded(.down))).map { rounded(lower + Double($0) * interval) }
+            : [lower, upper]
+    }
+
+    /// The decimal places `interval` needs to be written: 0 for 1, 1 for 0.5, 2 for 0.25.
+    public static func decimals(of interval: Double) -> Int {
+        (0 ... 6).first { places in abs((interval * pow(10, Double(places))).rounded() - interval * pow(10, Double(places))) < 1e-9 } ?? 6
+    }
+
+    /// `value` written with `places` decimal places, whatever the scale's precision.
+    public func formatted(_ value: Double, places: Int) -> String {
+        String(format: "%.\(max(places, 0))f", value)
+    }
+
     /// How many steps the range holds (infinite without a step).
     var stepCount: Double {
         step.map { $0 > 0 ? span / $0 : .infinity } ?? .infinity

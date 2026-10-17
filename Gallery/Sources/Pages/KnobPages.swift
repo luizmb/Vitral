@@ -4,9 +4,6 @@ import VitralTokens
 
 /// Knobs in every look, each turning a value the model keeps.
 struct KnobsPage: View {
-    /// An amp's black: black in any light, unlike the ink, which turns light at night.
-    static let black = ColorToken(.black)
-
     @Environment(GalleryModel.self) private var model
 
     var body: some View {
@@ -31,7 +28,7 @@ struct KnobsPage: View {
                         label: Text("Tone")
                     )
                 }
-                KnobSample("A chicken-head, 0 to 10") {
+                KnobSample("A chicken-head, whole numbers only") {
                     Knob(
                         value: $model.knobHandle,
                         scale: ValueScale(0 ... 10, step: 1, precision: 0),
@@ -50,21 +47,21 @@ struct KnobsPage: View {
                 KnobSample("A Soldano: up to 11") {
                     Knob(
                         value: $model.knobSoldano,
-                        scale: ValueScale(1 ... 11, step: 1, precision: 0),
-                        style: GlassKnobStyle(face: .colour(Self.black), faceSize: 0.5, numbers: .inside, pointer: .dot, showsArc: false),
+                        scale: ValueScale(1 ... 11, precision: 1),
+                        style: GlassKnobStyle(face: .colour(.black), faceSize: 0.5, numbers: .inside, numberStep: 1, pointer: .dot, showsArc: false, showsValue: true),
                         label: Text("Preamp")
                     )
                 }
             }
-            AmpPanel("A Marshall: gold caps, gold numbers, on leather", backdrop: .texture(.leather)) {
+            AmpPanel("A Marshall: numbered 0 to 10, it rests between them", backdrop: .texture(.leather)) {
                 Knob(
                     value: $model.knobMarshall,
-                    scale: ValueScale(0 ... 10, step: 0.5, precision: 0),
+                    scale: ValueScale(0 ... 10, precision: 2),
                     startAngle: -150,
                     endAngle: 150,
                     style: GlassKnobStyle(
-                        face: .colour(.washAmber), marks: 11, numbers: .outside, showsArc: false,
-                        markColour: .washAmber, numberColour: .washAmber, pointerColour: Self.black
+                        face: .colour(.gold), marks: 11, numbers: .outside, numberStep: 1, showsArc: false, showsValue: true,
+                        markColour: .gold, numberColour: .gold, valueColour: .gold, pointerColour: .black
                     ),
                     label: Text("Presence")
                 )
@@ -72,12 +69,12 @@ struct KnobsPage: View {
             AmpPanel("A Fender blackface: numbers on a black skirt, 1 to 10", backdrop: .brushedMetal) {
                 Knob(
                     value: $model.knobFender,
-                    scale: ValueScale(1 ... 10, step: 0.5, precision: 0),
+                    scale: ValueScale(1 ... 10, precision: 2),
                     startAngle: -150,
                     endAngle: 150,
                     style: GlassKnobStyle(
-                        face: .colour(Self.black), faceSize: 1, numbers: .inside, numberCount: 10, pointer: .dot, showsArc: false,
-                        numberColour: .onAccent, pointerColour: .onAccent
+                        face: .colour(.black), faceSize: 1, numbers: .inside, numberStep: 1, pointer: .dot, showsArc: false, showsValue: true,
+                        numberColour: .white, pointerColour: .white
                     ),
                     label: Text("Treble")
                 )
@@ -85,12 +82,12 @@ struct KnobsPage: View {
             AmpPanel("A Mesa Boogie: black knobs, white numbers, on diamond plate", backdrop: .texture(.metalPlate)) {
                 Knob(
                     value: $model.knobMesa,
-                    scale: ValueScale(0 ... 10, step: 0.5, precision: 0),
+                    scale: ValueScale(0 ... 10, precision: 2),
                     startAngle: -150,
                     endAngle: 150,
                     style: GlassKnobStyle(
-                        face: .colour(Self.black), faceSize: 0.9, marks: 21, numbers: .outside, pointer: .line, showsArc: false,
-                        markColour: .onAccent, numberColour: .onAccent, pointerColour: .onAccent
+                        face: .colour(.black), faceSize: 0.9, marks: 21, numbers: .outside, numberStep: 1, pointer: .line, showsArc: false, showsValue: true,
+                        markColour: .white, numberColour: .white, valueColour: .white, pointerColour: .white
                     ),
                     label: Text("Gain")
                 )
@@ -98,12 +95,12 @@ struct KnobsPage: View {
             AmpPanel("A chrome dome: polished silver, a small dot", backdrop: .texture(.slate)) {
                 Knob(
                     value: $model.knobChrome,
-                    scale: ValueScale(0 ... 10, step: 0.5, precision: 0),
+                    scale: ValueScale(0 ... 10, precision: 2),
                     startAngle: -150,
                     endAngle: 150,
                     style: GlassKnobStyle(
-                        face: .chrome, faceSize: 1, marks: 11, numbers: .outside, pointer: .dot, showsArc: false,
-                        markColour: .onAccent, numberColour: .onAccent, pointerColour: Self.black
+                        face: .chrome, faceSize: 1, marks: 11, numbers: .outside, numberStep: 1, pointer: .dot, showsArc: false, showsValue: true,
+                        markColour: .white, numberColour: .white, valueColour: .white, pointerColour: .black
                     ),
                     label: Text("Bass")
                 )

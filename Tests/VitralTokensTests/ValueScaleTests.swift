@@ -40,6 +40,15 @@ import VitralTokens
         #expect(scale.stepped(10, by: 1) == 10)
     }
 
+    @Test func marksEveryIntervalStandApartFromTheValuesPrecision() {
+        let scale = ValueScale(1 ... 10, precision: 2)
+        #expect(scale.marks(every: 1) == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+        #expect(scale.snapped(7.354) == 7.35)
+        #expect(ValueScale.decimals(of: 1) == 0)
+        #expect(ValueScale.decimals(of: 0.5) == 1)
+        #expect(ValueScale.decimals(of: 0.25) == 2)
+    }
+
     @Test func marksAreTheStepsWhenFew() {
         #expect(ValueScale(0 ... 10, step: 1, precision: 0).marks() == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
         #expect(ValueScale(0 ... 100, precision: 0).marks(limit: 5) == [0, 25, 50, 75, 100])
