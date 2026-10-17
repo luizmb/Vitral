@@ -4,10 +4,12 @@ Guidance for working in this repository.
 
 ## Layout
 
-- `Sources/VitralTokens`: plain values (colours, spacing, radii, sizes, type, glass, glyphs). No
-  SwiftUI, UIKit or AppKit: this target must build on Linux, Windows and Android.
+- `Sources/VitralTokens`: plain values (colours, spacing, radii, sizes, type, glass and finishes,
+  glyphs, value scales). No SwiftUI, UIKit or AppKit: this target must build on Linux, Windows and
+  Android.
 - `Sources/Vitral`: SwiftUI components. `Bridging/` is the only place tokens become SwiftUI values
-  (`Color(_:)`, `Font(_:)`, `Glass.token(_:)`, `Image(_:)`) and the token-taking view modifiers.
+  (`Color(_:)`, `Font(_:)`, `Glass.token(_:)`, `Image(_:)`, `FinishedShape`) and the token-taking
+  view modifiers.
 - `Gallery/`: an XcodeGen app showing every token, resource and component. It hosts the snapshot
   tests (`GallerySnapshotTests`), since glass renders only in a real window.
 

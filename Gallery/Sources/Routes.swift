@@ -89,7 +89,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .radii: "Concentric corners"
         case .sizes: "Controls, marks and hairlines"
         case .type: "Dynamic Type styles"
-        case .materials: "Regular, clear, tinted glass"
+        case .materials: "Glass, and finishes: solid, gradient, texture, chrome, Aqua"
         case .icons: "Glyphs, by role"
         case .images: "Illustrations for empty and error states"
         case .textures: "Every repeating pattern, by material"

@@ -278,8 +278,8 @@ public struct GlassFaderStyle: FaderStyle {
     let numberStep: Double?
     let markColour: ColorToken
     let numberColour: ColorToken
-    let thumbFinish: SurfaceFinish?
-    let fillFinish: SurfaceFinish?
+    let thumbFinish: FinishToken?
+    let fillFinish: FinishToken?
 
     /// - Parameters:
     ///   - trackThickness: how thick the track is; a thick one with no thumb fills like Control
@@ -298,8 +298,8 @@ public struct GlassFaderStyle: FaderStyle {
         numberStep: Double? = nil,
         markColour: ColorToken = .inkFaint,
         numberColour: ColorToken = .inkMuted,
-        thumbFinish: SurfaceFinish? = nil,
-        fillFinish: SurfaceFinish? = nil
+        thumbFinish: FinishToken? = nil,
+        fillFinish: FinishToken? = nil
     ) {
         self.trackThickness = trackThickness
         self.thumb = thumb
@@ -337,7 +337,7 @@ struct GlassFader: View {
     @Environment(\.accent) private var accent
     @Environment(\.controlFinish) private var controlFinish
 
-    var thumbFinish: SurfaceFinish { style.thumbFinish ?? controlFinish ?? .glass() }
+    var thumbFinish: FinishToken { style.thumbFinish ?? controlFinish ?? .glass() }
 
     /// With marks or numbers, the track moves off the middle to make room beside it.
     var trackOffset: Double {
