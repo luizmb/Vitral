@@ -42,7 +42,8 @@ public extension EmptyState where Actions == EmptyView {
         self.init(artwork: IllustrationView(illustration), title: title, message: message, actions: EmptyView())
     }
 
-    /// With a symbol, for tighter spaces (a side column, an inspector).
+    /// With a symbol (any SF Symbol, or a glyph), for tighter spaces (a side column, an inspector)
+    /// or a state Vitral has no illustration for.
     init(_ title: LocalizedStringKey, message: Text? = nil, icon: Image) where Artwork == SymbolArtwork {
         self.init(artwork: SymbolArtwork(icon), title: title, message: message, actions: EmptyView())
     }

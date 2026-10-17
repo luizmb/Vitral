@@ -36,6 +36,10 @@ public extension TypeToken {
     static let controlSmall = TypeToken(.subheadline, weight: .semibold)
     static let detail = TypeToken(.footnote)
     static let value = TypeToken(.body, weight: .semibold, design: .monospaced)
+    /// Code, in the system's monospaced face (SF Mono): a block of it, and a smaller size for
+    /// long listings.
+    static let code = TypeToken(.body, design: .monospaced)
+    static let codeSmall = TypeToken(.footnote, design: .monospaced)
     /// Uppercase section headers.
     static let sectionLabel = TypeToken(.caption, weight: .semibold)
 }

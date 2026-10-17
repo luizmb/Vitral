@@ -115,7 +115,8 @@ struct RadiiPage: View {
 struct TypePage: View {
     private static let entries: [(name: String, token: TypeToken)] = [
         ("title", .title), ("body", .body), ("bodyStrong", .bodyStrong), ("control", .control),
-        ("controlSmall", .controlSmall), ("detail", .detail), ("value", .value), ("sectionLabel", .sectionLabel)
+        ("controlSmall", .controlSmall), ("detail", .detail), ("value", .value), ("code", .code), ("codeSmall", .codeSmall),
+        ("sectionLabel", .sectionLabel)
     ]
 
     var body: some View {

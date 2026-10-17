@@ -47,6 +47,9 @@ pre-render by swapping the window's root controller: it leaks appearance into la
 - **Localisable.** User-facing strings and accessibility labels are parameters
   (`LocalizedStringKey` or `Text`). Accessibility identifiers that a component sets itself are
   hardcoded, but kept in an enum.
+- **SF Symbols are first-class.** Icons a component draws itself are `Glyph`s (SF Symbols by role).
+  Any parameter that takes an icon or artwork takes an `Image`, so callers can pass any SF Symbol.
+  Draw a new `Illustration` only where a symbol can't carry the message.
 - **Gallery dogfoods.** Everything the Gallery shows is built from Vitral components. Every new
   component gets a Gallery page (or a section on one) showing each state, and with it a snapshot.
 

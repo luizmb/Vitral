@@ -6,6 +6,7 @@ import VitralTokens
 struct IconsPage: View {
     var body: some View {
         Page("Icons") {
+            Banner("Every glyph is an SF Symbol, named by its role. Anywhere Vitral takes an icon, any SF Symbol works: Image(systemName:).")
             PanelList {
                 ForEach(Glyph.allCases, id: \.self) { glyph in
                     Row(LocalizedStringKey(String(describing: glyph)), detail: Text(verbatim: glyph.rawValue)) {
@@ -23,6 +24,7 @@ struct IconsPage: View {
 struct ImagesPage: View {
     var body: some View {
         Page("Images") {
+            Banner("Vitral ships these illustrations. Anywhere it takes artwork, any SF Symbol works too: EmptyState(title, icon: Image(systemName:)).")
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: Space.large)], spacing: Space.large) {
                 ForEach(Illustration.allCases, id: \.self) { illustration in
                     LabelledGroup(LocalizedStringKey(String(describing: illustration))) {

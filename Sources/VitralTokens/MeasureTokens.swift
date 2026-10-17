@@ -34,4 +34,7 @@ public enum Size {
     public static let swatch = 22.0
     /// A divider's thickness.
     public static let hairline = 0.5
+    /// The widest a small floating panel grows (progress, a short message): it reads as one
+    /// thought, not a page.
+    public static let floatingPanel = 320.0
 }

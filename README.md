@@ -52,6 +52,15 @@ AppearancePicker(selection: $appearance)
 `Appearance` is a plain value in `VitralTokens`, so an app's state can hold the user's choice.
 Token colours, Vitral's images (dark wood included) and glass all follow the override.
 
+## Icons and images
+
+SF Symbols are part of Vitral's vocabulary. `Glyph` names the symbols components draw by role
+(`.checkmark`, `.warning`, `.retry`, …), and every glyph is an SF Symbol. Anywhere a component
+takes an `Image` (a button's or tag's icon, an empty state's artwork), any SF Symbol works:
+`Image(systemName: "hand.tap")`. Vitral's own illustrations (`Illustration`) are for the larger
+moments (errors, empty screens) where a symbol is too small to carry the message; when there's no
+illustration for a state, use a symbol.
+
 ## Components
 
 | Group | Components |
@@ -63,7 +72,8 @@ Token colours, Vitral's images (dark wood included) and glass all follow the ove
 | Cards | `Card` with optional `.header { }` and `.footer { }`, `CardAdd` |
 | Fields | `FieldText`, `FieldSecure`, `FieldSearch`, `FieldContainer`, with `FieldStatus` |
 | Pickers | `SegmentedControlGlass`, `RadioList`, `StepperJump`, `AppearancePicker` |
-| Feedback | `Banner`, `EmptyState`, `ErrorScreen`, `ProgressOverlay` |
+| Feedback | `Banner`, `EmptyState`, `ErrorScreen`, `ProgressPanel` |
+| Overlays | `Overlay` (glass over what's behind, content at a placement), `.overlay(isPresented:)`, `.overlay(item:)`, `.progressOverlay(_:)` |
 | Backdrops | `Backdrop`: patterns, drawn materials (`.busFloor(angle:)`, `.wood`, …), textures, aurora, glow, waves, images |
 
 Modifiers that take tokens: `.foregroundStyle(_:)`, `.font(_:)`, `.glassSurface(_:cornerRadius:)`,

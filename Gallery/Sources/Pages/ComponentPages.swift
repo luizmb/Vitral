@@ -347,20 +347,52 @@ struct EmptyStatesPage: View {
 
 struct ProgressPage: View {
     var body: some View {
-        Page("Progress") {
-            LabelledGroup("ProgressOverlay with a fraction") {
-                Card("Highway to Hell", subtitle: "AC/DC")
-                    .frame(height: 220)
-                    .progressOverlay(ProgressOverlay("Importing 3 of 12", detail: Text(verbatim: "Highway to Hell.wav"), fraction: 0.25))
+        Page("Overlays") {
+            LabelledGroup(".progressOverlay, with a fraction") {
+                OverlaySample(title: "Highway to Hell", subtitle: "AC/DC")
+                    .progressOverlay(ProgressPanel("Importing 3 of 12", detail: Text(verbatim: "Highway to Hell.wav"), fraction: 0.25))
                     .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
             }
-            LabelledGroup("ProgressOverlay without one") {
-                Card("Pushing", subtitle: "feature/new-article")
-                    .frame(height: 220)
-                    .progressOverlay(ProgressOverlay("Pushing to GitHub"))
+            LabelledGroup(".progressOverlay, the task and the whole job") {
+                OverlaySample(title: "Back in Black", subtitle: "AC/DC")
+                    .progressOverlay(ProgressPanel("Importing 3 of 12", detail: Text(verbatim: "Hells Bells.wav"), fraction: 0.6, overall: 0.2))
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+            }
+            LabelledGroup(".progressOverlay, without one") {
+                OverlaySample(title: "Pushing", subtitle: "feature/new-article")
+                    .progressOverlay(ProgressPanel("Pushing to GitHub"))
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+            }
+            LabelledGroup("Overlay(placement: .bottom)") {
+                OverlaySample(title: "Inhalation", subtitle: "Twelve compartments")
+                    .overlay(isPresented: true, placement: .bottom) {
+                        Banner("Saved to your library", style: .success)
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+            }
+            LabelledGroup("Overlay(placement: .topTrailing, material: .clear)") {
+                OverlaySample(title: "Inhalation", subtitle: "Twelve compartments")
+                    .overlay(isPresented: true, placement: .topTrailing, material: .clear) {
+                        Tag("Draft", icon: Image(.info), style: .tint(.amber))
+                    }
                     .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
             }
         }
+    }
+}
+
+/// Something for an overlay to cover: a card on a backdrop.
+struct OverlaySample: View {
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey
+
+    var body: some View {
+        Card(title, subtitle: subtitle) {
+            TagCloud(["Glass", "over", "the", "content"])
+        }
+        .padding(Space.large)
+        .frame(height: 240)
+        .background { Backdrop(.waves()) }
     }
 }
 

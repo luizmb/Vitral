@@ -26,7 +26,7 @@ enum GallerySection: String, CaseIterable, Hashable {
         switch self {
         case .tokens: [.colours, .spacing, .radii, .sizes, .type, .materials]
         case .resources: [.icons, .images, .textures, .wallpapers]
-        case .components: [.appearance, .tints, .backdrops, .buttons, .selection, .pickers, .fields, .banners, .lists, .tags, .cards, .emptyStates, .progress]
+        case .components: [.appearance, .tints, .code, .backdrops, .buttons, .selection, .pickers, .fields, .banners, .lists, .tags, .cards, .emptyStates, .progress]
         }
     }
 
@@ -44,7 +44,7 @@ enum GallerySection: String, CaseIterable, Hashable {
 enum GalleryPage: String, CaseIterable, Hashable {
     case colours, spacing, radii, sizes, type, materials
     case icons, images, textures, wallpapers
-    case appearance, tints, backdrops, buttons, selection, pickers, fields, banners, lists, tags, cards, emptyStates, progress
+    case appearance, tints, code, backdrops, buttons, selection, pickers, fields, banners, lists, tags, cards, emptyStates, progress
 
     var title: LocalizedStringKey {
         switch self {
@@ -60,6 +60,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .wallpapers: "Wallpapers"
         case .appearance: "Appearance"
         case .tints: "Tints and accents"
+        case .code: "Code"
         case .backdrops: "Backdrops"
         case .buttons: "Buttons"
         case .selection: "Checkboxes and toggles"
@@ -70,7 +71,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .tags: "Tags and swatches"
         case .cards: "Cards"
         case .emptyStates: "Empty and error states"
-        case .progress: "Progress"
+        case .progress: "Overlays"
         }
     }
 
@@ -88,6 +89,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .wallpapers: "Full-size: generated, and photos an app copies in"
         case .appearance: "AppearancePicker, .appearance(_:)"
         case .tints: "Tint, .accent(.counter)"
+        case .code: "CodeBlock, SyntaxTheme, .code"
         case .backdrops: "Textures and wallpapers together"
         case .buttons: "ButtonPrimary, ButtonSecondary, ActionBar"
         case .pickers: "SegmentedControlGlass, RadioList, StepperJump"
@@ -98,7 +100,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .tags: "Tag, TagToggle, TagCloud, Swatch, SwatchStack, Stat"
         case .cards: "Card, with header and footer; CardAdd"
         case .emptyStates: "EmptyState, ErrorScreen"
-        case .progress: "ProgressOverlay"
+        case .progress: "Overlay, ProgressPanel"
         }
     }
 
@@ -117,6 +119,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .wallpapers: WallpapersPage()
         case .appearance: AppearancePage()
         case .tints: TintsPage()
+        case .code: CodePage()
         case .backdrops: BackdropsPage()
         case .buttons: ButtonsPage()
         case .selection: SelectionPage()
