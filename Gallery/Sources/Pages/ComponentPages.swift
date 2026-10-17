@@ -14,6 +14,7 @@ struct ButtonsPage: View {
                         ButtonPrimary("Calculate", icon: Image(.play), fillsWidth: true) {}
                         ButtonPrimary("Medium", size: .medium) {}
                         ButtonPrimary("Small", size: .small) {}
+                        ButtonPrimary("Saving", fillsWidth: true, isBusy: true) {}
                         ButtonPrimary("Disabled", fillsWidth: true) {}.disabled(true)
                     }
                 }
@@ -24,6 +25,7 @@ struct ButtonsPage: View {
                         ButtonSecondary("Try again", icon: Image(.retry), fillsWidth: true) {}
                         ButtonSecondary("Medium", size: .medium) {}
                         ButtonSecondary("Small", size: .small) {}
+                        ButtonSecondary("Pulling", fillsWidth: true, isBusy: true) {}
                         ButtonSecondary("Disabled", fillsWidth: true) {}.disabled(true)
                     }
                 }
@@ -33,6 +35,7 @@ struct ButtonsPage: View {
                     ActionBar {
                         ActionBarButton("Edit", icon: Image(systemName: "pencil"), accessibilityLabel: "Edit") {}
                         ActionBarButton("Run", icon: Image(.play), accessibilityLabel: "Run") {}
+                        ActionBarButton("Build", icon: Image(systemName: "hammer"), accessibilityLabel: "Build", isBusy: true) {}
                         ActionBarButton(icon: Image(systemName: "trash"), accessibilityLabel: "Delete", role: .destructive) {}
                     }
                 }
@@ -112,6 +115,26 @@ struct TagsPage: View {
                     TagCloud(["Nuclear", "Dosimetry", "ICRP 137", "Inhalation", "Type S", "48 compartments", "Plasma"])
                 }
             }
+            LabelledGroup("Tag styles") {
+                Panel {
+                    TagCloud {
+                        Tag("Plain")
+                        Tag("Tinted", icon: Image(systemName: "guitars"), style: .tinted(.accent))
+                        Tag("Warning", style: .tinted(.warning))
+                        Tag("Filled", style: .filled(.accent))
+                    }
+                }
+            }
+            LabelledGroup("TagToggle") {
+                Panel {
+                    TagCloud {
+                        TagToggle("#swift", isOn: .constant(true))
+                        TagToggle("#fp", isOn: .constant(true))
+                        TagToggle("#ios", isOn: .constant(false))
+                        TagToggle("#design", isOn: .constant(false))
+                    }
+                }
+            }
             LabelledGroup("Swatch and SwatchStack") {
                 Panel {
                     VStack(alignment: .leading, spacing: Space.medium) {
@@ -171,6 +194,98 @@ struct CardsPage: View {
                         ActionBarButton(icon: Image(systemName: "trash"), accessibilityLabel: "Delete", role: .destructive) {}
                     }
                 }
+            }
+        }
+    }
+}
+
+enum Method: Hashable, Sendable {
+    case birchall, rungeKutta4, rungeKutta45
+}
+
+enum ChartScale: Hashable, Sendable {
+    case linear, logarithmic
+}
+
+struct PickersPage: View {
+    var body: some View {
+        Page("Pickers") {
+            LabelledGroup("SegmentedControlGlass") {
+                Panel {
+                    VStack(spacing: Space.medium) {
+                        SegmentedControlGlass(selection: .constant(ChartScale.logarithmic), options: [
+                            ChoiceOption(ChartScale.linear, title: "Linear"),
+                            ChoiceOption(ChartScale.logarithmic, title: "Logarithmic")
+                        ])
+                        SegmentedControlGlass(selection: .constant(Method.birchall), options: [
+                            ChoiceOption(Method.birchall, icon: Image(systemName: "function"), accessibilityLabel: "Birchall"),
+                            ChoiceOption(Method.rungeKutta4, icon: Image(systemName: "4.circle"), accessibilityLabel: "Runge-Kutta 4"),
+                            ChoiceOption(Method.rungeKutta45, icon: Image(systemName: "waveform.path"), accessibilityLabel: "Runge-Kutta 45")
+                        ])
+                    }
+                }
+            }
+            LabelledGroup("RadioList") {
+                RadioList(selection: .constant(Method.birchall), options: [
+                    ChoiceOption(Method.birchall, title: "Birchall", detail: Text(verbatim: "exact")),
+                    ChoiceOption(Method.rungeKutta4, title: "Runge-Kutta 4", detail: Text(verbatim: "fixed step")),
+                    ChoiceOption(Method.rungeKutta45, title: "Runge-Kutta 45", detail: Text(verbatim: "adaptive"))
+                ])
+            }
+            LabelledGroup("StepperJump") {
+                Panel {
+                    VStack(spacing: Space.medium) {
+                        StepperJump(value: .constant(200), fine: 1, coarse: 20)
+                        StepperJump(value: .constant(1), fine: 1, coarse: 20)
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct FieldsPage: View {
+    var body: some View {
+        Page("Fields") {
+            LabelledGroup("FieldText") {
+                Panel {
+                    VStack(spacing: Space.medium) {
+                        FieldText("Name", text: .constant(""))
+                        FieldText("Name", text: .constant("U-234 Inhalation"))
+                        FieldText("Step", text: .constant("0,001"), suffix: Text(verbatim: "d"), keyboard: .decimal, isMonospaced: true)
+                    }
+                }
+            }
+            LabelledGroup("FieldSecure") {
+                Panel {
+                    FieldSecure("Personal access token", text: .constant("ghp_secret"))
+                }
+            }
+            LabelledGroup("FieldSearch") {
+                Panel {
+                    VStack(spacing: Space.medium) {
+                        FieldSearch("Name, artist or tag", text: .constant(""))
+                        FieldSearch("Name, artist or tag", text: .constant("Highway"))
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct BannersPage: View {
+    var body: some View {
+        Page("Banners") {
+            LabelledGroup("Tones") {
+                VStack(spacing: Space.medium) {
+                    Banner("Calculated in 0.4 s.")
+                    Banner("RK4 at this step may be unstable.", tone: .warning)
+                    Banner("The solver stopped at day 412.", tone: .danger)
+                }
+            }
+            LabelledGroup("With an action") {
+                Banner("This file changed on disk while you were editing it.", tone: .warning)
+                    .trailing { ButtonSecondary("Reload", size: .small) {} }
             }
         }
     }

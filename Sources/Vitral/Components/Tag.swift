@@ -1,26 +1,82 @@
 import SwiftUI
 import VitralTokens
 
-/// A short label on a capsule: a category, a property, a count.
-public struct Tag: View {
-    let text: Text
+/// How a tag is coloured.
+public enum TagStyle: Hashable, Sendable {
+    /// Quiet ink on a neutral capsule.
+    case plain
+    /// The colour on a faint wash of itself: a category with an identity.
+    case tinted(ColorToken)
+    /// Filled with the colour: something chosen.
+    case filled(ColorToken)
 
-    public init(_ title: LocalizedStringKey) {
-        self.text = Text(title)
+    var foreground: ColorToken {
+        switch self {
+        case .plain: .inkMuted
+        case let .tinted(color): color
+        case .filled: .onAccent
+        }
     }
 
-    public init(_ text: Text) {
+    var background: ColorToken {
+        switch self {
+        case .plain: .neutralSurface
+        case let .tinted(color): color.opacity(0.18)
+        case let .filled(color): color
+        }
+    }
+}
+
+/// A short label on a capsule, with an optional icon: a category, a property, a count.
+public struct Tag: View {
+    let text: Text
+    let icon: Image?
+    let style: TagStyle
+
+    public init(_ title: LocalizedStringKey, icon: Image? = nil, style: TagStyle = .plain) {
+        self.init(Text(title), icon: icon, style: style)
+    }
+
+    public init(_ text: Text, icon: Image? = nil, style: TagStyle = .plain) {
         self.text = text
+        self.icon = icon
+        self.style = style
     }
 
     public var body: some View {
-        text
-            .font(TypeToken.detail.weight(.semibold))
-            .foregroundStyle(.inkMuted)
-            .lineLimit(1)
-            .padding(.horizontal, Space.medium)
-            .padding(.vertical, Space.extraSmall)
-            .background(Color(.neutralSurface), in: Capsule())
+        HStack(spacing: Space.extraSmall) {
+            icon
+            text
+        }
+        .font(TypeToken.detail.weight(.semibold))
+        .foregroundStyle(style.foreground)
+        .lineLimit(1)
+        .padding(.horizontal, Space.medium)
+        .padding(.vertical, Space.extraSmall)
+        .background(Color(style.background), in: Capsule())
+    }
+}
+
+/// A tag that turns on and off: filled with the accent when on, plain when off.
+public struct TagToggle: View {
+    let title: LocalizedStringKey
+    let icon: Image?
+    @Binding var isOn: Bool
+
+    public init(_ title: LocalizedStringKey, icon: Image? = nil, isOn: Binding<Bool>) {
+        self.title = title
+        self.icon = icon
+        self._isOn = isOn
+    }
+
+    public var body: some View {
+        Button { isOn.toggle() } label: {
+            Tag(title, icon: icon, style: isOn ? .filled(.accent) : .plain)
+                .frame(minHeight: Size.controlSmall)
+                .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .accessibilityRepresentation { Toggle(title, isOn: $isOn) }
     }
 }
 

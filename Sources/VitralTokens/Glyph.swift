@@ -13,4 +13,8 @@ public enum Glyph: String, CaseIterable, Hashable, Sendable {
     case info = "info.circle"
     case retry = "arrow.clockwise"
     case play = "play.fill"
+    case search = "magnifyingglass"
+    /// Clears a field.
+    case clear = "xmark.circle.fill"
+    case lock = "lock"
 }

@@ -26,7 +26,7 @@ enum GallerySection: String, CaseIterable, Hashable {
         switch self {
         case .tokens: [.colours, .spacing, .radii, .sizes, .type, .materials]
         case .resources: [.icons, .images]
-        case .components: [.buttons, .selection, .lists, .tags, .cards]
+        case .components: [.buttons, .selection, .pickers, .fields, .banners, .lists, .tags, .cards]
         }
     }
 
@@ -44,7 +44,7 @@ enum GallerySection: String, CaseIterable, Hashable {
 enum GalleryPage: String, CaseIterable, Hashable {
     case colours, spacing, radii, sizes, type, materials
     case icons, images
-    case buttons, selection, lists, tags, cards
+    case buttons, selection, pickers, fields, banners, lists, tags, cards
 
     var title: LocalizedStringKey {
         switch self {
@@ -58,6 +58,9 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .images: "Images"
         case .buttons: "Buttons"
         case .selection: "Checkboxes and toggles"
+        case .pickers: "Pickers"
+        case .fields: "Fields"
+        case .banners: "Banners"
         case .lists: "Panels and rows"
         case .tags: "Tags and swatches"
         case .cards: "Cards"
@@ -74,10 +77,13 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .materials: "Regular, clear, tinted glass"
         case .icons: "Glyphs, by role"
         case .images: "Illustrations"
-        case .buttons: "ButtonPrimary, ButtonSecondary"
+        case .buttons: "ButtonPrimary, ButtonSecondary, ActionBar"
+        case .pickers: "SegmentedControlGlass, RadioList, StepperJump"
+        case .fields: "FieldText, FieldSecure, FieldSearch"
+        case .banners: "Banner, in three tones"
         case .selection: "Checkbox, ToggleSwitch, SelectionMark"
         case .lists: "Panel, PanelList, Row, SectionLabel"
-        case .tags: "Tag, TagCloud, Swatch, SwatchStack, Stat"
+        case .tags: "Tag, TagToggle, TagCloud, Swatch, SwatchStack, Stat"
         case .cards: "Card, with header and footer"
         }
     }
@@ -95,6 +101,9 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .images: ImagesPage()
         case .buttons: ButtonsPage()
         case .selection: SelectionPage()
+        case .pickers: PickersPage()
+        case .fields: FieldsPage()
+        case .banners: BannersPage()
         case .lists: ListsPage()
         case .tags: TagsPage()
         case .cards: CardsPage()

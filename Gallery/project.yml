@@ -43,6 +43,8 @@ targets:
     platform: iOS
     sources:
       - path: Tests
+        excludes:
+          - "__Snapshots__/**"
     dependencies:
       - target: Gallery
       - package: SnapshotTesting

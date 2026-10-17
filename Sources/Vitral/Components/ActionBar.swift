@@ -31,6 +31,7 @@ public struct ActionBarButton: View {
     let icon: Image
     let accessibilityLabel: LocalizedStringKey
     let role: ButtonRole?
+    let isBusy: Bool
     let action: @MainActor () -> Void
 
     /// - Parameter accessibilityLabel: what VoiceOver says. Needed when there's no title, and kept
@@ -40,8 +41,10 @@ public struct ActionBarButton: View {
         icon: Image,
         accessibilityLabel: LocalizedStringKey,
         role: ButtonRole? = nil,
+        isBusy: Bool = false,
         action: @escaping @MainActor () -> Void
     ) {
+        self.isBusy = isBusy
         self.title = title
         self.icon = icon
         self.accessibilityLabel = accessibilityLabel
@@ -52,7 +55,11 @@ public struct ActionBarButton: View {
     public var body: some View {
         Button(role: role, action: action) {
             HStack(spacing: Space.small) {
-                icon.font(.subheadline.weight(.medium))
+                if isBusy {
+                    ProgressView().controlSize(.small)
+                } else {
+                    icon.font(.subheadline.weight(.medium))
+                }
                 title.map { Text($0).font(.controlSmall).lineLimit(1).minimumScaleFactor(0.8) }
             }
             .foregroundStyle(role == .destructive ? .danger : .accent)
@@ -61,6 +68,7 @@ public struct ActionBarButton: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .disabled(isBusy)
         .accessibilityLabel(Text(accessibilityLabel))
     }
 }
