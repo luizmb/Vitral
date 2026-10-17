@@ -377,7 +377,8 @@ public extension Workspace where Leading == EmptyView, Trailing == EmptyView, Bo
     /// - Parameters:
     ///   - mode: forces how panels show; `nil` picks it from the width.
     ///   - exclusive: one panel at a time, opening one closing the others (it turns their bindings
-    ///     off): docked panels forced onto an iPhone then never squeeze the content.
+    ///     off), in any mode: docked panels forced onto an iPhone then never squeeze the content.
+    ///     Sheets are always one at a time: iOS shows one sheet at a time, even on an iPad.
     ///   - closeLabel: what VoiceOver says for the close button on a panel's sheet.
     init(mode: WorkspaceMode? = nil, exclusive: Bool = false, closeLabel: LocalizedStringKey = "Close", @ViewBuilder content: () -> Content) {
         self.mode = mode
