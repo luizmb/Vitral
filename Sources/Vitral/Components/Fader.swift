@@ -278,10 +278,14 @@ public struct GlassFaderStyle: FaderStyle {
     let numberStep: Double?
     let markColour: ColorToken
     let numberColour: ColorToken
+    let thumbFinish: SurfaceFinish?
+    let fillFinish: SurfaceFinish?
 
     /// - Parameters:
     ///   - trackThickness: how thick the track is; a thick one with no thumb fills like Control
     ///     Centre's sliders.
+    ///   - thumbFinish: what the thumb is made of; the environment's `controlFinish`, else glass.
+    ///   - fillFinish: what the fill is made of; the accent when `nil`.
     ///   - gradient: colours along the track instead of a fill (a temperature's blue to amber).
     ///   - marks: dashes beside the track, this many (`nil` for none).
     ///   - numberStep: a number beside the track every this much.
@@ -293,7 +297,9 @@ public struct GlassFaderStyle: FaderStyle {
         marks: Int? = nil,
         numberStep: Double? = nil,
         markColour: ColorToken = .inkFaint,
-        numberColour: ColorToken = .inkMuted
+        numberColour: ColorToken = .inkMuted,
+        thumbFinish: SurfaceFinish? = nil,
+        fillFinish: SurfaceFinish? = nil
     ) {
         self.trackThickness = trackThickness
         self.thumb = thumb
@@ -303,6 +309,8 @@ public struct GlassFaderStyle: FaderStyle {
         self.numberStep = numberStep
         self.markColour = markColour
         self.numberColour = numberColour
+        self.thumbFinish = thumbFinish
+        self.fillFinish = fillFinish
     }
 
     public var thumbLength: Double {
@@ -327,6 +335,9 @@ struct GlassFader: View {
     let configuration: FaderConfiguration
 
     @Environment(\.accent) private var accent
+    @Environment(\.controlFinish) private var controlFinish
+
+    var thumbFinish: SurfaceFinish { style.thumbFinish ?? controlFinish ?? .glass() }
 
     /// With marks or numbers, the track moves off the middle to make room beside it.
     var trackOffset: Double {
@@ -389,8 +400,7 @@ struct GlassFader: View {
     }
 
     func fill(_ frame: TrackFrame) -> some View {
-        Capsule()
-            .fill(Color(accent.base))
+        FinishedShape(finish: style.fillFinish ?? .solid(accent.base), shape: Capsule())
             .frame(
                 width: frame.size(along: fillLength(frame), across: style.trackThickness).width,
                 height: frame.size(along: fillLength(frame), across: style.trackThickness).height
@@ -425,18 +435,14 @@ struct GlassFader: View {
     func thumb(_ frame: TrackFrame) -> some View {
         switch style.thumb {
         case .round:
-            Circle()
-                .fill(.clear)
+            FinishedShape(finish: thumbFinish, shape: Circle())
                 .frame(width: 28, height: 28)
-                .glassEffect(.regular.interactive(), in: Circle())
                 .shadow(color: Color(.scrim), radius: 4, y: 2)
                 .scaleEffect(configuration.isDragging ? 1.12 : 1)
                 .position(frame.point(configuration.fraction, across: trackOffset))
         case .capsule:
-            Capsule()
-                .fill(.clear)
+            FinishedShape(finish: thumbFinish, shape: Capsule())
                 .frame(width: frame.size(along: 22, across: 34).width, height: frame.size(along: 22, across: 34).height)
-                .glassEffect(.regular.interactive(), in: Capsule())
                 .shadow(color: Color(.scrim), radius: 4, y: 2)
                 .position(frame.point(configuration.fraction, across: trackOffset))
         case .none:

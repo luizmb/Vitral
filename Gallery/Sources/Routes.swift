@@ -26,7 +26,7 @@ enum GallerySection: String, CaseIterable, Hashable {
         switch self {
         case .tokens: [.colours, .spacing, .radii, .sizes, .type, .materials]
         case .resources: [.icons, .images, .textures, .wallpapers]
-        case .components: [.appearance, .tints, .code, .carousel, .glassList, .knobs, .faders, .backdrops, .buttons, .selection, .pickers, .fields, .banners, .lists, .tags, .cards, .emptyStates, .progress, .overlays, .workspace]
+        case .components: [.appearance, .tints, .finishes, .code, .carousel, .glassList, .knobs, .faders, .backdrops, .buttons, .selection, .pickers, .fields, .banners, .lists, .tags, .cards, .emptyStates, .progress, .overlays, .workspace]
         }
     }
 
@@ -44,7 +44,7 @@ enum GallerySection: String, CaseIterable, Hashable {
 enum GalleryPage: String, CaseIterable, Hashable {
     case colours, spacing, radii, sizes, type, materials
     case icons, images, textures, wallpapers
-    case appearance, tints, code, carousel, glassList, knobs, faders, backdrops, buttons, selection, pickers, fields, banners, lists, tags, cards, emptyStates, progress, overlays, workspace
+    case appearance, tints, finishes, code, carousel, glassList, knobs, faders, backdrops, buttons, selection, pickers, fields, banners, lists, tags, cards, emptyStates, progress, overlays, workspace
 
     var title: LocalizedStringKey {
         switch self {
@@ -60,6 +60,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .wallpapers: "Wallpapers"
         case .appearance: "Appearance"
         case .tints: "Tints and accents"
+        case .finishes: "Finishes"
         case .code: "Code"
         case .carousel: "Carousel"
         case .glassList: "GlassList"
@@ -95,6 +96,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .wallpapers: "Full-size: generated, and photos an app copies in"
         case .appearance: "AppearancePicker, .appearance(_:)"
         case .tints: "Tint, .accent(.counter)"
+        case .finishes: "Glass, solid, gradient, texture, chrome, Aqua's gel"
         case .code: "CodeBlock, SyntaxTheme, .code"
         case .carousel: "Carousel, PageDots, SegmentedPages"
         case .glassList: "GlassList, GlassSection, Row, RowAction"
@@ -131,6 +133,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .wallpapers: WallpapersPage()
         case .appearance: AppearancePage()
         case .tints: TintsPage()
+        case .finishes: FinishesPage()
         case .code: CodePage()
         case .carousel: CarouselPage()
         case .glassList: GlassListPage()
