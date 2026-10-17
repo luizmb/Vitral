@@ -12,7 +12,7 @@ public enum KnobInteraction {
 }
 
 /// What a knob style draws: where the value sits and how it reads.
-public struct KnobConfiguration {
+public struct KnobConfiguration: Sendable {
     public let value: Double
     /// Where the value sits, 0 ... 1.
     public let fraction: Double
@@ -36,23 +36,50 @@ public struct KnobConfiguration {
 }
 
 /// How a knob looks. Write one to draw a knob entirely your own way; `GlassKnobStyle` is the
-/// default.
+/// default. Set one for every knob under a view with `.knobStyle(_:)`.
 public protocol KnobStyle {
     associatedtype Body: View
     @MainActor @ViewBuilder func makeBody(_ configuration: KnobConfiguration) -> Body
 }
 
+/// Any knob style, so one can sit in the environment.
+public struct AnyKnobStyle: KnobStyle, Sendable {
+    let make: @MainActor @Sendable (KnobConfiguration) -> AnyView
+
+    public init<Style: KnobStyle & Sendable>(_ style: Style) {
+        self.make = { AnyView(style.makeBody($0)) }
+    }
+
+    public func makeBody(_ configuration: KnobConfiguration) -> some View {
+        make(configuration)
+    }
+}
+
+public extension EnvironmentValues {
+    /// How every knob under this view looks, unless it's given its own style.
+    @Entry var knobStyle = AnyKnobStyle(GlassKnobStyle())
+}
+
+public extension View {
+    /// How every knob under this view looks: an amp panel's worth in one line.
+    func knobStyle<Style: KnobStyle & Sendable>(_ style: Style) -> some View {
+        environment(\.knobStyle, AnyKnobStyle(style))
+    }
+}
+
 /// A knob: turn it round, or drag it up and down, between the scale's ends. Stateless: the value
 /// is the binding's (a vertical drag also keeps where it started, in the app's state). It is as
-/// big as its frame, square.
-public struct Knob<Style: KnobStyle>: View {
+/// big as its frame, square. It looks as `style` says, else as the environment's `.knobStyle`.
+public struct Knob: View {
     @Binding var value: Double
     let scale: ValueScale
     let interaction: KnobInteraction
     let startAngle: Double
     let endAngle: Double
-    let style: Style
+    let style: AnyKnobStyle?
     let label: Text
+
+    @Environment(\.knobStyle) private var environmentStyle
 
     /// - Parameters:
     ///   - startAngle, endAngle: where the pointer is at the lowest and highest values, degrees
@@ -64,7 +91,31 @@ public struct Knob<Style: KnobStyle>: View {
         interaction: KnobInteraction = .circular,
         startAngle: Double = -135,
         endAngle: Double = 135,
-        style: Style,
+        style: some KnobStyle & Sendable,
+        label: Text
+    ) {
+        self.init(value: value, scale: scale, interaction: interaction, startAngle: startAngle, endAngle: endAngle, anyStyle: AnyKnobStyle(style), label: label)
+    }
+
+    /// A knob in the environment's style (`.knobStyle(_:)`, glass unless set).
+    public init(
+        value: Binding<Double>,
+        scale: ValueScale = ValueScale(),
+        interaction: KnobInteraction = .circular,
+        startAngle: Double = -135,
+        endAngle: Double = 135,
+        label: Text
+    ) {
+        self.init(value: value, scale: scale, interaction: interaction, startAngle: startAngle, endAngle: endAngle, anyStyle: nil, label: label)
+    }
+
+    init(
+        value: Binding<Double>,
+        scale: ValueScale,
+        interaction: KnobInteraction,
+        startAngle: Double,
+        endAngle: Double,
+        anyStyle: AnyKnobStyle?,
         label: Text
     ) {
         self._value = value
@@ -72,7 +123,7 @@ public struct Knob<Style: KnobStyle>: View {
         self.interaction = interaction
         self.startAngle = startAngle
         self.endAngle = endAngle
-        self.style = style
+        self.style = anyStyle
         self.label = label
     }
 
@@ -85,7 +136,7 @@ public struct Knob<Style: KnobStyle>: View {
 
     public var body: some View {
         GeometryReader { proxy in
-            style.makeBody(
+            (style ?? environmentStyle).makeBody(
                 KnobConfiguration(
                     value: value,
                     fraction: scale.fraction(of: value),
@@ -135,23 +186,9 @@ public struct Knob<Style: KnobStyle>: View {
     }
 }
 
-public extension Knob where Style == GlassKnobStyle {
-    /// A glass knob (`GlassKnobStyle()`).
-    init(
-        value: Binding<Double>,
-        scale: ValueScale = ValueScale(),
-        interaction: KnobInteraction = .circular,
-        startAngle: Double = -135,
-        endAngle: Double = 135,
-        label: Text
-    ) {
-        self.init(value: value, scale: scale, interaction: interaction, startAngle: startAngle, endAngle: endAngle, style: GlassKnobStyle(), label: label)
-    }
-}
-
 /// The glass knob, and its options: what the centre is made of, marks around it, numbers inside
 /// or outside, the pointer, an arc of the accent showing the value, and the value written under.
-public struct GlassKnobStyle: KnobStyle {
+public struct GlassKnobStyle: KnobStyle, Sendable {
     /// The knob's centre.
     public enum Face: Hashable, Sendable {
         /// Glass all through.

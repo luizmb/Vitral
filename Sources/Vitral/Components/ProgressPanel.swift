@@ -65,7 +65,7 @@ public struct ProgressPanel: View {
 
 public extension View {
     /// A `ProgressPanel` in a centred `Overlay` while there's a `panel`.
-    func progressOverlay(_ panel: ProgressPanel?) -> some View {
-        overlay(item: panel) { $0 }
+    func progressOverlay(_ panel: ProgressPanel?, obscuring: Obscuring = .soft) -> some View {
+        overlay(item: panel, obscuring: obscuring) { $0 }
     }
 }

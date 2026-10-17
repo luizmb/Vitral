@@ -385,6 +385,20 @@ struct OverlaysPage: View {
                     }
                     .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
             }
+            LabelledGroup("obscuring: .strong, a heavy blur") {
+                OverlaySample(title: "Inhalation", subtitle: "Twelve compartments")
+                    .overlay(isPresented: true, obscuring: .strong) {
+                        Tag("Locked while syncing", icon: Image(.lock), style: .tint(.blue))
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+            }
+            LabelledGroup("obscuring: .dark, darkened") {
+                OverlaySample(title: "Inhalation", subtitle: "Twelve compartments")
+                    .overlay(isPresented: true, obscuring: .dark) {
+                        ButtonPrimary("Unlock") {}
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+            }
             LabelledGroup("Overlay(placement: .topTrailing, material: .clear)") {
                 OverlaySample(title: "Inhalation", subtitle: "Twelve compartments")
                     .overlay(isPresented: true, placement: .topTrailing, material: .clear) {

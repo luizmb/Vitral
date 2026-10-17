@@ -47,7 +47,7 @@ public struct FinishedShape<S: InsettableShape>: View {
                 .overlay { shape.strokeBorder(Color(.chromeShadow), lineWidth: 0.75) }
         case let .layered(base, effects):
             FinishedShape(finish: base, shape: shape)
-                .overlay { GelLayers(tone: base.tone, effects: effects, shape: shape) }
+                .overlay { GelLayers(tone: base.tone, effects: effects, strength: base.isGlass ? 0.35 : 1, shape: shape) }
         }
     }
 }
@@ -56,6 +56,8 @@ public struct FinishedShape<S: InsettableShape>: View {
 struct GelLayers<S: InsettableShape>: View {
     let tone: ColorToken
     let effects: Set<FinishEffect>
+    /// How strong the glow and gloss are: full on a colour, lighter on glass so it stays clear.
+    var strength: Double = 1
     let shape: S
 
     var body: some View {
@@ -65,7 +67,7 @@ struct GelLayers<S: InsettableShape>: View {
                     // Light passing through, gathering at the bottom.
                     shape.fill(
                         RadialGradient(
-                            colors: [Color(tone).mix(with: .white, by: 0.6).opacity(0.85), .clear],
+                            colors: [Color(tone).mix(with: .white, by: 0.6).opacity(0.85 * strength), .clear],
                             center: UnitPoint(x: 0.5, y: 1),
                             startRadius: 0,
                             endRadius: max(proxy.size.width, proxy.size.height) * 0.6
@@ -74,12 +76,12 @@ struct GelLayers<S: InsettableShape>: View {
                 }
                 if effects.contains(.gloss) {
                     Capsule()
-                        .fill(LinearGradient(colors: [Color(ColorToken.fixedWhite.opacity(0.9)), Color(ColorToken.fixedWhite.opacity(0.08))], startPoint: .top, endPoint: .bottom))
+                        .fill(LinearGradient(colors: [Color(ColorToken.fixedWhite.opacity(0.9 * max(strength, 0.6))), Color(ColorToken.fixedWhite.opacity(0.08 * strength))], startPoint: .top, endPoint: .bottom))
                         .frame(width: proxy.size.width * 0.84, height: proxy.size.height * 0.48)
                         .position(x: proxy.size.width / 2, y: proxy.size.height * 0.28)
                 }
                 if effects.contains(.rim) {
-                    shape.strokeBorder(Color(tone).mix(with: .black, by: 0.4), lineWidth: 0.8)
+                    shape.strokeBorder(Color(tone).mix(with: .black, by: 0.4).opacity(strength < 1 ? 0.35 : 1), lineWidth: 0.8)
                 }
             }
             .clipShape(shape)

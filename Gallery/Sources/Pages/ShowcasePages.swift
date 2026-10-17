@@ -57,7 +57,7 @@ struct AppearancePage: View {
                 LabelledGroup(LocalizedStringKey(".appearance(.\(appearance.rawValue))")) {
                     VStack(spacing: Space.medium) {
                         AppearanceSample(backdrop: .texture(.wood))
-                        AppearanceSample(backdrop: .waves())
+                        AppearanceSample(backdrop: .glow())
                     }
                     .appearance(appearance)
                 }

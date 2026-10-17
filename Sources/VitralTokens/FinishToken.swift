@@ -37,6 +37,15 @@ public enum FinishToken: Hashable, Sendable {
         }
     }
 
+    /// Whether it's glass underneath (its layers are lighter, so it stays clear).
+    public var isGlass: Bool {
+        switch self {
+        case .glass: true
+        case let .layered(base, _): base.isGlass
+        default: false
+        }
+    }
+
     /// The colour light picks up passing through it, for the glow.
     public var tone: ColorToken {
         switch self {

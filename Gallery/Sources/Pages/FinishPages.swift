@@ -16,7 +16,7 @@ struct FinishesPage: View {
     ]
 
     static let layered: [(name: String, finish: FinishToken)] = [
-        ("glass.gel", .glass().gel),
+        ("glass(.clear).gel", .glass(.clear).gel),
         ("solid.gel", .solid(.washGreen).gel),
         ("gradient.with(.gloss)", .gradient([.washAmber, .counterAccent]).with(.gloss)),
         ("texture.with(.gloss, .rim)", .texture(.wood).with(.gloss, .rim))
@@ -38,16 +38,16 @@ struct FinishesPage: View {
                         Fader(value: model.fader("finishGlass", 0.4), title: Text(verbatim: "glass (default)"), labels: .top, label: Text("Glass"))
                         Fader(
                             value: model.fader("finishGel", 0.6),
-                            title: Text(verbatim: "thumb: .glass().gel"),
+                            title: Text(verbatim: "thumb: .glass(.clear).gel"),
                             labels: .top,
-                            style: GlassFaderStyle(thumbFinish: .glass().gel),
+                            style: GlassFaderStyle(thumbFinish: .glass(.clear).gel),
                             label: Text("Gel")
                         )
                         Fader(
                             value: model.fader("finishAqua", 0.7),
                             title: Text(verbatim: "thumb: .aqua, fill: .aqua"),
                             labels: .top,
-                            style: GlassFaderStyle(trackThickness: 10, thumbFinish: .aqua(.fixedSilver), fillFinish: .aqua(.accent)),
+                            style: GlassFaderStyle(trackThickness: 14, thumbFinish: .aqua(.fixedSilver), fillFinish: .aqua(.accent)),
                             label: Text("Aqua")
                         )
                         Fader(
