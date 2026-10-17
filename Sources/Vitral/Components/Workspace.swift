@@ -94,16 +94,17 @@ public struct Workspace<Leading: View, Content: View, Trailing: View>: View {
             let resolved = mode ?? WorkspaceMode.fitting(width: proxy.size.width, panels: [leading?.range.ideal, trailing?.range.ideal].compactMap { $0 })
             layout(resolved, width: proxy.size.width)
                 .environment(\.workspaceMode, resolved)
+                // Sheets are one at a time anyway, so there they always are.
+                .onChange(of: leading?.isPresented.wrappedValue) { _, isOpen in
+                    if exclusive || resolved == .sheet, isOpen == true { trailing?.isPresented.wrappedValue = false }
+                }
+                .onChange(of: trailing?.isPresented.wrappedValue) { _, isOpen in
+                    if exclusive || resolved == .sheet, isOpen == true { leading?.isPresented.wrappedValue = false }
+                }
         }
         .coordinateSpace(.named(Self.space))
         .animation(animation, value: leading?.isPresented.wrappedValue)
         .animation(animation, value: trailing?.isPresented.wrappedValue)
-        .onChange(of: leading?.isPresented.wrappedValue) { _, isOpen in
-            if exclusive, isOpen == true { trailing?.isPresented.wrappedValue = false }
-        }
-        .onChange(of: trailing?.isPresented.wrappedValue) { _, isOpen in
-            if exclusive, isOpen == true { leading?.isPresented.wrappedValue = false }
-        }
     }
 
     @ViewBuilder
@@ -136,22 +137,27 @@ public struct Workspace<Leading: View, Content: View, Trailing: View>: View {
         case .sheet:
             content
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .sheet(isPresented: leadingSheet) { leading.map { sheet($0.body) } }
-                .background {
-                    Color.clear.sheet(isPresented: trailingSheet) { trailing.map { sheet($0.body) } }
+                .sheet(isPresented: anySheet) {
+                    // One sheet for both panels: opening the other swaps what's in it.
+                    if leading?.isPresented.wrappedValue == true {
+                        leading.map { sheet($0.body) }
+                    } else {
+                        trailing.map { sheet($0.body) }
+                    }
                 }
         }
     }
 
-    /// One sheet at a time: the leading panel's wins.
-    var leadingSheet: Binding<Bool> {
-        Binding(get: { leading?.isPresented.wrappedValue ?? false }, set: { leading?.isPresented.wrappedValue = $0 })
-    }
-
-    var trailingSheet: Binding<Bool> {
+    /// Whether a panel's sheet is up; dismissing it closes both.
+    var anySheet: Binding<Bool> {
         Binding(
-            get: { (trailing?.isPresented.wrappedValue ?? false) && !(leading?.isPresented.wrappedValue ?? false) },
-            set: { trailing?.isPresented.wrappedValue = $0 }
+            get: { (leading?.isPresented.wrappedValue ?? false) || (trailing?.isPresented.wrappedValue ?? false) },
+            set: { isUp in
+                if !isUp {
+                    leading?.isPresented.wrappedValue = false
+                    trailing?.isPresented.wrappedValue = false
+                }
+            }
         )
     }
 
