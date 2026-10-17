@@ -387,11 +387,14 @@ struct BackdropsPage: View {
         Page("Backdrops") {
             ForEach(Self.samples, id: \.name) { sample in
                 LabelledGroup(LocalizedStringKey(sample.name)) {
-                    Panel { TagCloud(["Glass", "over", "the", "backdrop"]) }
-                        .padding(Space.extraLarge)
-                        .padding(.vertical, Space.large)
-                        .background { Backdrop(sample.style) }
-                        .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+                    NavigationLink(value: GlassShowcaseRoute(name: sample.name)) {
+                        Panel { TagCloud(["Glass", "over", "the", "backdrop"]) }
+                            .padding(Space.extraLarge)
+                            .padding(.vertical, Space.large)
+                            .background { Backdrop(sample.style) }
+                            .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
                 }
             }
         }

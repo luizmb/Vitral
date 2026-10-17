@@ -42,6 +42,16 @@ Card("U-234 Inhalation", subtitle: "ICRP 137, Type S") {
 Every colour follows light and dark mode by itself: `Color(.accent)` and `.foregroundStyle(.ink)`
 resolve per appearance, so a view is written once.
 
+To force an appearance whatever the system says, on a screen or any part of one:
+
+```swift
+SettingsScreen().appearance(.dark)   // .light, .dark, or .system
+AppearancePicker(selection: $appearance)
+```
+
+`Appearance` is a plain value in `VitralTokens`, so an app's state can hold the user's choice.
+Token colours, Vitral's images (dark wood included) and glass all follow the override.
+
 ## Components
 
 | Group | Components |
@@ -50,10 +60,14 @@ resolve per appearance, so a view is written once.
 | Selection | `Checkbox`, `ToggleSwitch`, `SelectionMark` |
 | Layout | `Page`, `Panel`, `PanelList`, `Row`, `LabelledGroup`, `SectionLabel`, `Hairline` |
 | Tags and colour | `Tag`, `TagCloud`, `FlowLayout`, `Swatch`, `SwatchStack`, `Stat` |
-| Cards | `Card` with optional `.header { }` and `.footer { }` |
+| Cards | `Card` with optional `.header { }` and `.footer { }`, `CardAdd` |
+| Fields | `FieldText`, `FieldSecure`, `FieldSearch`, `FieldContainer`, with `FieldStatus` |
+| Pickers | `SegmentedControlGlass`, `RadioList`, `StepperJump`, `AppearancePicker` |
+| Feedback | `Banner`, `EmptyState`, `ErrorScreen`, `ProgressOverlay` |
+| Backdrops | `Backdrop`: patterns, materials, textures, aurora, glow, waves, images |
 
 Modifiers that take tokens: `.foregroundStyle(_:)`, `.font(_:)`, `.glassSurface(_:cornerRadius:)`,
-`.glassCapsule(_:)`, `.surface(_:cornerRadius:)`.
+`.glassCapsule(_:)`, `.glassMaterial(_:)`, `.surface(_:cornerRadius:)`, `.appearance(_:)`.
 
 ## Gallery
 

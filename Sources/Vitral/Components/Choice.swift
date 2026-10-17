@@ -71,7 +71,7 @@ public struct Segment<Value: Hashable & Sendable>: View {
             .font(TypeToken.controlSmall.weight(isSelected ? .semibold : .medium))
             .foregroundStyle(isSelected ? .ink : .inkMuted)
             .lineLimit(1)
-            .frame(maxWidth: .infinity, minHeight: Size.controlSmall + Space.extraSmall)
+            .frame(minWidth: Size.hitTarget, maxWidth: .infinity, minHeight: Size.controlSmall + Space.extraSmall)
             .background {
                 if isSelected {
                     Capsule().fill(Color(.selectedSurface)).shadow(color: Color(.hairline), radius: 3, y: 1)

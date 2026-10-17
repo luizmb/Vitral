@@ -52,6 +52,12 @@ struct GallerySnapshotTests {
         )
     }
 
+    /// A few showcases, one of each kind: every one would add megabytes of near-identical glass.
+    @Test(arguments: ["grid", "busFloor", "waves", "aurora", "glow", "texture(.denim)", "texture(.wood)", "wallpaper(earthrise)"])
+    func showcase(_ name: String) {
+        snapshot(GlassShowcasePage(route: GlassShowcaseRoute(name: name)), named: "showcase-\(name)")
+    }
+
     @Test func home() {
         snapshot(HomePage(), named: "home")
     }
