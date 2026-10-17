@@ -26,3 +26,15 @@ import VitralTokens
         #expect(token.light == token.dark)
     }
 }
+
+@Suite struct FinishTokenTests {
+    @Test func layersKeepTheBasesColourAndTone() {
+        #expect(FinishToken.solid(.accent).gel.isColoured)
+        #expect(FinishToken.glass().gel.isColoured == false)
+        #expect(FinishToken.aqua(.accent).with(.gloss).tone == .accent)
+    }
+
+    @Test func gelIsEveryLayer() {
+        #expect(FinishToken.solid(.accent).gel == .layered(.solid(.accent), [.gloss, .glow, .rim]))
+    }
+}

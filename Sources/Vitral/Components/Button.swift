@@ -54,7 +54,7 @@ public struct ButtonLabel: View {
 /// shows a spinner and takes no taps.
 public struct ButtonPrimary: View {
     let label: ButtonLabel
-    let finish: SurfaceFinish?
+    let finish: FinishToken?
     let action: @MainActor () -> Void
 
     @Environment(\.accent) private var accent
@@ -66,7 +66,7 @@ public struct ButtonPrimary: View {
         size: ButtonSize = .large,
         fillsWidth: Bool = false,
         isBusy: Bool = false,
-        finish: SurfaceFinish? = nil,
+        finish: FinishToken? = nil,
         action: @escaping @MainActor () -> Void
     ) {
         self.label = ButtonLabel(title, icon: icon, size: size, fillsWidth: fillsWidth, isBusy: isBusy)
@@ -91,7 +91,7 @@ public struct ButtonPrimary: View {
 /// Any other action: clear glass.
 public struct ButtonSecondary: View {
     let label: ButtonLabel
-    let finish: SurfaceFinish?
+    let finish: FinishToken?
     let action: @MainActor () -> Void
 
     @Environment(\.controlFinish) private var controlFinish
@@ -102,7 +102,7 @@ public struct ButtonSecondary: View {
         size: ButtonSize = .large,
         fillsWidth: Bool = false,
         isBusy: Bool = false,
-        finish: SurfaceFinish? = nil,
+        finish: FinishToken? = nil,
         action: @escaping @MainActor () -> Void
     ) {
         self.label = ButtonLabel(title, icon: icon, size: size, fillsWidth: fillsWidth, isBusy: isBusy)
@@ -112,7 +112,7 @@ public struct ButtonSecondary: View {
 
     /// Under an Aqua finish a secondary button is Aqua's silver gel, as on the Mac; any other
     /// finish it takes as it is.
-    var resolvedFinish: SurfaceFinish? {
+    var resolvedFinish: FinishToken? {
         finish ?? controlFinish.map { shared in
             if case .aqua = shared { .aqua(.fixedSilver) } else { shared }
         }
@@ -135,7 +135,7 @@ public struct ButtonSecondary: View {
 /// A button made of a finish: a capsule of it, the label in the light ink on a colour or the
 /// dark ink otherwise, pressing in a little.
 struct FinishButtonStyle: ButtonStyle {
-    let finish: SurfaceFinish
+    let finish: FinishToken
 
     /// The light ink on a colour, black on chrome or silver, the ink (dark by day, light at night)
     /// on glass or a texture.

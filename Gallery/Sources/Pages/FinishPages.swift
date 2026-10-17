@@ -5,7 +5,7 @@ import VitralTokens
 /// Every finish, on buttons and fader thumbs; Aqua's layers over each; and a whole group in
 /// Aqua's gel from one `controlFinish`.
 struct FinishesPage: View {
-    static let finishes: [(name: String, finish: SurfaceFinish)] = [
+    static let finishes: [(name: String, finish: FinishToken)] = [
         ("glass", .glass()),
         ("solid", .solid(.accent)),
         ("gradient", .gradient([.washViolet, .washPink])),
@@ -15,7 +15,7 @@ struct FinishesPage: View {
         ("aqua, graphite", .aqua(.fixedSilver))
     ]
 
-    static let layered: [(name: String, finish: SurfaceFinish)] = [
+    static let layered: [(name: String, finish: FinishToken)] = [
         ("glass.gel", .glass().gel),
         ("solid.gel", .solid(.washGreen).gel),
         ("gradient.with(.gloss)", .gradient([.washAmber, .counterAccent]).with(.gloss)),
@@ -26,7 +26,7 @@ struct FinishesPage: View {
 
     var body: some View {
         Page("Finishes", backdrop: .glow()) {
-            LabelledGroup("SurfaceFinish, on ButtonPrimary(finish:)") {
+            LabelledGroup("FinishToken, on ButtonPrimary(finish:)") {
                 FinishGrid(finishes: Self.finishes)
             }
             LabelledGroup("Aqua's layers over anything: .gel, .with(.gloss, .glow, .rim)") {
@@ -79,7 +79,7 @@ struct FinishesPage: View {
 
 /// A button per finish, with its name.
 struct FinishGrid: View {
-    let finishes: [(name: String, finish: SurfaceFinish)]
+    let finishes: [(name: String, finish: FinishToken)]
 
     var body: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: Space.medium)], spacing: Space.medium) {

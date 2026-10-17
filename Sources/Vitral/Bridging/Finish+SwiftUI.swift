@@ -1,88 +1,30 @@
 import SwiftUI
 import VitralTokens
 
-/// What a control's surface is made of: a thumb, a cap, a button. Glass by default; or a solid
-/// colour, a gradient, a texture, chrome, or Aqua's gel (a saturated body glowing lighter at the
-/// bottom, a gloss over its top half).
-public enum SurfaceFinish: Hashable, Sendable {
-    /// Liquid glass: `material`, or the environment's glass; clear, with a bright rim.
-    case glass(GlassToken? = nil)
-    case solid(ColorToken)
-    /// Top to bottom.
-    case gradient([ColorToken])
-    case texture(Texture)
-    /// Aqua's gel, in `colour`.
-    case aqua(ColorToken)
-    /// Polished chrome.
-    case chrome
-    /// A finish with Aqua's layers over it: the gloss, the glow, the rim, on glass, a colour, a
-    /// gradient or a texture alike.
-    indirect case layered(SurfaceFinish, Set<FinishEffect>)
-
-    /// This finish with `effects` over it.
-    public func with(_ effects: FinishEffect...) -> SurfaceFinish {
-        .layered(self, Set(effects))
-    }
-
-    /// This finish as a gel: the gloss, the glow and the rim over it.
-    public var gel: SurfaceFinish {
-        with(.gloss, .glow, .rim)
-    }
-
-    /// Whether text on it reads in the light ink (on a colour) rather than the dark.
-    var isColoured: Bool {
-        switch self {
-        case .solid, .gradient, .aqua: true
-        case .glass, .texture, .chrome: false
-        case let .layered(base, _): base.isColoured
-        }
-    }
-
-    /// The colour light picks up passing through it, for the glow.
-    var tone: ColorToken {
-        switch self {
-        case let .solid(colour), let .aqua(colour): colour
-        case let .gradient(colours): colours.last ?? .fixedWhite
-        case .glass, .texture, .chrome: .fixedWhite
-        case let .layered(base, _): base.tone
-        }
-    }
-}
-
-/// One of Aqua's layers, to put over any finish.
-public enum FinishEffect: Hashable, Sendable {
-    /// A white sheen over the top half, inset from the sides.
-    case gloss
-    /// Light gathering at the bottom, in the finish's own colour.
-    case glow
-    /// A darker edge, as a gel's.
-    case rim
-}
-
 public extension EnvironmentValues {
     /// The finish every Vitral control under this view is made of, unless it asks for its own;
     /// `nil` leaves each to its own default.
-    @Entry var controlFinish: SurfaceFinish?
+    @Entry var controlFinish: FinishToken?
 }
 
 public extension View {
     /// The finish every Vitral control under this view is made of: buttons, fader thumbs.
-    func controlFinish(_ finish: SurfaceFinish?) -> some View {
+    func controlFinish(_ finish: FinishToken?) -> some View {
         environment(\.controlFinish, finish)
     }
 
     /// Fills the space behind this view with `finish`, cut to `shape`.
-    func finish(_ finish: SurfaceFinish, in shape: some InsettableShape) -> some View {
+    func finish(_ finish: FinishToken, in shape: some InsettableShape) -> some View {
         background { FinishedShape(finish: finish, shape: shape) }
     }
 }
 
 /// A shape made of a finish.
 public struct FinishedShape<S: InsettableShape>: View {
-    let finish: SurfaceFinish
+    let finish: FinishToken
     let shape: S
 
-    public init(finish: SurfaceFinish, shape: S) {
+    public init(finish: FinishToken, shape: S) {
         self.finish = finish
         self.shape = shape
     }

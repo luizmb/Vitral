@@ -162,6 +162,16 @@ struct MaterialsPage: View {
             LabelledGroup("active") {
                 Panel(material: .active) { TagCloud(["Chosen", "glass"]) }
             }
+            LabelledGroup("FinishToken: what a control's surface is made of") {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 96), spacing: Space.medium)], spacing: Space.medium) {
+                    ForEach(FinishesPage.finishes + FinishesPage.layered, id: \.name) { entry in
+                        VStack(spacing: Space.extraSmall) {
+                            FinishedShape(finish: entry.finish, shape: Capsule()).frame(height: 32)
+                            Text(verbatim: entry.name).font(.caption2).foregroundStyle(.inkMuted).lineLimit(1).minimumScaleFactor(0.7)
+                        }
+                    }
+                }
+            }
         }
     }
 }
