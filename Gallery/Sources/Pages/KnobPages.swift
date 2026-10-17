@@ -118,6 +118,22 @@ struct KnobsPage: View {
                     label: Text("Treble")
                 )
             }
+            LabelledGroup(".knobStyle(_:) on a panel: every knob in it, one line") {
+                HStack(spacing: Space.large) {
+                    ForEach(["Bass", "Middle", "Treble"], id: \.self) { name in
+                        VStack(spacing: Space.small) {
+                            Knob(value: model.fader("panel\(name)", 5), scale: ValueScale(0 ... 10, precision: 1), startAngle: -150, endAngle: 150, label: Text(LocalizedStringKey(name)))
+                                .frame(width: 96)
+                            Text(LocalizedStringKey(name)).font(TypeToken.detail.weight(.semibold)).foregroundStyle(Color(.fixedCream))
+                        }
+                    }
+                }
+                .knobStyle(GlassKnobStyle(face: .chrome, faceSize: 1, marks: 11, pointer: .chromeStud, showsArc: false, markColour: .fixedCream))
+                .padding(Space.large)
+                .frame(maxWidth: .infinity)
+                .background { Backdrop(.texture(.leather)) }
+                .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+            }
             LabelledGroup("JogDial: endless, in steps of 15°") {
                 VStack(spacing: Space.medium) {
                     JogDial(rotation: $model.jogRotation, lastTouch: $model.jogTouch, label: Text("Scrub"))

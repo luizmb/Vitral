@@ -90,8 +90,8 @@ illustration for a state, use a symbol.
 | Buttons | `ButtonPrimary`, `ButtonSecondary` (both take `finish:`), `ButtonLabel`, `ActionBar`, `ActionBarButton` |
 | Selection | `Checkbox`, `ToggleSwitch`, `SelectionMark` |
 | Layout | `Page`, `Panel`, `PanelList`, `Row` (`.trailing`, `.disclosure`, `.rowState`), `LabelledGroup`, `SectionLabel`, `Hairline` |
-| Dials | `Knob` (`.circular`, `.vertical(dragStart:)`; any start and end angle), `KnobStyle`, `GlassKnobStyle`, `JogDial`, `ValueScale` (range, step, precision, taper) |
-| Faders | `Fader` (horizontal or vertical; `.absolute` or `.relative(dragStart:)`; `centre`, `detents`, `resetValue`; labels on any side or inside), `FaderStyle`, `GlassFaderStyle`, `ConsoleFaderStyle` |
+| Dials | `Knob` (`.circular`, `.vertical(dragStart:)`; any start and end angle), `KnobStyle`, `GlassKnobStyle`, `.knobStyle(_:)`, `JogDial`, `ValueScale` (range, step, precision, taper) |
+| Faders | `Fader` (horizontal or vertical; `.absolute` or `.relative(dragStart:)`; `centre`, `detents`, `resetValue`; labels on any side or inside), `FaderStyle`, `GlassFaderStyle`, `ConsoleFaderStyle`, `.faderStyle(_:)` |
 | Lists | `GlassList` (the platform list on the backdrop), `GlassSection`, `RowState`, `.rowActions([RowAction])` |
 | Tags and colour | `Tag`, `TagCloud`, `FlowLayout`, `Swatch`, `SwatchStack`, `Stat` |
 | Cards | `Card` with optional `.header { }` and `.footer { }`, `CardAdd` |
@@ -101,7 +101,7 @@ illustration for a state, use a symbol.
 | Paging | `Carousel` (`.slide`, `.flip`), `PageDots` (the native page control on iOS), `SegmentedPages` |
 | Workspace | `Workspace` (`.leading`, `.trailing`, `.bottom`, optionally with `pages:`), `PanelSize`, `PanelToggle`, `.workspaceToolbar`, `.panelAnimation`, `.panelTransition` |
 | Code | `CodeBlock`, `CodeSpan`, `SyntaxTheme` (`.neon`), `TypeToken.code` |
-| Overlays | `Overlay` (glass over what's behind, content at a placement), `.overlay(isPresented:)`, `.overlay(item:)`, `.progressOverlay(_:)` |
+| Overlays | `Overlay` (glass over what's behind, content at a placement, `obscuring:` blur and dim), `.overlay(isPresented:)`, `.overlay(item:)`, `.progressOverlay(_:)` |
 | Backdrops | `Backdrop`: patterns (grid, dots, guilloche), drawn materials (`.busFloor(angle:)`, `.wood`, …), textures, aurora, glow, waves, laser, contours, fractal, images |
 
 Modifiers that take tokens: `.foregroundStyle(_:)`, `.font(_:)`, `.glassSurface(_:cornerRadius:)`,

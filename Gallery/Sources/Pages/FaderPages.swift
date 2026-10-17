@@ -141,7 +141,6 @@ struct MixerDesk: View {
                         interaction: .relative(dragStart: model.faderStart("level\(channel)")),
                         detents: [0],
                         resetValue: 0,
-                        style: ConsoleFaderStyle(ticks: Self.ticks, scaleColour: .fixedWhite),
                         label: Text("\(channel) level")
                     )
                     .frame(height: 260)
@@ -157,6 +156,8 @@ struct MixerDesk: View {
                 .frame(maxWidth: .infinity)
             }
         }
+        // One line sets the look of every level fader on the desk; the pans set their own.
+        .faderStyle(ConsoleFaderStyle(ticks: Self.ticks, scaleColour: .fixedWhite))
         .padding(Space.small)
         .background { Backdrop(.texture(.metalPlate)) }
         .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))

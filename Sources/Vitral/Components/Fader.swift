@@ -27,7 +27,7 @@ public enum FaderLabelPlacement: Hashable, Sendable {
 }
 
 /// What a fader style draws.
-public struct FaderConfiguration {
+public struct FaderConfiguration: Sendable {
     public let value: Double
     /// Where the value sits, 0 ... 1 from the lowest.
     public let fraction: Double
@@ -52,11 +52,40 @@ public protocol FaderStyle {
     @MainActor @ViewBuilder func makeBody(_ configuration: FaderConfiguration) -> Body
 }
 
+/// Any fader style, so one can sit in the environment.
+public struct AnyFaderStyle: FaderStyle, Sendable {
+    public let thumbLength: Double
+    public let breadth: Double
+    let make: @MainActor @Sendable (FaderConfiguration) -> AnyView
+
+    public init<Style: FaderStyle & Sendable>(_ style: Style) {
+        self.thumbLength = style.thumbLength
+        self.breadth = style.breadth
+        self.make = { AnyView(style.makeBody($0)) }
+    }
+
+    public func makeBody(_ configuration: FaderConfiguration) -> some View {
+        make(configuration)
+    }
+}
+
+public extension EnvironmentValues {
+    /// How every fader under this view looks, unless it's given its own style.
+    @Entry var faderStyle = AnyFaderStyle(GlassFaderStyle())
+}
+
+public extension View {
+    /// How every fader under this view looks: a mixing desk's worth in one line.
+    func faderStyle<Style: FaderStyle & Sendable>(_ style: Style) -> some View {
+        environment(\.faderStyle, AnyFaderStyle(style))
+    }
+}
+
 /// A fader: a thumb along a track, horizontal or vertical, between the scale's ends. A `centre`
 /// makes it two-way (pan, exposure), filling from the middle; `detents` pull the thumb onto
 /// values it passes near (0 dB, the centre); a double tap returns it to `resetValue`. Stateless:
 /// the value is the binding's.
-public struct Fader<Style: FaderStyle>: View {
+public struct Fader: View {
     @Binding var value: Double
     let scale: ValueScale
     let axis: Axis
@@ -66,8 +95,13 @@ public struct Fader<Style: FaderStyle>: View {
     let resetValue: Double?
     let title: Text?
     let labels: FaderLabelPlacement
-    let style: Style
+    let given: AnyFaderStyle?
     let label: Text
+
+    @Environment(\.faderStyle) private var environmentStyle
+
+    /// The style given, else the environment's.
+    var style: AnyFaderStyle { given ?? environmentStyle }
 
     /// - Parameters:
     ///   - title: shown where `labels` says, with the value.
@@ -82,7 +116,45 @@ public struct Fader<Style: FaderStyle>: View {
         resetValue: Double? = nil,
         title: Text? = nil,
         labels: FaderLabelPlacement = .none,
-        style: Style,
+        style: some FaderStyle & Sendable,
+        label: Text
+    ) {
+        self.init(
+            value: value, scale: scale, axis: axis, interaction: interaction, centre: centre, detents: detents,
+            resetValue: resetValue, title: title, labels: labels, given: AnyFaderStyle(style), label: label
+        )
+    }
+
+    /// A fader in the environment's style (`.faderStyle(_:)`, glass unless set).
+    public init(
+        value: Binding<Double>,
+        scale: ValueScale = ValueScale(),
+        axis: Axis = .horizontal,
+        interaction: FaderInteraction = .absolute,
+        centre: Double? = nil,
+        detents: [Double] = [],
+        resetValue: Double? = nil,
+        title: Text? = nil,
+        labels: FaderLabelPlacement = .none,
+        label: Text
+    ) {
+        self.init(
+            value: value, scale: scale, axis: axis, interaction: interaction, centre: centre, detents: detents,
+            resetValue: resetValue, title: title, labels: labels, given: nil, label: label
+        )
+    }
+
+    init(
+        value: Binding<Double>,
+        scale: ValueScale,
+        axis: Axis,
+        interaction: FaderInteraction,
+        centre: Double?,
+        detents: [Double],
+        resetValue: Double?,
+        title: Text?,
+        labels: FaderLabelPlacement,
+        given: AnyFaderStyle?,
         label: Text
     ) {
         self._value = value
@@ -94,7 +166,7 @@ public struct Fader<Style: FaderStyle>: View {
         self.resetValue = resetValue
         self.title = title
         self.labels = labels
-        self.style = style
+        self.given = given
         self.label = label
     }
 
@@ -209,27 +281,6 @@ public struct Fader<Style: FaderStyle>: View {
     }
 }
 
-public extension Fader where Style == GlassFaderStyle {
-    /// A glass fader (`GlassFaderStyle()`).
-    init(
-        value: Binding<Double>,
-        scale: ValueScale = ValueScale(),
-        axis: Axis = .horizontal,
-        interaction: FaderInteraction = .absolute,
-        centre: Double? = nil,
-        detents: [Double] = [],
-        resetValue: Double? = nil,
-        title: Text? = nil,
-        labels: FaderLabelPlacement = .none,
-        label: Text
-    ) {
-        self.init(
-            value: value, scale: scale, axis: axis, interaction: interaction, centre: centre, detents: detents,
-            resetValue: resetValue, title: title, labels: labels, style: GlassFaderStyle(), label: label
-        )
-    }
-}
-
 /// Places things along and across a track, whichever way it lies: `along` from the track's start
 /// (its lowest value), `across` from its middle line.
 struct TrackFrame {
@@ -251,6 +302,18 @@ struct TrackFrame {
         axis == .horizontal ? CGSize(width: along, height: across) : CGSize(width: across, height: along)
     }
 
+    /// How far along the track, from its lowest end, `fraction` sits.
+    func along(_ fraction: Double) -> Double {
+        TrackGeometry.position(of: fraction, length: length, thumb: thumbLength, reversed: false)
+    }
+
+    /// The point `along` from the track's lowest end, `across` off its middle line.
+    func pointAlong(_ along: Double, across: Double = 0) -> CGPoint {
+        axis == .horizontal
+            ? CGPoint(x: along, y: size.height / 2 + across)
+            : CGPoint(x: size.width / 2 + across, y: length - along)
+    }
+
     /// The distance between two fractions along the track.
     func span(_ from: Double, _ to: Double) -> Double {
         abs(to - from) * TrackGeometry.travel(length: length, thumb: thumbLength)
@@ -259,7 +322,7 @@ struct TrackFrame {
 
 /// The glass fader, and its options: the track's thickness and colours, the thumb, marks and
 /// numbers beside the track.
-public struct GlassFaderStyle: FaderStyle {
+public struct GlassFaderStyle: FaderStyle, Sendable {
     /// The part the finger moves.
     public enum Thumb: Hashable, Sendable {
         /// A round glass thumb.
@@ -386,17 +449,23 @@ struct GlassFader: View {
     var fillFrom: Double { min(configuration.originFraction, configuration.fraction) }
     var fillTo: Double { max(configuration.originFraction, configuration.fraction) }
 
-    /// The fill's length: the span, rounded past the thumb at each end (or exactly the span with no
-    /// thumb, a thick track filling up).
+    /// Where the fill begins and ends along the track, from its lowest end: from the track's very
+    /// end when it starts at the lowest value (so no stub of track shows past it), else from the
+    /// origin's place; to the thumb's centre, or the track's end at the highest value.
+    func fillStart(_ frame: TrackFrame) -> Double {
+        fillFrom <= 0 ? 0 : frame.along(fillFrom)
+    }
+
+    func fillEnd(_ frame: TrackFrame) -> Double {
+        fillTo >= 1 ? frame.length : frame.along(fillTo)
+    }
+
     func fillLength(_ frame: TrackFrame) -> Double {
-        frame.span(fillFrom, fillTo) + (style.thumb == .none ? 0 : style.trackThickness)
+        max(fillEnd(frame) - fillStart(frame), style.trackThickness)
     }
 
     func fillCentre(_ frame: TrackFrame) -> CGPoint {
-        CGPoint(
-            x: (frame.point(fillFrom, across: trackOffset).x + frame.point(fillTo, across: trackOffset).x) / 2,
-            y: (frame.point(fillFrom, across: trackOffset).y + frame.point(fillTo, across: trackOffset).y) / 2
-        )
+        frame.pointAlong((fillStart(frame) + fillEnd(frame)) / 2, across: trackOffset)
     }
 
     func fill(_ frame: TrackFrame) -> some View {
@@ -453,7 +522,7 @@ struct GlassFader: View {
 
 /// A mixing desk's fader: a dark slot, a ridged metal cap with a white line across, and the dB
 /// scale printed beside it.
-public struct ConsoleFaderStyle: FaderStyle {
+public struct ConsoleFaderStyle: FaderStyle, Sendable {
     let ticks: [Double]
     let lowestLabel: String?
     let slotColour: ColorToken
