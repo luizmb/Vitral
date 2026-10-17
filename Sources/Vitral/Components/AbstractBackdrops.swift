@@ -152,6 +152,11 @@ struct Waves: View {
 
     let colour: ColorToken
 
+    @Environment(\.colorScheme) private var colorScheme
+
+    /// How strong the layers are: softer at night, so they don't glare.
+    var strength: Double { colorScheme == .dark ? 0.55 : 1 }
+
     var body: some View {
         Canvas { context, size in
             var layered = context
@@ -162,8 +167,8 @@ struct Waves: View {
                     crest,
                     with: .linearGradient(
                         Gradient(colors: [
-                            Color(colour.opacity(0.18 + 0.14 * Double(layer))),
-                            Color(colour.opacity(0.30 + 0.14 * Double(layer)))
+                            Color(colour.opacity((0.18 + 0.14 * Double(layer)) * strength)),
+                            Color(colour.opacity((0.30 + 0.14 * Double(layer)) * strength))
                         ]),
                         startPoint: CGPoint(x: 0, y: crest.boundingRect.minY),
                         endPoint: CGPoint(x: size.width, y: size.height)
@@ -214,11 +219,11 @@ struct Laser: View {
                 let colour = palette[index % palette.count]
                 lines.stroke(
                     strand,
-                    with: .color(Color(colour.opacity((isNight ? 0.3 : 0.16) + (isNight ? 0.45 : 0.24) * scatter(index, 91)))),
+                    with: .color(Color(colour.opacity((isNight ? 0.12 : 0.16) + (isNight ? 0.26 : 0.24) * scatter(index, 91)))),
                     lineWidth: 0.4 + scatter(index, 92) * 1.1
                 )
                 if index.isMultiple(of: 5) {
-                    glow.stroke(strand, with: .color(Color(colour.opacity(isNight ? 0.3 : 0.12))), lineWidth: 3)
+                    glow.stroke(strand, with: .color(Color(colour.opacity(isNight ? 0.16 : 0.12))), lineWidth: 3)
                 }
             }
         }
@@ -252,12 +257,19 @@ struct Contours: View {
 
     let palette: [ColorToken]
 
+    @Environment(\.colorScheme) private var colorScheme
+
+    /// A palette colour toned for the appearance: lighter by day, deeper at night.
+    func toned(_ token: ColorToken) -> Color {
+        colorScheme == .dark ? Color(token).mix(with: .black, by: 0.58) : Color(token).mix(with: .white, by: 0.3)
+    }
+
     var body: some View {
         Canvas { context, size in
             var layered = context
             layered.addFilter(.shadow(color: Color(ColorToken.fixedBlack.opacity(0.28)), radius: 10, y: -2))
             for layer in 0 ..< (palette.isEmpty ? 0 : Contours.layers) {
-                let colour = Color(palette[layer % palette.count])
+                let colour = toned(palette[layer % palette.count])
                 layered.fill(
                     Contours.hill(layer, offset: 0, closed: true, in: size),
                     with: .linearGradient(
@@ -275,7 +287,7 @@ struct Contours: View {
                 }
             }
         }
-        .background(Color(palette.first ?? .backdrop))
+        .background(palette.first.map(toned) ?? Color(.backdrop))
         .drawingGroup()
     }
 
@@ -305,7 +317,7 @@ struct Contours: View {
 }
 
 /// A Julia set (c = −0.8 + 0.156i): each point coloured by how fast it escapes, smoothly, through
-/// the palette; the set itself in the palette's first colour, darkened. Computed small and drawn
+/// the palette; the set itself pale by day, nearly black at night. Computed small and drawn
 /// smoothed: a few milliseconds, once.
 struct Fractal: View {
     static let width = 240
@@ -319,7 +331,8 @@ struct Fractal: View {
             Fractal.image(
                 width: Fractal.width,
                 height: min(Int(Double(Fractal.width) * proxy.size.height / max(proxy.size.width, 1)), Fractal.width * 3),
-                palette: palette.map { colorScheme == .dark ? $0.dark : $0.light }
+                palette: palette.map { colorScheme == .dark ? $0.dark : $0.light },
+                isDark: colorScheme == .dark
             )
             .map { image in
                 Image(decorative: image, scale: 1)
@@ -330,8 +343,19 @@ struct Fractal: View {
         }
     }
 
-    static func image(width: Int, height: Int, palette: [RGBA]) -> CGImage? {
-        CGDataProvider(data: Data(pixels(width: width, height: max(height, 1), palette: palette)) as CFData).flatMap { provider in
+    /// By day the bands are pastel and the set pale; at night the bands deep and the set nearly
+    /// black: a backdrop under glass, not a poster.
+    static func image(width: Int, height: Int, palette: [RGBA], isDark: Bool) -> CGImage? {
+        CGDataProvider(
+            data: Data(
+                pixels(
+                    width: width,
+                    height: max(height, 1),
+                    palette: palette.map { mix($0, isDark ? .black : .white, isDark ? 0.58 : 0.38) },
+                    set: mix(palette.first ?? .black, isDark ? .black : .white, isDark ? 0.85 : 0.72)
+                )
+            ) as CFData
+        ).flatMap { provider in
             CGImage(
                 width: width,
                 height: max(height, 1),
@@ -348,10 +372,10 @@ struct Fractal: View {
         }
     }
 
-    static func pixels(width: Int, height: Int, palette: [RGBA]) -> [UInt8] {
+    static func pixels(width: Int, height: Int, palette: [RGBA], set: RGBA) -> [UInt8] {
         (0 ..< height).flatMap { row in
             (0 ..< width).flatMap { column in
-                bytes(colour(escape: escape(point(column: column, row: row, width: width, height: height)), palette: palette))
+                bytes(colour(escape: escape(point(column: column, row: row, width: width, height: height)), palette: palette, set: set))
             }
         }
     }
@@ -393,10 +417,10 @@ struct Fractal: View {
     /// radiating from the set.
     static let band = 9.0
 
-    /// The palette's colour at `escape`, going round it once every `band` steps, or its first
-    /// colour darkened for the set.
-    static func colour(escape: Double?, palette: [RGBA]) -> RGBA {
-        escape.map { along(($0 / band).truncatingRemainder(dividingBy: 1), palette: palette + palette.prefix(1)) } ?? darkened(palette.first ?? .black)
+    /// The palette's colour at `escape`, going round it once every `band` steps, or `set` for a
+    /// point of the set.
+    static func colour(escape: Double?, palette: [RGBA], set: RGBA) -> RGBA {
+        escape.map { along(($0 / band).truncatingRemainder(dividingBy: 1), palette: palette + palette.prefix(1)) } ?? set
     }
 
     static func along(_ t: Double, palette: [RGBA]) -> RGBA {
@@ -411,10 +435,6 @@ struct Fractal: View {
 
     static func mix(_ a: RGBA, _ b: RGBA, _ t: Double) -> RGBA {
         RGBA(red: a.red + (b.red - a.red) * t, green: a.green + (b.green - a.green) * t, blue: a.blue + (b.blue - a.blue) * t)
-    }
-
-    static func darkened(_ colour: RGBA) -> RGBA {
-        RGBA(red: colour.red * 0.25, green: colour.green * 0.25, blue: colour.blue * 0.25)
     }
 
     static func bytes(_ colour: RGBA) -> [UInt8] {
