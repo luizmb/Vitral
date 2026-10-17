@@ -102,7 +102,7 @@ illustration for a state, use a symbol.
 | Workspace | `Workspace` (`.leading`, `.trailing`, `.bottom`, optionally with `pages:`), `PanelSize`, `PanelToggle`, `.workspaceToolbar`, `.panelAnimation`, `.panelTransition` |
 | Code | `CodeBlock`, `CodeSpan`, `SyntaxTheme` (`.neon`), `TypeToken.code` |
 | Overlays | `Overlay` (glass over what's behind, content at a placement), `.overlay(isPresented:)`, `.overlay(item:)`, `.progressOverlay(_:)` |
-| Backdrops | `Backdrop`: patterns, drawn materials (`.busFloor(angle:)`, `.wood`, …), textures, aurora, glow, waves, images |
+| Backdrops | `Backdrop`: patterns (grid, dots, guilloche), drawn materials (`.busFloor(angle:)`, `.wood`, …), textures, aurora, glow, waves, laser, contours, fractal, images |
 
 Modifiers that take tokens: `.foregroundStyle(_:)`, `.font(_:)`, `.glassSurface(_:cornerRadius:)`,
 `.glassCapsule(_:)`, `.glassMaterial(_:)`, `.surface(_:cornerRadius:)`, `.appearance(_:)`.

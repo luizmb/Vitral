@@ -10,8 +10,9 @@ public enum BackdropStyle: Sendable {
     case grid(origin: CGPoint = .zero, scale: Double = 1, spacing: Double = 28)
     /// A dot at every crossing of a `spacing`-point grid.
     case dots(spacing: Double = 22)
-    /// Fine interlaced curves, the way banknotes are engraved, in a colour of the palette.
-    case laserCurves(ColorToken = .accent)
+    /// Guilloché: fine interlaced curves, the way banknotes are engraved, in a colour of the
+    /// palette.
+    case guilloche(ColorToken = .accent)
     /// Planks of wood, the grain running across.
     case wood
     /// Brushed metal: a sheen from the top and fine streaks across.
@@ -30,6 +31,13 @@ public enum BackdropStyle: Sendable {
     case glow([ColorToken] = [.washViolet, .washPink, .accent, .washTeal])
     /// Layered hills of one colour, deeper toward the bottom, each shadowing the one behind.
     case waves(ColorToken = .accent)
+    /// Light trails: hundreds of thin glowing strands flowing in a band across a dark ground,
+    /// adding up to light where they cross (fine inked strands on a pale ground by day).
+    case laser([ColorToken] = [.washTeal, .washGreen])
+    /// Sculpted hills, each covered in fine lines following its curve, in the palette's colours.
+    case contours([ColorToken] = [.washTeal, .washGreen, .fixedCream, .washTeal])
+    /// A Julia set: a fractal's coastline, coloured through the palette.
+    case fractal([ColorToken] = [.washViolet, .washTeal, .washGreen, .washAmber])
     /// One of Vitral's textures, tiled.
     case texture(Texture)
     /// A picture: tiled at its own size (a texture), or filling the space and cropped (a photo).
@@ -58,9 +66,15 @@ public struct Backdrop: View {
             case let .dots(spacing):
                 Color(.backdrop)
                 DotGrid(spacing: spacing)
-            case let .laserCurves(color):
+            case let .guilloche(color):
                 Color(.backdrop)
-                LaserCurves(color: color)
+                Guilloche(color: color)
+            case let .laser(palette):
+                Laser(palette: palette)
+            case let .contours(palette):
+                Contours(palette: palette)
+            case let .fractal(palette):
+                Fractal(palette: palette)
             case .wood:
                 Color(.woodBase)
                 WoodGrain()
@@ -202,8 +216,8 @@ struct DotGrid: View {
     }
 }
 
-/// Two bands of interlaced sine curves, each curve a step out of phase with the last.
-struct LaserCurves: View {
+/// Guilloché: two bands of interlaced sine curves, each curve a step out of phase with the last.
+struct Guilloche: View {
     let color: ColorToken
 
     var body: some View {
@@ -211,7 +225,7 @@ struct LaserCurves: View {
             for band in [0.3, 0.72] {
                 for curve in 0 ..< 28 {
                     context.stroke(
-                        LaserCurves.curve(index: curve, centre: size.height * band, size: size),
+                        Guilloche.curve(index: curve, centre: size.height * band, size: size),
                         with: .color(Color(color.opacity(0.10 + 0.14 * scatter(curve, Int(band * 100))))),
                         lineWidth: 0.7
                     )
