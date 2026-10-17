@@ -23,18 +23,18 @@ enum DemoInspectorPage: String, PageKind {
 
 /// The sample's modes: picked from the width (the default), or each one forced.
 enum WorkspaceModeChoice: String, CaseIterable, Hashable, Sendable {
-    case automatic, docked, dockedExclusive, floating, sheet
+    case automatic, docked, dockedExclusive, floating, floatingExclusive, sheet
 
     var mode: WorkspaceMode? {
         switch self {
         case .automatic: nil
         case .docked, .dockedExclusive: .docked
-        case .floating: .floating
+        case .floating, .floatingExclusive: .floating
         case .sheet: .sheet
         }
     }
 
-    var exclusive: Bool { self == .dockedExclusive }
+    var exclusive: Bool { self == .dockedExclusive || self == .floatingExclusive }
 
     var title: LocalizedStringKey {
         switch self {
@@ -42,6 +42,7 @@ enum WorkspaceModeChoice: String, CaseIterable, Hashable, Sendable {
         case .docked: "Docked, forced"
         case .dockedExclusive: "Docked, forced, one panel at a time"
         case .floating: "Floating, forced"
+        case .floatingExclusive: "Floating, forced, one panel at a time"
         case .sheet: "Sheets, forced"
         }
     }
@@ -52,7 +53,8 @@ enum WorkspaceModeChoice: String, CaseIterable, Hashable, Sendable {
         case .docked: "Workspace(mode: .docked): columns beside the content"
         case .dockedExclusive: "Workspace(mode: .docked, exclusive: true): opening one closes the other"
         case .floating: "Workspace(mode: .floating): glass panels over the content"
-        case .sheet: "Workspace(mode: .sheet): sheets, the content usable behind"
+        case .floatingExclusive: "Workspace(mode: .floating, exclusive: true): opening one closes the others"
+        case .sheet: "Workspace(mode: .sheet): one sheet, always one panel at a time"
         }
     }
 }
