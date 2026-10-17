@@ -347,26 +347,41 @@ struct EmptyStatesPage: View {
 
 struct ProgressPage: View {
     var body: some View {
-        Page("Overlays") {
-            LabelledGroup(".progressOverlay, with a fraction") {
-                OverlaySample(title: "Highway to Hell", subtitle: "AC/DC")
-                    .progressOverlay(ProgressPanel("Importing 3 of 12", detail: Text(verbatim: "Highway to Hell.wav"), fraction: 0.25))
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+        Page("Progress") {
+            LabelledGroup("ProgressPanel, with a fraction") {
+                ProgressPanel("Importing 3 of 12", detail: Text(verbatim: "Highway to Hell.wav"), fraction: 0.25)
             }
-            LabelledGroup(".progressOverlay, the task and the whole job") {
+            LabelledGroup("ProgressPanel, the task and the whole job") {
+                ProgressPanel("Importing 3 of 12", detail: Text(verbatim: "Hells Bells.wav"), fraction: 0.6, overall: 0.2)
+            }
+            LabelledGroup("ProgressPanel, without one") {
+                ProgressPanel("Pushing to GitHub", detail: Text(verbatim: "feature/new-article"))
+            }
+            LabelledGroup(".progressOverlay(_:)") {
                 OverlaySample(title: "Back in Black", subtitle: "AC/DC")
                     .progressOverlay(ProgressPanel("Importing 3 of 12", detail: Text(verbatim: "Hells Bells.wav"), fraction: 0.6, overall: 0.2))
                     .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
             }
-            LabelledGroup(".progressOverlay, without one") {
-                OverlaySample(title: "Pushing", subtitle: "feature/new-article")
-                    .progressOverlay(ProgressPanel("Pushing to GitHub"))
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
+struct OverlaysPage: View {
+    var body: some View {
+        Page("Overlays") {
+            LabelledGroup("Overlay, centred") {
+                OverlaySample(title: "Inhalation", subtitle: "Twelve compartments")
+                    .overlay(isPresented: true) {
+                        Tag("Locked while syncing", icon: Image(.lock), style: .tint(.blue))
+                    }
                     .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
             }
             LabelledGroup("Overlay(placement: .bottom)") {
                 OverlaySample(title: "Inhalation", subtitle: "Twelve compartments")
                     .overlay(isPresented: true, placement: .bottom) {
                         Banner("Saved to your library", style: .success)
+                            .glassSurface(.regular, cornerRadius: Radius.medium)
                     }
                     .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
             }

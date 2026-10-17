@@ -4,20 +4,22 @@ import VitralTokens
 
 @main
 struct GalleryApp: App {
-    /// The appearance switch's choice. The app is the Gallery's boundary, so it holds the one piece
-    /// of state; every view only reads it or reports a change through the binding.
-    @State private var appearance = Appearance.system
+    /// The app is the Gallery's boundary, so it owns the one model; every view only reads it or
+    /// reports a change through a binding.
+    @State private var model = GalleryModel()
 
     var body: some Scene {
         WindowGroup {
+            @Bindable var model = model
             NavigationStack {
                 HomePage()
-                    .galleryChrome($appearance)
-                    .navigationDestination(for: GallerySection.self) { SectionPage(section: $0).galleryChrome($appearance) }
-                    .navigationDestination(for: GalleryPage.self) { $0.view.galleryChrome($appearance) }
-                    .navigationDestination(for: GlassShowcaseRoute.self) { GlassShowcasePage(route: $0).galleryChrome($appearance) }
+                    .galleryChrome($model.appearance)
+                    .navigationDestination(for: GallerySection.self) { SectionPage(section: $0).galleryChrome($model.appearance) }
+                    .navigationDestination(for: GalleryPage.self) { $0.view.galleryChrome($model.appearance) }
+                    .navigationDestination(for: GlassShowcaseRoute.self) { GlassShowcasePage(route: $0).galleryChrome($model.appearance) }
             }
-            .appearance(appearance)
+            .appearance(model.appearance)
+            .environment(model)
         }
     }
 }
