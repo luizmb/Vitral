@@ -123,9 +123,9 @@ public extension ColorToken {
     static let washViolet = ColorToken(light: RGBA(hex: 0x7F5CF0), dark: RGBA(hex: 0x9B6BFF))
     static let washPink = ColorToken(light: RGBA(hex: 0xEE6FAE), dark: RGBA(hex: 0xFF5FA8))
     static let washAmber = ColorToken(light: RGBA(hex: 0xF4A63A), dark: RGBA(hex: 0xFFB347))
-    /// The sky an aurora hangs in, top and horizon: a pale dawn in light mode, night in dark mode.
-    static let skyTop = ColorToken(light: RGBA(hex: 0xDDE5F2), dark: RGBA(hex: 0x03060E))
-    static let skyHorizon = ColorToken(light: RGBA(hex: 0xF5F3EE), dark: RGBA(hex: 0x0C1424))
+    /// The sky an aurora hangs in, top and horizon: a blue day in light mode, night in dark mode.
+    static let skyTop = ColorToken(light: RGBA(hex: 0x3F7FD9), dark: RGBA(hex: 0x03060E))
+    static let skyHorizon = ColorToken(light: RGBA(hex: 0xB4D3F2), dark: RGBA(hex: 0x0C1424))
     /// Stars: none by day.
     static let star = ColorToken(light: RGBA.white.opacity(0), dark: RGBA.white.opacity(0.7))
 }

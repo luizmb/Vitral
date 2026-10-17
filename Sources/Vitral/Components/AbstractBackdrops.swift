@@ -2,9 +2,15 @@ import SwiftUI
 import VitralTokens
 
 /// Northern lights: curtains of colour hanging in the sky, brightest at their lower edge, with
-/// fine rays rising from it. Stars at night.
+/// fine rays rising from it. Stars at night; by day the curtains are painted stronger, to hold
+/// their own against a blue sky.
 struct Aurora: View {
     let palette: [ColorToken]
+
+    @Environment(\.colorScheme) private var colorScheme
+
+    /// How strongly the curtains are painted: more by day.
+    var strength: Double { colorScheme == .dark ? 1 : 1.25 }
 
     var body: some View {
         ZStack {
@@ -15,11 +21,18 @@ struct Aurora: View {
                     let radius = 0.3 + scatter(index, 33) * 0.8
                     context.fill(
                         Path(ellipseIn: CGRect(x: point.x - radius, y: point.y - radius, width: radius * 2, height: radius * 2)),
-                        with: .color(Color(ColorToken.star.opacity(ColorToken.star.dark.alpha * (0.3 + 0.7 * scatter(index, 34)))))
+                        with: .color(Color(.star).opacity(0.3 + 0.7 * scatter(index, 34)))
                     )
                 }
                 var glow = context
                 glow.addFilter(.blur(radius: 26))
+                if colorScheme != .dark {
+                    var horizon = context
+                    horizon.addFilter(.blur(radius: 50))
+                    for (index, colour) in palette.enumerated() {
+                        horizon.fill(Aurora.horizonPool(index: index, count: palette.count, size: size), with: .color(Color(colour.opacity(0.45))))
+                    }
+                }
                 var rays = context
                 rays.addFilter(.blur(radius: 1.2))
                 for (index, colour) in palette.enumerated() {
@@ -27,7 +40,7 @@ struct Aurora: View {
                     glow.fill(
                         curtain.band,
                         with: .linearGradient(
-                            Gradient(colors: [.clear, Color(colour.opacity(0.55)), Color(colour.opacity(0.85))]),
+                            Gradient(colors: [.clear, Color(colour.opacity(0.55 * strength)), Color(colour.opacity(min(1, 0.85 * strength)))]),
                             startPoint: CGPoint(x: 0, y: curtain.bounds.minY),
                             endPoint: CGPoint(x: 0, y: curtain.bounds.maxY)
                         )
@@ -38,7 +51,7 @@ struct Aurora: View {
                         rays.stroke(
                             GraphPaper.segment(CGPoint(x: x, y: top), CGPoint(x: x, y: foot)),
                             with: .linearGradient(
-                                Gradient(colors: [.clear, Color(colour.opacity(0.15 + 0.35 * scatter(ray, 50 + index)))]),
+                                Gradient(colors: [.clear, Color(colour.opacity((0.15 + 0.35 * scatter(ray, 50 + index)) * strength))]),
                                 startPoint: CGPoint(x: x, y: top),
                                 endPoint: CGPoint(x: x, y: foot)
                             ),
@@ -49,6 +62,16 @@ struct Aurora: View {
             }
         }
         .drawingGroup()
+    }
+
+    /// By day, a wide pool of each colour low over the horizon, so the lower sky isn't bare.
+    static func horizonPool(index: Int, count: Int, size: CGSize) -> Path {
+        Path(ellipseIn: CGRect(
+            x: size.width * ((Double(index) - 0.3) / Double(max(count, 1)) - 0.1 * scatter(index, 81)),
+            y: size.height * (0.62 + 0.18 * scatter(index, 82)),
+            width: size.width * (1.6 / Double(max(count, 1)) + 0.2),
+            height: size.height * 0.3
+        ))
     }
 
     /// One curtain: its lower edge sweeps across the sky in long waves, and it rises above that
