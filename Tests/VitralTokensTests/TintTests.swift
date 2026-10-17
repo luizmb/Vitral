@@ -19,3 +19,10 @@ import VitralTokens
         #expect(AccentToken.primary.base == .accent)
     }
 }
+
+@Suite struct InvariantColourTests {
+    @Test(arguments: [ColorToken.black, .charcoal, .white, .cream, .gold, .silver])
+    func theSameInLightAndDark(_ token: ColorToken) {
+        #expect(token.light == token.dark)
+    }
+}
