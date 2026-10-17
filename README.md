@@ -87,7 +87,7 @@ illustration for a state, use a symbol.
 | Group | Components |
 |---|---|
 | Finishes | `FinishToken` (glass, solid, gradient, texture, chrome, Aqua's gel; `.gel`, `.with(.gloss, .glow, .rim)` over any), `.controlFinish(_:)`, `.finish(_:in:)` |
-| Buttons | `ButtonPrimary`, `ButtonSecondary` (both take `finish:`), `ButtonLabel`, `ActionBar`, `ActionBarButton` |
+| Buttons | `Pill`, `ButtonPrimary`, `ButtonSecondary` (both take `finish:`), `ButtonLabel`, `ActionBar`, `ActionBarButton` |
 | Selection | `Checkbox`, `ToggleSwitch`, `SelectionMark` |
 | Layout | `Page`, `Panel`, `PanelList`, `Row` (`.trailing`, `.disclosure`, `.rowState`), `LabelledGroup`, `SectionLabel`, `Hairline` |
 | Dials | `Knob` (`.circular`, `.vertical(dragStart:)`; any start and end angle), `KnobStyle`, `GlassKnobStyle`, `.knobStyle(_:)`, `JogDial`, `ValueScale` (range, step, precision, taper) |
