@@ -12,7 +12,8 @@ import VitralTokens
 /// Rasterising differs across CPU architectures and simulator versions, so references only compare
 /// on the machine that recorded them (iPhone 17 Pro Max simulator). CI sets `TEST_RUNNER_CI` and
 /// skips them. Liquid Glass dithers faintly from frame to frame, so a few pixels in two hundred may
-/// drift in colour; a layout change moves far more than that.
+/// drift in colour; a layout change moves far more than that. Recorded at 1x: enough to see layout,
+/// wrapping and colour, at a ninth of a 3x image's size.
 @MainActor
 @Suite(.serialized, .enabled(if: ProcessInfo.processInfo.environment["CI"] == nil))
 struct GallerySnapshotTests {
@@ -64,7 +65,7 @@ struct GallerySnapshotTests {
         for style in [UIUserInterfaceStyle.light, .dark] {
             assertSnapshot(
                 of: UIHostingController(rootView: NavigationStack { view }),
-                as: .image(drawHierarchyInKeyWindow: true, precision: 0.995, perceptualPrecision: 0.98, size: CGSize(width: 440, height: 956), traits: UITraitCollection(userInterfaceStyle: style)),
+                as: Self.strategy(style: style),
                 named: "\(name)-\(style == .dark ? "dark" : "light")",
                 fileID: fileID,
                 file: filePath,
@@ -73,5 +74,30 @@ struct GallerySnapshotTests {
                 column: column
             )
         }
+    }
+
+    /// The window's picture, redrawn as 8-bit sRGB: a window draws in wide colour at 16 bits a
+    /// channel, which doubles every reference without showing anything more.
+    private static func strategy(style: UIUserInterfaceStyle) -> Snapshotting<UIViewController, UIImage> {
+        Snapshotting<UIImage, UIImage>.image(precision: 0.995, perceptualPrecision: 0.98).asyncPullback { controller in
+            windowCapture(style: style).snapshot(controller).map(standardRange)
+        }
+    }
+
+    private static func windowCapture(style: UIUserInterfaceStyle) -> Snapshotting<UIViewController, UIImage> {
+        .image(
+            drawHierarchyInKeyWindow: true,
+            size: CGSize(width: 440, height: 956),
+            traits: UITraitCollection { $0.userInterfaceStyle = style; $0.displayScale = 1 }
+        )
+    }
+
+    /// An sRGB display's format: 8 bits a channel.
+    private static func standardRange(_ image: UIImage) -> UIImage {
+        UIGraphicsImageRenderer(
+            size: image.size,
+            format: UIGraphicsImageRendererFormat(for: UITraitCollection { $0.displayScale = image.scale; $0.displayGamut = .SRGB })
+        )
+        .image { _ in image.draw(at: .zero) }
     }
 }
