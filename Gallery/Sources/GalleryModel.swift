@@ -35,6 +35,18 @@ final class GalleryModel {
     var knobFrequency = 1000.0
     var jogRotation = 0.0
     var jogTouch: Double?
+    var faders: [String: Double] = [:]
+    var faderStarts: [String: Double] = [:]
+
+    /// A fader's value, kept by name.
+    func fader(_ name: String, _ initial: Double) -> Binding<Double> {
+        Binding(get: { self.faders[name] ?? initial }, set: { self.faders[name] = $0 })
+    }
+
+    /// Where a fader's drag started, kept by name while it lasts.
+    func faderStart(_ name: String) -> Binding<Double?> {
+        Binding(get: { self.faderStarts[name] }, set: { self.faderStarts[name] = $0 })
+    }
 
     // What the list reports, applied here as a store's reducer would.
 
