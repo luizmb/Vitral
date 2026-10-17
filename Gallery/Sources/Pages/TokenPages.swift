@@ -8,9 +8,14 @@ struct ColoursPage: View {
         let tokens: [(name: String, token: ColorToken)]
     }
 
-    private static let groups = [
+    private static let groups: [ColourGroup] = [
         ColourGroup(title: "Ink", tokens: [("ink", .ink), ("inkMuted", .inkMuted), ("inkFaint", .inkFaint), ("onAccent", .onAccent)]),
         ColourGroup(title: "Accent", tokens: [("accent", .accent), ("accentTop", .accentTop), ("accentBottom", .accentBottom), ("accentGlow", .accentGlow)]),
+        ColourGroup(
+            title: "Counter-accent",
+            tokens: [("counterAccent", .counterAccent), ("counterAccentTop", .counterAccentTop), ("counterAccentBottom", .counterAccentBottom), ("counterAccentGlow", .counterAccentGlow)]
+        ),
+        ColourGroup(title: "Tints", tokens: Tint.allCases.flatMap { [("\($0.rawValue).surface", $0.surface), ("\($0.rawValue).ink", $0.ink)] }),
         ColourGroup(title: "Feedback", tokens: [("info", .info), ("infoSurface", .infoSurface), ("success", .success), ("successSurface", .successSurface), ("warning", .warning), ("warningSurface", .warningSurface), ("danger", .danger), ("dangerSurface", .dangerSurface)]),
         ColourGroup(
             title: "Surfaces",

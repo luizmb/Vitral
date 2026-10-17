@@ -28,6 +28,11 @@ public extension View {
         environment(\.glassMaterial, material)
     }
 
+    /// The accent every Vitral control under this view is marked with: `.primary` unless set.
+    func accent(_ accent: AccentToken) -> some View {
+        environment(\.accent, accent)
+    }
+
     /// A flat fill behind the content, cut to a rounded rectangle with continuous corners.
     func surface(_ fill: ColorToken, cornerRadius: Double = Radius.medium) -> some View {
         background(Color(fill), in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
@@ -37,6 +42,8 @@ public extension View {
 public extension EnvironmentValues {
     /// The glass Vitral's surfaces are made of: `veiled()` unless set (`.glassMaterial(_:)`).
     @Entry var glassMaterial: GlassToken = .veiled()
+    /// The accent Vitral's controls are marked with: `.primary` unless set (`.accent(_:)`).
+    @Entry var accent: AccentToken = .primary
 }
 
 /// Glass in a shape, from the given material or the environment's.

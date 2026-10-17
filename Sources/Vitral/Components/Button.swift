@@ -56,6 +56,8 @@ public struct ButtonPrimary: View {
     let label: ButtonLabel
     let action: @MainActor () -> Void
 
+    @Environment(\.accent) private var accent
+
     public init(
         _ title: LocalizedStringKey,
         icon: Image? = nil,
@@ -72,7 +74,7 @@ public struct ButtonPrimary: View {
         Button(action: action) { label }
             .disabled(label.isBusy)
             .buttonStyle(.glassProminent)
-            .tint(Color(.accent))
+            .tint(Color(accent.base))
     }
 }
 

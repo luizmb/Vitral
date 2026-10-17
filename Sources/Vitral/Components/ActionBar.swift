@@ -34,6 +34,8 @@ public struct ActionBarButton: View {
     let isBusy: Bool
     let action: @MainActor () -> Void
 
+    @Environment(\.accent) private var accent
+
     /// - Parameter accessibilityLabel: what VoiceOver says. Needed when there's no title, and kept
     ///   for both so a title can be dropped on narrow layouts without losing it.
     public init(
@@ -62,7 +64,7 @@ public struct ActionBarButton: View {
                 }
                 title.map { Text($0).font(.controlSmall).lineLimit(1).minimumScaleFactor(0.8) }
             }
-            .foregroundStyle(role == .destructive ? .danger : .accent)
+            .foregroundStyle(role == .destructive ? .danger : accent.base)
             .frame(maxWidth: title == nil ? nil : .infinity)
             .frame(minWidth: Size.hitTarget, minHeight: Size.hitTarget)
             .contentShape(Rectangle())

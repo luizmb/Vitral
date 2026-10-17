@@ -11,6 +11,8 @@ public struct SelectionMark: View {
     let isSelected: Bool
     let shape: Shape
 
+    @Environment(\.accent) private var accent
+
     public init(isSelected: Bool, shape: Shape = .round) {
         self.isSelected = isSelected
         self.shape = shape
@@ -24,8 +26,8 @@ public struct SelectionMark: View {
         ZStack {
             if isSelected {
                 outline
-                    .fill(LinearGradient(colors: [Color(.accentTop), Color(.accentBottom)], startPoint: .top, endPoint: .bottom))
-                    .shadow(color: Color(.accentGlow), radius: 5, y: 2)
+                    .fill(LinearGradient(colors: [Color(accent.top), Color(accent.bottom)], startPoint: .top, endPoint: .bottom))
+                    .shadow(color: Color(accent.glow), radius: 5, y: 2)
                 Image(.checkmark)
                     .font(.caption.weight(.bold))
                     .foregroundStyle(.onAccent)
@@ -70,6 +72,8 @@ public struct ToggleSwitch: View {
     let title: LocalizedStringKey
     @Binding var isOn: Bool
 
+    @Environment(\.accent) private var accent
+
     public init(_ title: LocalizedStringKey, isOn: Binding<Bool>) {
         self.title = title
         self._isOn = isOn
@@ -82,7 +86,7 @@ public struct ToggleSwitch: View {
                 .foregroundStyle(.ink)
         }
         .toggleStyle(.switch)
-        .tint(Color(.accent))
+        .tint(Color(accent.base))
         .frame(minHeight: Size.hitTarget)
     }
 }

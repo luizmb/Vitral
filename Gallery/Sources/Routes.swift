@@ -26,7 +26,7 @@ enum GallerySection: String, CaseIterable, Hashable {
         switch self {
         case .tokens: [.colours, .spacing, .radii, .sizes, .type, .materials]
         case .resources: [.icons, .images, .textures, .wallpapers]
-        case .components: [.appearance, .backdrops, .buttons, .selection, .pickers, .fields, .banners, .lists, .tags, .cards, .emptyStates, .progress]
+        case .components: [.appearance, .tints, .backdrops, .buttons, .selection, .pickers, .fields, .banners, .lists, .tags, .cards, .emptyStates, .progress]
         }
     }
 
@@ -44,7 +44,7 @@ enum GallerySection: String, CaseIterable, Hashable {
 enum GalleryPage: String, CaseIterable, Hashable {
     case colours, spacing, radii, sizes, type, materials
     case icons, images, textures, wallpapers
-    case appearance, backdrops, buttons, selection, pickers, fields, banners, lists, tags, cards, emptyStates, progress
+    case appearance, tints, backdrops, buttons, selection, pickers, fields, banners, lists, tags, cards, emptyStates, progress
 
     var title: LocalizedStringKey {
         switch self {
@@ -59,6 +59,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .textures: "Textures"
         case .wallpapers: "Wallpapers"
         case .appearance: "Appearance"
+        case .tints: "Tints and accents"
         case .backdrops: "Backdrops"
         case .buttons: "Buttons"
         case .selection: "Checkboxes and toggles"
@@ -86,6 +87,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .textures: "Every repeating pattern, by material"
         case .wallpapers: "Full-size: generated, and photos an app copies in"
         case .appearance: "AppearancePicker, .appearance(_:)"
+        case .tints: "Tint, .accent(.counter)"
         case .backdrops: "Textures and wallpapers together"
         case .buttons: "ButtonPrimary, ButtonSecondary, ActionBar"
         case .pickers: "SegmentedControlGlass, RadioList, StepperJump"
@@ -114,6 +116,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .textures: TexturesPage()
         case .wallpapers: WallpapersPage()
         case .appearance: AppearancePage()
+        case .tints: TintsPage()
         case .backdrops: BackdropsPage()
         case .buttons: ButtonsPage()
         case .selection: SelectionPage()
