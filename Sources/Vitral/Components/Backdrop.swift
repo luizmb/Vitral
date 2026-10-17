@@ -23,6 +23,12 @@ public enum BackdropStyle: Sendable {
     case busFloor
     /// Soft colour fields from a palette, corner to corner.
     case mesh([ColorToken])
+    /// Northern lights: curtains of colour over a sky, a pale dawn by day and starry at night.
+    case aurora([ColorToken] = [.washGreen, .washTeal, .washViolet])
+    /// Large soft pools of colour overlapping on the backdrop.
+    case glow([ColorToken] = [.washViolet, .washPink, .accent, .washTeal])
+    /// Layered hills of one colour, deeper toward the bottom, each shadowing the one behind.
+    case waves(ColorToken = .accent)
     /// One of Vitral's textures, tiled.
     case texture(Texture)
     /// A picture: tiled at its own size (a texture), or filling the space and cropped (a photo).
@@ -68,6 +74,12 @@ public struct Backdrop: View {
             case let .mesh(palette):
                 Color(.backdrop)
                 MeshBackdrop(palette: palette)
+            case let .aurora(palette):
+                Aurora(palette: palette)
+            case let .glow(palette):
+                Glow(palette: palette)
+            case let .waves(colour):
+                Waves(colour: colour)
             case let .texture(texture):
                 Image(texture).resizable(resizingMode: .tile)
                 if !texture.followsAppearance {
