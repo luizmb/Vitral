@@ -17,6 +17,7 @@ struct GalleryApp: App {
                     .navigationDestination(for: GallerySection.self) { SectionPage(section: $0).galleryChrome($model.appearance) }
                     .navigationDestination(for: GalleryPage.self) { $0.view.galleryChrome($model.appearance) }
                     .navigationDestination(for: GlassShowcaseRoute.self) { GlassShowcasePage(route: $0).galleryChrome($model.appearance) }
+                    .navigationDestination(for: WorkspaceRoute.self) { WorkspaceSample(route: $0).galleryChrome($model.appearance) }
             }
             .appearance(model.appearance)
             .environment(model)

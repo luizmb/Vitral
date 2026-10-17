@@ -26,7 +26,7 @@ enum GallerySection: String, CaseIterable, Hashable {
         switch self {
         case .tokens: [.colours, .spacing, .radii, .sizes, .type, .materials]
         case .resources: [.icons, .images, .textures, .wallpapers]
-        case .components: [.appearance, .tints, .code, .carousel, .backdrops, .buttons, .selection, .pickers, .fields, .banners, .lists, .tags, .cards, .emptyStates, .progress, .overlays]
+        case .components: [.appearance, .tints, .code, .carousel, .backdrops, .buttons, .selection, .pickers, .fields, .banners, .lists, .tags, .cards, .emptyStates, .progress, .overlays, .workspace]
         }
     }
 
@@ -44,7 +44,7 @@ enum GallerySection: String, CaseIterable, Hashable {
 enum GalleryPage: String, CaseIterable, Hashable {
     case colours, spacing, radii, sizes, type, materials
     case icons, images, textures, wallpapers
-    case appearance, tints, code, carousel, backdrops, buttons, selection, pickers, fields, banners, lists, tags, cards, emptyStates, progress, overlays
+    case appearance, tints, code, carousel, backdrops, buttons, selection, pickers, fields, banners, lists, tags, cards, emptyStates, progress, overlays, workspace
 
     var title: LocalizedStringKey {
         switch self {
@@ -74,6 +74,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .emptyStates: "Empty and error states"
         case .progress: "Progress"
         case .overlays: "Overlays"
+        case .workspace: "Workspace"
         }
     }
 
@@ -92,7 +93,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .appearance: "AppearancePicker, .appearance(_:)"
         case .tints: "Tint, .accent(.counter)"
         case .code: "CodeBlock, SyntaxTheme, .code"
-        case .carousel: "Carousel, PageDots"
+        case .carousel: "Carousel, PageDots, SegmentedPages"
         case .backdrops: "Textures and wallpapers together"
         case .buttons: "ButtonPrimary, ButtonSecondary, ActionBar"
         case .pickers: "SegmentedControlGlass, RadioList, StepperJump"
@@ -105,6 +106,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .emptyStates: "EmptyState, ErrorScreen"
         case .progress: "ProgressPanel, .progressOverlay"
         case .overlays: "Overlay: glass over what's behind"
+        case .workspace: "Panels beside the content, Xcode's way"
         }
     }
 
@@ -137,6 +139,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .emptyStates: EmptyStatesPage()
         case .progress: ProgressPage()
         case .overlays: OverlaysPage()
+        case .workspace: WorkspacePage()
         }
     }
 }

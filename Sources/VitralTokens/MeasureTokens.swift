@@ -37,4 +37,8 @@ public enum Size {
     /// The widest a small floating panel grows (progress, a short message): it reads as one
     /// thought, not a page.
     public static let floatingPanel = 320.0
+    /// The least a workspace leaves its content when panels dock beside it.
+    public static let workspaceContent = 400.0
+    /// Below this width a workspace shows its panels as sheets.
+    public static let workspaceSheets = 600.0
 }

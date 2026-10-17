@@ -31,6 +31,13 @@ struct CarouselPage: View {
             LabelledGroup("Carousel(style: .flip)") {
                 CarouselSample(selection: $model.flipPage, style: .flip)
             }
+            LabelledGroup("SegmentedPages(selection:, showsTitles: true)") {
+                SegmentedPages(selection: $model.segmentedPage, showsTitles: true) { page in
+                    WorkspaceInspector(page: page)
+                }
+                .frame(height: 260)
+                .glassSurface(cornerRadius: Radius.card)
+            }
         }
     }
 }
