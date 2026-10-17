@@ -101,6 +101,7 @@ illustration for a state, use a symbol.
 | Paging | `Carousel` (`.slide`, `.flip`), `PageDots` (the native page control on iOS), `SegmentedPages` |
 | Workspace | `Workspace` (`.leading`, `.trailing`, `.bottom`, optionally with `pages:`), `PanelSize`, `PanelToggle`, `.workspaceToolbar`, `.panelAnimation`, `.panelTransition` |
 | Code | `CodeBlock`, `CodeSpan`, `SyntaxTheme` (`.neon`), `TypeToken.code` |
+| Edges | `EdgeFade` (a soft fade where content runs under a bar) |
 | Overlays | `Overlay` (glass over what's behind, content at a placement, `obscuring:` blur and dim), `.overlay(isPresented:)`, `.overlay(item:)`, `.progressOverlay(_:)` |
 | Backdrops | `Backdrop`: patterns (grid, dots, guilloche), drawn materials (`.busFloor(angle:)`, `.wood`, …), textures, aurora, glow, waves, laser, contours, fractal, images |
 
