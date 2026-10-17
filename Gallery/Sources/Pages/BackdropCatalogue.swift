@@ -54,7 +54,7 @@ enum BackdropCatalogue {
                     Entry(title: ".grid", key: "grid", style: .grid()),
                     Entry(title: ".grid, zoomed out", key: "grid, zoomed out", style: .grid(scale: 0.3)),
                     Entry(title: ".dots", key: "dots", style: .dots()),
-                    Entry(title: ".laserCurves", key: "laserCurves", style: .laserCurves()),
+                    Entry(title: ".guilloche", key: "guilloche", style: .guilloche()),
                     Entry(title: ".paper", key: "paper", style: .paper)
                 ])
             ]
@@ -68,7 +68,13 @@ enum BackdropCatalogue {
             Entry(title: ".glow", key: "glow", style: .glow()),
             Entry(title: ".glow, sunset", key: "glow, sunset", style: .glow([.washAmber, .washPink, .danger])),
             Entry(title: ".waves", key: "waves", style: .waves()),
-            Entry(title: ".waves, violet", key: "waves, violet", style: .waves(.washViolet))
+            Entry(title: ".waves, violet", key: "waves, violet", style: .waves(.washViolet)),
+            Entry(title: ".laser", key: "laser", style: .laser()),
+            Entry(title: ".laser, violet", key: "laser, violet", style: .laser([.washViolet, .washPink])),
+            Entry(title: ".contours", key: "contours", style: .contours()),
+            Entry(title: ".contours, dusk", key: "contours, dusk", style: .contours([.washViolet, .washPink, .washAmber, .washViolet])),
+            Entry(title: ".fractal", key: "fractal", style: .fractal()),
+            Entry(title: ".fractal, ember", key: "fractal, ember", style: .fractal([.fixedBlack, .counterAccent, .washAmber, .fixedCream]))
         ]),
         Shelf(title: "photos", entries: Wallpaper.all.map { Entry(title: $0.name, key: $0.showcaseName, style: $0.backdrop) }),
         Shelf(title: "plain", entries: [Entry(title: ".plain", key: "plain", style: .plain)])

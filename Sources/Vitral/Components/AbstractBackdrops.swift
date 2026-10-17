@@ -189,3 +189,235 @@ struct Waves: View {
         }
     }
 }
+
+/// Light trails: thin strands flowing in a band across the screen, each its own wave within the
+/// band, a few glowing. At night they add up to light on a dark ground where they cross; by day
+/// they're fine inked strands on the backdrop.
+struct Laser: View {
+    static let strands = 170
+
+    let palette: [ColorToken]
+
+    @Environment(\.colorScheme) private var colorScheme
+
+    var isNight: Bool { colorScheme == .dark }
+
+    var body: some View {
+        Canvas { context, size in
+            var lines = context
+            lines.blendMode = isNight ? .plusLighter : .normal
+            var glow = context
+            glow.blendMode = isNight ? .plusLighter : .normal
+            glow.addFilter(.blur(radius: 5))
+            for index in 0 ..< (palette.isEmpty ? 0 : Laser.strands) {
+                let strand = Laser.strand(index, in: size)
+                let colour = palette[index % palette.count]
+                lines.stroke(
+                    strand,
+                    with: .color(Color(colour.opacity((isNight ? 0.3 : 0.16) + (isNight ? 0.45 : 0.24) * scatter(index, 91)))),
+                    lineWidth: 0.4 + scatter(index, 92) * 1.1
+                )
+                if index.isMultiple(of: 5) {
+                    glow.stroke(strand, with: .color(Color(colour.opacity(isNight ? 0.3 : 0.12))), lineWidth: 3)
+                }
+            }
+        }
+        .background(isNight ? Color(.fixedBlack) : Color(.backdrop))
+        .drawingGroup()
+    }
+
+    /// One strand: the band runs from the upper left to the lower right in a long wave; each
+    /// strand sits at its own place across the band, with a ripple of its own.
+    static func strand(_ index: Int, in size: CGSize) -> Path {
+        Path { path in
+            path.addLines(stride(from: -10.0, through: size.width + 10, by: 6).map { x in
+                CGPoint(x: x, y: height(index, at: x / max(size.width, 1), in: size))
+            })
+        }
+    }
+
+    static func height(_ index: Int, at along: Double, in size: CGSize) -> Double {
+        size.height * (0.22 + 0.34 * along)
+            + sin(along * .pi * 1.6 + 0.6) * size.height * 0.07
+            + (scatter(index, 93) * 2 - 1) * size.height * (0.1 + 0.06 * sin(along * .pi * 2 + scatter(index, 94) * 3))
+            + sin(along * .pi * (3 + 5 * scatter(index, 95)) + scatter(index, 96) * 6) * size.height * 0.025 * scatter(index, 97)
+    }
+}
+
+/// Sculpted hills, back to front, each a colour of the palette with fine lines following its
+/// curve, casting a soft shadow on the one behind.
+struct Contours: View {
+    static let layers = 7
+    static let lines = 16
+
+    let palette: [ColorToken]
+
+    var body: some View {
+        Canvas { context, size in
+            var layered = context
+            layered.addFilter(.shadow(color: Color(ColorToken.fixedBlack.opacity(0.28)), radius: 10, y: -2))
+            for layer in 0 ..< (palette.isEmpty ? 0 : Contours.layers) {
+                let colour = Color(palette[layer % palette.count])
+                layered.fill(
+                    Contours.hill(layer, offset: 0, closed: true, in: size),
+                    with: .linearGradient(
+                        Gradient(colors: [colour, colour.mix(with: .black, by: 0.2)]),
+                        startPoint: CGPoint(x: 0, y: Contours.top(layer, in: size)),
+                        endPoint: CGPoint(x: size.width, y: size.height)
+                    )
+                )
+                for line in 1 ... Contours.lines {
+                    context.stroke(
+                        Contours.hill(layer, offset: Double(line) * size.height * 0.011, closed: false, in: size),
+                        with: .color(Color(ColorToken.fixedWhite.opacity(line.isMultiple(of: 2) ? 0.22 : 0.12))),
+                        lineWidth: 0.6
+                    )
+                }
+            }
+        }
+        .background(Color(palette.first ?? .backdrop))
+        .drawingGroup()
+    }
+
+    static func top(_ layer: Int, in size: CGSize) -> Double {
+        size.height * (0.04 + 0.13 * Double(layer))
+    }
+
+    /// A hill's crest, `offset` below it: two long waves crossing, so no two hills match.
+    static func crest(_ layer: Int, at x: Double, offset: Double, in size: CGSize) -> Double {
+        top(layer, in: size) + offset * (1 + 0.6 * sin(x / max(size.width, 1) * .pi * 2 + scatter(layer, 81) * 6))
+            + sin(x / max(size.width, 1) * .pi * (1.2 + scatter(layer, 82)) + scatter(layer, 83) * 6) * size.height * 0.07
+            + sin(x / max(size.width, 1) * .pi * (2.6 + scatter(layer, 84) * 2) + scatter(layer, 85) * 6) * size.height * 0.03
+    }
+
+    static func hill(_ layer: Int, offset: Double, closed: Bool, in size: CGSize) -> Path {
+        Path { path in
+            path.addLines(stride(from: 0.0, through: size.width + 4, by: 4).map { x in
+                CGPoint(x: x, y: crest(layer, at: x, offset: offset, in: size))
+            })
+            if closed {
+                path.addLine(to: CGPoint(x: size.width, y: size.height))
+                path.addLine(to: CGPoint(x: 0, y: size.height))
+                path.closeSubpath()
+            }
+        }
+    }
+}
+
+/// A Julia set (c = −0.8 + 0.156i): each point coloured by how fast it escapes, smoothly, through
+/// the palette; the set itself in the palette's first colour, darkened. Computed small and drawn
+/// smoothed: a few milliseconds, once.
+struct Fractal: View {
+    static let width = 240
+
+    let palette: [ColorToken]
+
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        GeometryReader { proxy in
+            Fractal.image(
+                width: Fractal.width,
+                height: min(Int(Double(Fractal.width) * proxy.size.height / max(proxy.size.width, 1)), Fractal.width * 3),
+                palette: palette.map { colorScheme == .dark ? $0.dark : $0.light }
+            )
+            .map { image in
+                Image(decorative: image, scale: 1)
+                    .resizable()
+                    .interpolation(.high)
+                    .frame(width: proxy.size.width, height: proxy.size.height)
+            }
+        }
+    }
+
+    static func image(width: Int, height: Int, palette: [RGBA]) -> CGImage? {
+        CGDataProvider(data: Data(pixels(width: width, height: max(height, 1), palette: palette)) as CFData).flatMap { provider in
+            CGImage(
+                width: width,
+                height: max(height, 1),
+                bitsPerComponent: 8,
+                bitsPerPixel: 32,
+                bytesPerRow: width * 4,
+                space: CGColorSpace(name: CGColorSpace.sRGB) ?? CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue),
+                provider: provider,
+                decode: nil,
+                shouldInterpolate: true,
+                intent: .defaultIntent
+            )
+        }
+    }
+
+    static func pixels(width: Int, height: Int, palette: [RGBA]) -> [UInt8] {
+        (0 ..< height).flatMap { row in
+            (0 ..< width).flatMap { column in
+                bytes(colour(escape: escape(point(column: column, row: row, width: width, height: height)), palette: palette))
+            }
+        }
+    }
+
+    /// The point of the plane a pixel shows: 3.2 wide, centred, the height in proportion.
+    static func point(column: Int, row: Int, width: Int, height: Int) -> SIMD2<Double> {
+        SIMD2<Double>(
+            (Double(column) / Double(width) - 0.5) * 3.2,
+            (Double(row) / Double(height) - 0.5) * 3.2 * Double(height) / Double(width)
+        )
+    }
+
+    static let iterations = 64
+    static let c = SIMD2<Double>(-0.8, 0.156)
+
+    static func next(_ z: SIMD2<Double>) -> SIMD2<Double> {
+        SIMD2<Double>(z.x * z.x - z.y * z.y, 2 * z.x * z.y) + c
+    }
+
+    static func size(_ z: SIMD2<Double>) -> Double {
+        (z * z).sum()
+    }
+
+    /// How many steps `start` takes to escape, smoothed, or `nil` for a point of the set.
+    static func escape(_ start: SIMD2<Double>) -> Double? {
+        sequence(first: start, next: next)
+            .prefix(iterations)
+            .enumerated()
+            .first { size($0.element) > 4 }
+            .map { step in smooth(step: step.offset, at: step.element) }
+    }
+
+    /// The escape count made continuous, so the colours band smoothly.
+    static func smooth(step: Int, at z: SIMD2<Double>) -> Double {
+        max(Double(step) + 1 - log2(log(max(size(z).squareRoot(), 1.000_1))), 0)
+    }
+
+    /// How many escape steps one round of the palette takes: the colours cycle in bands
+    /// radiating from the set.
+    static let band = 9.0
+
+    /// The palette's colour at `escape`, going round it once every `band` steps, or its first
+    /// colour darkened for the set.
+    static func colour(escape: Double?, palette: [RGBA]) -> RGBA {
+        escape.map { along(($0 / band).truncatingRemainder(dividingBy: 1), palette: palette + palette.prefix(1)) } ?? darkened(palette.first ?? .black)
+    }
+
+    static func along(_ t: Double, palette: [RGBA]) -> RGBA {
+        palette.count < 2
+            ? (palette.first ?? .black)
+            : mix(
+                palette[min(Int(t * Double(palette.count - 1)), palette.count - 2)],
+                palette[min(Int(t * Double(palette.count - 1)), palette.count - 2) + 1],
+                t * Double(palette.count - 1) - Double(min(Int(t * Double(palette.count - 1)), palette.count - 2))
+            )
+    }
+
+    static func mix(_ a: RGBA, _ b: RGBA, _ t: Double) -> RGBA {
+        RGBA(red: a.red + (b.red - a.red) * t, green: a.green + (b.green - a.green) * t, blue: a.blue + (b.blue - a.blue) * t)
+    }
+
+    static func darkened(_ colour: RGBA) -> RGBA {
+        RGBA(red: colour.red * 0.25, green: colour.green * 0.25, blue: colour.blue * 0.25)
+    }
+
+    static func bytes(_ colour: RGBA) -> [UInt8] {
+        [colour.red, colour.green, colour.blue].map { UInt8(min(max($0, 0), 1) * 255) } + [255]
+    }
+}
