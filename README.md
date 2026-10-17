@@ -52,6 +52,27 @@ AppearancePicker(selection: $appearance)
 `Appearance` is a plain value in `VitralTokens`, so an app's state can hold the user's choice.
 Token colours, Vitral's images (dark wood included) and glass all follow the override.
 
+## Customising colour
+
+Every colour has a default from the tokens, and two ways to change it:
+
+- **The environment, for a whole area.** `.accent(_:)` sets the accent every control below is
+  marked with: buttons, checkboxes, toggles, tag toggles, action bars, progress bars, page dots
+  (`.primary` by default; `.counter`, or your own `AccentToken`). `.glassMaterial(_:)` sets the
+  glass every surface below is made of (`.veiled()` by default). Apply them to a screen, a section
+  or a single control.
+- **An init parameter, when the colour belongs to the content.** A tag's `style: .tint(.pink)`,
+  a banner's `style:` (presets, or `.custom`), a swatch's colour, a backdrop's palette, a code
+  block's `theme:`.
+
+```swift
+SettingsScreen()
+    .accent(.counter)              // every control in it, coral
+PageDots(ids, selection: $page)
+    .accent(AccentToken(base: .washViolet, top: .washViolet, bottom: .washViolet, glow: .accentGlow))
+Tag("Draft", style: .tint(.amber))
+```
+
 ## Icons and images
 
 SF Symbols are part of Vitral's vocabulary. `Glyph` names the symbols components draw by role
