@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+  <!-- A clear leaded window, waiting for its colours: nothing here yet. -->
+  <rect x="24" y="16" width="112" height="128" rx="56" ry="56" fill="#3B9BFF" fill-opacity="0.08" stroke="#8C8C99" stroke-opacity="0.55" stroke-width="4"/>
+  <path d="M80 18 L80 142 M26 80 L134 80 M40 40 L120 120 M120 40 L40 120" stroke="#8C8C99" stroke-opacity="0.35" stroke-width="2" stroke-dasharray="5 5"/>
+  <circle cx="80" cy="80" r="10" fill="#3B9BFF" fill-opacity="0.45"/>
+</svg>

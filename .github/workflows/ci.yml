@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  tokens-linux:
+    runs-on: ubuntu-latest
+    container: swift:6.3
+    steps:
+      - uses: actions/checkout@v4
+      - run: swift test
+
+  apple:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - run: swift test
+      - run: brew install xcodegen
+      - run: xcodegen generate
+        working-directory: Gallery
+      # Snapshot references only compare on the machine that recorded them, so the suite is
+      # skipped here (TEST_RUNNER_CI reaches the test process as CI); this still builds the
+      # Gallery and runs it.
+      - run: >
+          xcodebuild test -project VitralGallery.xcodeproj -scheme Gallery
+          -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max' -skipMacroValidation
+        working-directory: Gallery
+        env:
+          TEST_RUNNER_CI: "true"

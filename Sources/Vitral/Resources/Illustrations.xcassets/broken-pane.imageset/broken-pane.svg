@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+  <!-- A stained-glass window with one pane fallen out: something went wrong. -->
+  <rect x="24" y="16" width="112" height="128" rx="56" ry="56" fill="none" stroke="#8C8C99" stroke-opacity="0.55" stroke-width="4"/>
+  <path d="M80 18 L80 142 M26 80 L134 80" stroke="#8C8C99" stroke-opacity="0.55" stroke-width="3"/>
+  <path d="M30 76 C30 46 50 22 76 20 L76 76 Z" fill="#3B9BFF" fill-opacity="0.55"/>
+  <path d="M84 20 C110 22 130 46 130 76 L84 76 Z" fill="#FFB55A" fill-opacity="0.55"/>
+  <path d="M30 84 L76 84 L76 138 C50 134 30 112 30 84 Z" fill="#34C27A" fill-opacity="0.5"/>
+  <path d="M96 100 L120 92 L112 118 Z" fill="#FF6B5A" fill-opacity="0.75"/>
+  <path d="M104 132 L126 126 L118 146 Z" fill="#FF6B5A" fill-opacity="0.55"/>
+  <path d="M88 108 L94 120 L84 124 Z" fill="#FF6B5A" fill-opacity="0.45"/>
+</svg>

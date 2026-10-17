@@ -1,0 +1,52 @@
+{
+  "wallpapers": [
+    {
+      "name": "earthrise",
+      "file": "Images/earthrise.jpg",
+      "title": "Earthrise",
+      "kind": "photo",
+      "source": "NASA",
+      "url": "https://images.nasa.gov/details/as08-14-2383",
+      "authors": [
+        "Apollo 8 crew (William Anders), 1968"
+      ],
+      "license": "Public domain (NASA)"
+    },
+    {
+      "name": "blueMarble",
+      "file": "Images/blueMarble.jpg",
+      "title": "The Blue Marble",
+      "kind": "photo",
+      "source": "NASA",
+      "url": "https://images.nasa.gov/details/as17-148-22727",
+      "authors": [
+        "Apollo 17 crew, 1972"
+      ],
+      "license": "Public domain (NASA)"
+    },
+    {
+      "name": "aurora",
+      "file": "Images/aurora.jpg",
+      "title": "Earth's limb with an aurora",
+      "kind": "photo",
+      "source": "NASA",
+      "url": "https://images.nasa.gov/details/iss058e005282",
+      "authors": [
+        "Expedition 58 crew, ISS, 2019"
+      ],
+      "license": "Public domain (NASA)"
+    },
+    {
+      "name": "orbitalSunrise",
+      "file": "Images/orbitalSunrise.jpg",
+      "title": "An orbital sunrise",
+      "kind": "photo",
+      "source": "NASA",
+      "url": "https://images.nasa.gov/details/iss071e001425",
+      "authors": [
+        "Expedition 71 crew, ISS, 2024"
+      ],
+      "license": "Public domain (NASA)"
+    }
+  ]
+}
