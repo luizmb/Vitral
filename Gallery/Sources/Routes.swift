@@ -26,7 +26,7 @@ enum GallerySection: String, CaseIterable, Hashable {
         switch self {
         case .tokens: [.colours, .spacing, .radii, .sizes, .type, .materials]
         case .resources: [.icons, .images, .textures, .wallpapers]
-        case .components: [.backdrops, .buttons, .selection, .pickers, .fields, .banners, .lists, .tags, .cards, .emptyStates, .progress]
+        case .components: [.appearance, .backdrops, .buttons, .selection, .pickers, .fields, .banners, .lists, .tags, .cards, .emptyStates, .progress]
         }
     }
 
@@ -44,7 +44,7 @@ enum GallerySection: String, CaseIterable, Hashable {
 enum GalleryPage: String, CaseIterable, Hashable {
     case colours, spacing, radii, sizes, type, materials
     case icons, images, textures, wallpapers
-    case backdrops, buttons, selection, pickers, fields, banners, lists, tags, cards, emptyStates, progress
+    case appearance, backdrops, buttons, selection, pickers, fields, banners, lists, tags, cards, emptyStates, progress
 
     var title: LocalizedStringKey {
         switch self {
@@ -58,6 +58,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .images: "Images"
         case .textures: "Textures"
         case .wallpapers: "Wallpapers"
+        case .appearance: "Appearance"
         case .backdrops: "Backdrops"
         case .buttons: "Buttons"
         case .selection: "Checkboxes and toggles"
@@ -82,9 +83,10 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .materials: "Regular, clear, tinted glass"
         case .icons: "Glyphs, by role"
         case .images: "Illustrations for empty and error states"
-        case .textures: "Woods, stones, fabrics and metal, tiled"
-        case .wallpapers: "Photos an app copies in; not in the library"
-        case .backdrops: "Patterns, materials, textures, mesh"
+        case .textures: "Every repeating pattern, by material"
+        case .wallpapers: "Full-size: generated, and photos an app copies in"
+        case .appearance: "AppearancePicker, .appearance(_:)"
+        case .backdrops: "Textures and wallpapers together"
         case .buttons: "ButtonPrimary, ButtonSecondary, ActionBar"
         case .pickers: "SegmentedControlGlass, RadioList, StepperJump"
         case .fields: "FieldText, FieldSecure, FieldSearch"
@@ -111,6 +113,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .images: ImagesPage()
         case .textures: TexturesPage()
         case .wallpapers: WallpapersPage()
+        case .appearance: AppearancePage()
         case .backdrops: BackdropsPage()
         case .buttons: ButtonsPage()
         case .selection: SelectionPage()

@@ -18,4 +18,7 @@ public enum Glyph: String, CaseIterable, Hashable, Sendable {
     /// Clears a field.
     case clear = "xmark.circle.fill"
     case lock = "lock"
+    case appearanceSystem = "circle.lefthalf.filled"
+    case appearanceLight = "sun.max"
+    case appearanceDark = "moon"
 }

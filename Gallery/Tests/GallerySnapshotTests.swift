@@ -22,9 +22,9 @@ struct GallerySnapshotTests {
         snapshot(page.view, named: page.rawValue)
     }
 
-    @Test(arguments: BackdropsPage.samples.map(\.name))
+    @Test(arguments: BackdropCatalogue.drawn)
     func backdrop(_ name: String) {
-        let style = BackdropsPage.samples.first { $0.name == name }?.style ?? .plain
+        let style = BackdropCatalogue.style(named: name)
         snapshot(
             Panel { TagCloud(["Glass", "over", "the", "backdrop"]) }
                 .padding(Space.extraLarge)
@@ -50,6 +50,12 @@ struct GallerySnapshotTests {
                 .background { Backdrop(wallpaper?.backdrop ?? .plain) },
             named: "wallpaper-\(name)"
         )
+    }
+
+    /// A few showcases, one of each kind: every one would add megabytes of near-identical glass.
+    @Test(arguments: ["grid", "busFloor", "busFloor(45°)", "waves", "aurora", "glow", "texture(.denim)", "texture(.wood)", "wallpaper(earthrise)"])
+    func showcase(_ name: String) {
+        snapshot(GlassShowcasePage(route: GlassShowcaseRoute(name: name)), named: "showcase-\(name)")
     }
 
     @Test func home() {

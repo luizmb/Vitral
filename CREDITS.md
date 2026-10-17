@@ -4,7 +4,7 @@ Assets that ship inside Vitral.
 
 ## Textures
 
-Seamless tiles from [Poly Haven](https://polyhaven.com), CC0 1.0 (no attribution required; credited anyway), cut to 512 px for `BackdropStyle.texture(_:)`. The dark-mode tiles of `wood` and `woodPale` are darkened, the way a stain would.
+Seamless tiles from [Poly Haven](https://polyhaven.com), CC0 1.0 (no attribution required; credited anyway), cut to 512 px for `BackdropStyle.texture(_:)`. The dark-mode tiles of `wood` and `woodPale` are darkened, the way a stain would; the light `wood` tile is turned upright and its grain brought out (local contrast), to match.
 
 | Texture | Original | Author |
 |---|---|---|

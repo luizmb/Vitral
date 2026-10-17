@@ -155,7 +155,7 @@ struct MaterialsPage: View {
 
 /// Every rung from clear to regular, over one backdrop.
 struct MaterialLadder: View {
-    nonisolated static let backdrops: [(name: String, style: BackdropStyle)] = [("graph paper", .grid()), ("the bus floor", .busFloor), ("wood", .wood)]
+    nonisolated static let backdrops: [(name: String, style: BackdropStyle)] = [("graph paper", .grid()), ("the bus floor", .busFloor()), ("wood", .wood)]
 
     let backdrop: BackdropStyle
 

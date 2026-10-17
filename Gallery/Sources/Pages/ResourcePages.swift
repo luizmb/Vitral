@@ -55,41 +55,9 @@ struct Wallpaper: Sendable {
     var backdrop: BackdropStyle {
         .image(image)
     }
+
+    /// Its name in the glass showcase, apart from the backdrops' (there's an aurora of each).
+    var showcaseName: String { "wallpaper(\(name))" }
 }
 
-struct WallpapersPage: View {
-    var body: some View {
-        Page("Wallpapers") {
-            ForEach(Wallpaper.all, id: \.name) { wallpaper in
-                Card(LocalizedStringKey(wallpaper.title), subtitle: LocalizedStringKey(wallpaper.credit))
-                    .padding(Space.extraLarge)
-                    .padding(.vertical, Space.huge)
-                    .background { Backdrop(wallpaper.backdrop) }
-                    .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
-            }
-        }
-    }
-}
 
-struct TexturesPage: View {
-    var body: some View {
-        Page("Textures") {
-            ForEach(Texture.Family.allCases, id: \.self) { family in
-                LabelledGroup(LocalizedStringKey(family.rawValue)) {
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 64), spacing: Space.small)], spacing: Space.small) {
-                        ForEach(Texture.allCases.filter { $0.family == family }, id: \.self) { texture in
-                            Tag(Text(verbatim: texture.rawValue))
-                                .font(.caption2)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.6)
-                                .frame(maxWidth: .infinity, minHeight: 64, alignment: .bottomLeading)
-                                .padding(Space.extraSmall)
-                                .background { Backdrop(.texture(texture)) }
-                                .clipShape(RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
