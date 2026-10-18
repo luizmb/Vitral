@@ -25,7 +25,6 @@ Then depend on the `Vitral` product (or only `VitralTokens` outside Apple platfo
 
 ```swift
 import Vitral
-import VitralTokens
 
 Card("U-234 Inhalation", subtitle: "ICRP 137, Type S") {
     TagCloud(["Nuclear", "Inhalation"])
