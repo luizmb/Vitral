@@ -2,18 +2,12 @@ import SwiftUI
 import Vitral
 import VitralTokens
 
-/// One icon of the samples: a song, its colour and its initials.
+/// One icon of the samples: a song and its band.
 struct DemoIcon: Identifiable, Sendable {
     let id: Int
     let title: String
     let subtitle: String
-    let colour: ColorToken
 
-    var initials: String {
-        title.split(separator: " ").prefix(2).compactMap { $0.first.map(String.init) }.joined().uppercased()
-    }
-
-    static let colours: [ColorToken] = [.washTeal, .washViolet, .washPink, .washAmber, .washGreen, .accent]
     static let titles = [
         "Highway to Hell", "Hells Bells", "Back in Black", "Crazy Train", "Paranoid", "Iron Man",
         "Ace of Spades", "Smoke on the Water", "Black Night", "Run to the Hills", "The Trooper",
@@ -22,7 +16,7 @@ struct DemoIcon: Identifiable, Sendable {
     ]
 
     static let all = titles.enumerated().map { index, title in
-        DemoIcon(id: index, title: title, subtitle: "Band \(index % 4 + 1)", colour: colours[index % colours.count])
+        DemoIcon(id: index, title: title, subtitle: "Band \(index % 4 + 1)")
     }
 }
 
@@ -55,7 +49,7 @@ struct IconGroupPage: View {
                         tap: { model.tapIcon(icon.id) },
                         hold: { model.pickIcon(icon.id) }
                     ) {
-                        Swatch(icon.colour, label: Text(verbatim: icon.initials), diameter: Size.icon)
+                        Monogram(icon.title)
                     }
                 } header: {
                     HStack {
@@ -85,7 +79,7 @@ struct IconGroupPage: View {
                         IconTileAdd(Text("Add"), action: {})
                     case let .icon(icon):
                         IconTile(Text(verbatim: icon.title), tap: {}) {
-                            Swatch(icon.colour, label: Text(verbatim: icon.initials), diameter: Size.icon)
+                            Monogram(icon.title)
                         }
                     }
                 }

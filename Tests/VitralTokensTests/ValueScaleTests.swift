@@ -1,5 +1,5 @@
 import Testing
-import VitralTokens
+@testable import VitralTokens
 
 @Suite struct ValueScaleTests {
     @Test func linearFractionsAndValuesRoundTrip() {
@@ -132,5 +132,19 @@ import VitralTokens
         #expect(gain.formatted(2) == "+6.0")
         #expect(gain.formatted(0.5) == "\u{2212}6.0")
         #expect(gain.formatted(0) == "−∞")
+    }
+}
+
+@Suite struct MonogramTests {
+    @Test func initialsAreTheFirstTwoWords() {
+        #expect(Initials.of("Highway to Hell") == "HT")
+        #expect(Initials.of("paranoid") == "P")
+        #expect(Initials.of("") == "")
+    }
+
+    @Test func aNameKeepsItsColour() {
+        #expect(ColorToken.stable(for: "AC/DC") == ColorToken.stable(for: "AC/DC"))
+        #expect(ColorToken.fnv1a("") == 0xCBF2_9CE4_8422_2325)
+        #expect(ColorToken.stable(for: "x", palette: []) == .inkMuted)
     }
 }

@@ -37,6 +37,16 @@ struct ButtonsPage: View {
                     }
                 }
             }
+            LabelledGroup("ToggleButtonLatched: a desk's mute and solo") {
+                Panel {
+                    HStack(spacing: Space.small) {
+                        ToggleButtonLatched(Text(verbatim: "M"), isOn: .constant(true), accessibilityLabel: Text("Mute"))
+                        ToggleButtonLatched(Text(verbatim: "S"), isOn: .constant(true), lit: .warning, litInk: .fixedBlack, accessibilityLabel: Text("Solo"))
+                        ToggleButtonLatched(Text(verbatim: "M"), isOn: .constant(false), accessibilityLabel: Text("Mute"))
+                        ToggleButtonLatched(Text(verbatim: "S"), isOn: .constant(false), lit: .warning, litInk: .fixedBlack, accessibilityLabel: Text("Solo"))
+                    }
+                }
+            }
             LabelledGroup("ActionBar") {
                 Panel(padding: 0) {
                     ActionBar {
@@ -154,6 +164,19 @@ struct TagsPage: View {
                         SwatchStack([.accent, .accentTop, .warning, .danger, .inkMuted, .ink, .inkFaint, .accentBottom])
                         SwatchStack(items: [SwatchItem(.accent, label: "HH"), SwatchItem(.danger, label: "BB"), SwatchItem(.warning, label: "TN")], diameter: 38)
                         SwatchStack(items: [], diameter: 38)
+                    }
+                }
+            }
+            LabelledGroup("Monogram and SwatchStack(monograms:): a name's own colour") {
+                Panel {
+                    VStack(alignment: .leading, spacing: Space.medium) {
+                        HStack(spacing: Space.small) {
+                            Monogram("AC/DC", diameter: 44)
+                            Monogram("Black Sabbath", diameter: 44)
+                            Monogram("Deep Purple", diameter: 44)
+                            Monogram("Iron Maiden", diameter: 44)
+                        }
+                        SwatchStack(monograms: ["Highway to Hell", "Paranoid", "Smoke on the Water", "The Trooper"])
                     }
                 }
             }
