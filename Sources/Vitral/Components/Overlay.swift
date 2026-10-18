@@ -46,7 +46,7 @@ public struct Overlay<Content: View>: View {
         ZStack(alignment: placement) {
             Rectangle()
                 .fill(.clear)
-                .glassEffect(.token(material), in: Rectangle())
+                .glassLayer(material, in: Rectangle())
                 .overlay { Color(ColorToken.fixedBlack.opacity(obscuring.dim)) }
                 .ignoresSafeArea()
                 // Swallows touches: what's underneath isn't to be used now.
