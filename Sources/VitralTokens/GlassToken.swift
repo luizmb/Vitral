@@ -1,4 +1,4 @@
-/// A glass material: how much of what's behind shows through, an optional tint, and whether it
+/// A glass glass: how much of what's behind shows through, an optional tint, and whether it
 /// reacts to touch.
 public struct GlassToken: Hashable, Sendable {
     public enum Variant: Hashable, Sendable {

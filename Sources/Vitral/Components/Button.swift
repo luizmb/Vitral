@@ -123,7 +123,7 @@ public struct ButtonSecondary: View {
     /// finish it takes as it is.
     var resolvedFinish: FinishToken? {
         finish ?? controlFinish.map { shared in
-            if case .aqua = shared { .aqua(.fixedSilver) } else { shared }
+            if case .gel = shared.fill, shared.glass == nil { .aqua(.fixedSilver) } else { shared }
         }
     }
 
@@ -159,7 +159,7 @@ struct FinishButtonStyle: ButtonStyle {
             .foregroundStyle(ink)
             // Light text on a glossy colour sinks into the gloss; a soft shadow under it keeps it
             // readable, as Aqua's labels did.
-            .shadow(color: Color(ColorToken.fixedBlack.opacity(ink == .onAccent && !finish.effects.isEmpty ? 0.35 : 0)), radius: 0.5, y: 1)
+            .shadow(color: Color(ColorToken.fixedBlack.opacity(ink == .onAccent && !finish.sheen.isNone ? 0.35 : 0)), radius: 0.5, y: 1)
             // The label leaves the glass style its vertical padding; this finish adds the same.
             .padding(.vertical, Space.medium / 2)
             .padding(.horizontal, Space.medium)

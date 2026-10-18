@@ -50,7 +50,7 @@ struct TintedGlass: View {
     var body: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: Space.small)], spacing: Space.small) {
             ForEach(Tint.allCases, id: \.self) { tint in
-                Panel(material: GlassToken.clear.tinted(tint.surface), padding: Space.medium) {
+                Panel(glass: GlassToken.clear.tinted(tint.surface), padding: Space.medium) {
                     Text(verbatim: tint.rawValue).font(.bodyStrong).foregroundStyle(tint.ink)
                 }
             }

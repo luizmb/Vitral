@@ -429,9 +429,9 @@ struct OverlaysPage: View {
                     }
                     .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
             }
-            LabelledGroup("Overlay(placement: .topTrailing, material: .clear)") {
+            LabelledGroup("Overlay(placement: .topTrailing, glass: .clear)") {
                 OverlaySample(title: "Inhalation", subtitle: "Twelve compartments")
-                    .overlay(isPresented: true, placement: .topTrailing, material: .clear) {
+                    .overlay(isPresented: true, placement: .topTrailing, glass: .clear) {
                         Tag("Draft", icon: Image(.info), style: .tint(.amber))
                     }
                     .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))

@@ -17,7 +17,7 @@ struct GlassShowcasePage: View {
                 LabelledGroup(LocalizedStringKey(rung.name)) {
                     GlassSampler()
                 }
-                .glassMaterial(rung.token)
+                .surfaceGlass(rung.token)
             }
         }
     }

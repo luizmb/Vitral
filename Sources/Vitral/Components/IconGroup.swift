@@ -13,7 +13,7 @@ public struct IconGroup<Item: Identifiable, Tile: View, Header: View, Footer: Vi
     let rows: Int
     let tileHeight: Double
     let showsPageControl: Bool
-    let material: GlassToken?
+    let glass: GlassToken?
     let items: (Int) -> [Item]
     let tile: (Item) -> Tile
     let header: Header
@@ -33,7 +33,7 @@ public struct IconGroup<Item: Identifiable, Tile: View, Header: View, Footer: Vi
         rows: Int = 3,
         tileHeight: Double = Size.iconTile,
         showsPageControl: Bool = true,
-        material: GlassToken? = nil,
+        glass: GlassToken? = nil,
         items: @escaping (Int) -> [Item],
         @ViewBuilder tile: @escaping (Item) -> Tile,
         @ViewBuilder header: () -> Header = { EmptyView() },
@@ -45,7 +45,7 @@ public struct IconGroup<Item: Identifiable, Tile: View, Header: View, Footer: Vi
         self.rows = rows
         self.tileHeight = tileHeight
         self.showsPageControl = showsPageControl
-        self.material = material
+        self.glass = glass
         self.items = items
         self.tile = tile
         self.header = header()
@@ -60,7 +60,7 @@ public struct IconGroup<Item: Identifiable, Tile: View, Header: View, Footer: Vi
         rows: Int = 3,
         tileHeight: Double = Size.iconTile,
         showsPageControl: Bool = true,
-        material: GlassToken? = nil,
+        glass: GlassToken? = nil,
         @ViewBuilder tile: @escaping (Item) -> Tile,
         @ViewBuilder header: () -> Header = { EmptyView() },
         @ViewBuilder footer: () -> Footer = { EmptyView() }
@@ -73,7 +73,7 @@ public struct IconGroup<Item: Identifiable, Tile: View, Header: View, Footer: Vi
             rows: rows,
             tileHeight: tileHeight,
             showsPageControl: showsPageControl,
-            material: material,
+            glass: glass,
             items: { index in Array(all.dropFirst(index * perPage).prefix(perPage)) },
             tile: tile,
             header: header,
@@ -111,7 +111,7 @@ public struct IconGroup<Item: Identifiable, Tile: View, Header: View, Footer: Vi
                     .padding(.bottom, Space.medium)
             }
         }
-        .glassSurface(material, cornerRadius: Radius.sheet)
+        .glassSurface(glass, cornerRadius: Radius.sheet)
     }
 
     var pager: some View {

@@ -31,13 +31,13 @@ public struct Obscuring: Hashable, Sendable {
 /// overlay only places it.
 public struct Overlay<Content: View>: View {
     let placement: Alignment
-    let material: GlassToken
+    let glass: GlassToken
     let obscuring: Obscuring
     let content: Content
 
-    public init(placement: Alignment = .center, material: GlassToken = .scrim, obscuring: Obscuring = .none, @ViewBuilder content: () -> Content) {
+    public init(placement: Alignment = .center, glass: GlassToken = .scrim, obscuring: Obscuring = .none, @ViewBuilder content: () -> Content) {
         self.placement = placement
-        self.material = material
+        self.glass = glass
         self.obscuring = obscuring
         self.content = content()
     }
@@ -46,7 +46,7 @@ public struct Overlay<Content: View>: View {
         ZStack(alignment: placement) {
             Rectangle()
                 .fill(.clear)
-                .glassLayer(material, in: Rectangle())
+                .glassLayer(glass, in: Rectangle())
                 .overlay { Color(ColorToken.fixedBlack.opacity(obscuring.dim)) }
                 .ignoresSafeArea()
                 // Swallows touches: what's underneath isn't to be used now.
@@ -69,14 +69,14 @@ public extension View {
     func overlay<Content: View>(
         isPresented: Bool,
         placement: Alignment = .center,
-        material: GlassToken = .scrim,
+        glass: GlassToken = .scrim,
         obscuring: Obscuring = .none,
         @ViewBuilder content: () -> Content
     ) -> some View {
         blur(radius: isPresented ? obscuring.blur : 0)
             .overlay {
                 if isPresented {
-                    Overlay(placement: placement, material: material, obscuring: obscuring, content: content)
+                    Overlay(placement: placement, glass: glass, obscuring: obscuring, content: content)
                 }
             }
     }
@@ -85,14 +85,14 @@ public extension View {
     func overlay<Item, Content: View>(
         item: Item?,
         placement: Alignment = .center,
-        material: GlassToken = .scrim,
+        glass: GlassToken = .scrim,
         obscuring: Obscuring = .none,
         @ViewBuilder content: (Item) -> Content
     ) -> some View {
         blur(radius: item == nil ? 0 : obscuring.blur)
             .overlay {
                 if let item {
-                    Overlay(placement: placement, material: material, obscuring: obscuring) { content(item) }
+                    Overlay(placement: placement, glass: glass, obscuring: obscuring) { content(item) }
                 }
             }
     }

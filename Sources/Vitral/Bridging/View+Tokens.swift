@@ -12,20 +12,20 @@ public extension View {
         font(Font(token))
     }
 
-    /// Glass cut to a rounded rectangle with continuous corners: `material`, or the environment's
-    /// `glassMaterial` when not given.
-    func glassSurface(_ material: GlassToken? = nil, cornerRadius: Double = Radius.large) -> some View {
-        modifier(GlassShape(material: material, shape: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)))
+    /// Glass cut to a rounded rectangle with continuous corners: `glass`, or the environment's
+    /// `surfaceGlass` when not given.
+    func glassSurface(_ glass: GlassToken? = nil, cornerRadius: Double = Radius.large) -> some View {
+        modifier(GlassShape(glass: glass, shape: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)))
     }
 
-    /// Glass cut to a capsule: `material`, or the environment's `glassMaterial` when not given.
-    func glassCapsule(_ material: GlassToken? = nil) -> some View {
-        modifier(GlassShape(material: material, shape: Capsule()))
+    /// Glass cut to a capsule: `glass`, or the environment's `surfaceGlass` when not given.
+    func glassCapsule(_ glass: GlassToken? = nil) -> some View {
+        modifier(GlassShape(glass: glass, shape: Capsule()))
     }
 
     /// The glass every Vitral surface under this view is made of, unless it asks for its own.
-    func glassMaterial(_ material: GlassToken) -> some View {
-        environment(\.glassMaterial, material)
+    func surfaceGlass(_ glass: GlassToken) -> some View {
+        environment(\.surfaceGlass, glass)
     }
 
     /// The accent every Vitral control under this view is marked with: `.primary` unless set.
@@ -40,42 +40,42 @@ public extension View {
 }
 
 public extension EnvironmentValues {
-    /// The glass Vitral's surfaces are made of: `veiled()` unless set (`.glassMaterial(_:)`).
-    @Entry var glassMaterial: GlassToken = .veiled()
+    /// The glass Vitral's surfaces are made of: `veiled()` unless set (`.surfaceGlass(_:)`).
+    @Entry var surfaceGlass: GlassToken = .veiled()
     /// The accent Vitral's controls are marked with: `.primary` unless set (`.accent(_:)`).
     @Entry var accent: AccentToken = .primary
 }
 
-/// Glass in a shape, from the given material or the environment's.
+/// Glass in a shape, from the given glass or the environment's.
 struct GlassShape<S: Shape>: ViewModifier {
-    let material: GlassToken?
+    let glass: GlassToken?
     let shape: S
 
-    @Environment(\.glassMaterial) private var environmentMaterial
+    @Environment(\.surfaceGlass) private var environmentGlass
 
     func body(content: Content) -> some View {
-        content.glassLayer(material ?? environmentMaterial, in: shape)
+        content.glassLayer(glass ?? environmentGlass, in: shape)
     }
 }
 
 extension View {
-    /// `material` behind this view, cut to `shape`: the system's glass, or for `sheer` its tint
+    /// `glass` behind this view, cut to `shape`: the system's glass, or for `sheer` its tint
     /// and a sheen drawn over the backdrop, nothing behind blurred.
-    func glassLayer(_ material: GlassToken, in shape: some Shape) -> some View {
-        modifier(GlassMaterial(material: material, shape: shape))
+    func glassLayer(_ glass: GlassToken, in shape: some Shape) -> some View {
+        modifier(GlassLayer(glass: glass, shape: shape))
     }
 }
 
-struct GlassMaterial<S: Shape>: ViewModifier {
-    let material: GlassToken
+struct GlassLayer<S: Shape>: ViewModifier {
+    let glass: GlassToken
     let shape: S
 
     // One path for every variant: a branch around `glassEffect` blanked whole
     // `GlassEffectContainer`s. `sheer` is the system's identity glass with Vitral's layer behind.
     func body(content: Content) -> some View {
         content
-            .background { SheerGlass(tint: material.tint, shape: shape).opacity(material.variant == .sheer ? 1 : 0) }
-            .glassEffect(.token(material), in: shape)
+            .background { SheerGlass(tint: glass.tint, shape: shape).opacity(glass.variant == .sheer ? 1 : 0) }
+            .glassEffect(.token(glass), in: shape)
     }
 }
 

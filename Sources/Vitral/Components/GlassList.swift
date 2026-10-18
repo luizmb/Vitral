@@ -7,7 +7,7 @@ import VitralTokens
 /// change goes back out as an event (`selection`, `.onDelete`, `.onMove`, `.rowActions`), for the
 /// app's state to apply.
 ///
-/// Each row sits on the environment's glass (`.glassMaterial(_:)`); a list only draws the rows on
+/// Each row sits on the environment's glass (`.surfaceGlass(_:)`); a list only draws the rows on
 /// screen, so it stays cheap. A `NavigationLink` row shows no system chevron: give it
 /// `.disclosure()`, the same chevron as every other row.
 public struct GlassList<Selection: Hashable, Content: View>: View {

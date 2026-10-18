@@ -3,7 +3,7 @@ import Vitral
 import VitralTokens
 
 /// Every backdrop the Gallery shows, on shelves: textures (anything that repeats, a picture or
-/// drawn, by material) and wallpapers (anything that fills the screen once, generated or a photo).
+/// drawn, by glass) and wallpapers (anything that fills the screen once, generated or a photo).
 /// Backdrops are the two together.
 enum BackdropCatalogue {
     struct Entry: Sendable {
@@ -40,7 +40,7 @@ enum BackdropCatalogue {
         ]
     ]
 
-    /// Everything that repeats, by material.
+    /// Everything that repeats, by glass.
     nonisolated static let textures: [Shelf] =
         Texture.Family.allCases.map { family in
             Shelf(
@@ -90,7 +90,7 @@ enum BackdropCatalogue {
     }
 }
 
-/// Every repeating pattern, a picture or drawn, by material.
+/// Every repeating pattern, a picture or drawn, by glass.
 struct TexturesPage: View {
     var body: some View {
         Page("Textures") {

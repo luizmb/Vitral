@@ -18,18 +18,18 @@ public struct Hairline: View {
 
 /// Glass holding its content, padded.
 public struct Panel<Content: View>: View {
-    let material: GlassToken?
+    let glass: GlassToken?
     let cornerRadius: Double
     let padding: Double
     let content: Content
 
     public init(
-        material: GlassToken? = nil,
+        glass: GlassToken? = nil,
         cornerRadius: Double = Radius.card,
         padding: Double = Space.large,
         @ViewBuilder content: () -> Content
     ) {
-        self.material = material
+        self.glass = glass
         self.cornerRadius = cornerRadius
         self.padding = padding
         self.content = content()
@@ -39,7 +39,7 @@ public struct Panel<Content: View>: View {
         content
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .glassSurface(material, cornerRadius: cornerRadius)
+            .glassSurface(glass, cornerRadius: cornerRadius)
     }
 }
 

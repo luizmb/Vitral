@@ -57,7 +57,7 @@ public struct FieldContainer<Input: View>: View {
     let status: FieldStatus
     let input: Input
 
-    @Environment(\.glassMaterial) private var material
+    @Environment(\.surfaceGlass) private var glass
 
     public init(icon: Image? = nil, suffix: Text? = nil, status: FieldStatus = .normal, @ViewBuilder input: () -> Input) {
         self.icon = icon
@@ -84,7 +84,7 @@ public struct FieldContainer<Input: View>: View {
             }
             .padding(.horizontal, Space.medium + Space.extraSmall)
             .frame(minHeight: Size.hitTarget)
-            .glassSurface(material.tinted(status.style?.background ?? material.tint), cornerRadius: Radius.medium)
+            .glassSurface(glass.tinted(status.style?.background ?? glass.tint), cornerRadius: Radius.medium)
             .overlay {
                 status.style.map { style in
                     RoundedRectangle(cornerRadius: Radius.medium, style: .continuous)

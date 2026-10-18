@@ -109,7 +109,7 @@ struct RadiiPage: View {
             PanelList {
                 ForEach(Self.entries, id: \.name) { entry in
                     Row(LocalizedStringKey(entry.name), detail: Text("\(entry.value.formatted()) pt")) {
-                        Panel(material: .active, cornerRadius: entry.value, padding: 0) { EmptyView() }
+                        Panel(glass: .active, cornerRadius: entry.value, padding: 0) { EmptyView() }
                             .frame(width: Size.controlLarge, height: Size.controlLarge)
                     }
                     .padding(.vertical, Space.extraSmall)
@@ -160,7 +160,7 @@ struct MaterialsPage: View {
                 }
             }
             LabelledGroup("active") {
-                Panel(material: .active) { TagCloud(["Chosen", "glass"]) }
+                Panel(glass: .active) { TagCloud(["Chosen", "glass"]) }
             }
             LabelledGroup("FinishToken: what a control's surface is made of") {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 96), spacing: Space.medium)], spacing: Space.medium) {
