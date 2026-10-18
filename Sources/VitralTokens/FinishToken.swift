@@ -37,6 +37,16 @@ public enum FinishToken: Hashable, Sendable {
         }
     }
 
+    /// This finish with its glass replaced by `base`, its layers kept: how a primary button keeps
+    /// its accent under a glass finish.
+    public func replacingGlass(with base: FinishToken) -> FinishToken {
+        switch self {
+        case .glass: base
+        case let .layered(inner, effects): .layered(inner.replacingGlass(with: base), effects)
+        default: self
+        }
+    }
+
     /// Whether it's glass underneath (its layers are lighter, so it stays clear).
     public var isGlass: Bool {
         switch self {
