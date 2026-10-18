@@ -66,12 +66,18 @@ struct FillAndSheen<S: InsettableShape>: View {
     let shape: S
 
     var body: some View {
+        // `Color.clear` first, so a finish of glass alone (no fill, no sheen) still has the
+        // shape's size for the glass to be laid on: an empty stack has none, and draws nothing.
         ZStack {
+            Color.clear
             finish.fill.map { fill in
                 FillShape(fill: fill, shape: shape, edged: finish.glass == nil).opacity(finish.glass == nil ? 1 : finish.amount)
             }
             if !finish.sheen.isNone {
+                // A finish laid on glass shows `amount` of itself, its sheen included: a hint of
+                // Aqua is a hint of its gloss too, not the gloss at full strength.
                 SheenLayers(tone: finish.tone, sheen: finish.sheen, shape: shape)
+                    .opacity(finish.glass != nil && finish.fill != nil ? finish.amount : 1)
             }
         }
     }
@@ -97,7 +103,7 @@ struct FillShape<S: InsettableShape>: View {
                 .fill(LinearGradient(colors: [.chromeHighlight, .chromeMid, .chromeShadow, .chromeMid].map { Color($0) }, startPoint: .top, endPoint: .bottom))
                 .overlay { shape.strokeBorder(Color(.chromeShadow), lineWidth: 0.75) }
         case let .gel(colour):
-            GelBody(colour: colour, shape: shape, shadowed: edged)
+            GelBody(colour: colour, shape: shape)
         }
     }
 }
@@ -165,11 +171,10 @@ struct Rim<S: InsettableShape>: View {
 }
 
 /// Aqua's gel body: the colour darkening towards the top and lighter at the bottom, with the
-/// shadow a drop of gel casts when it stands on its own.
+/// shadow a drop of gel casts.
 struct GelBody<S: InsettableShape>: View {
     let colour: ColorToken
     let shape: S
-    let shadowed: Bool
 
     var body: some View {
         shape
@@ -180,6 +185,6 @@ struct GelBody<S: InsettableShape>: View {
                     endPoint: .bottom
                 )
             )
-            .shadow(color: Color(colour).mix(with: .black, by: 0.3).opacity(shadowed ? 0.45 : 0), radius: 3, y: 2)
+            .shadow(color: Color(colour).mix(with: .black, by: 0.3).opacity(0.45), radius: 3, y: 2)
     }
 }

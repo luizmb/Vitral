@@ -229,23 +229,29 @@ public struct Fader: View {
 
     var track: some View {
         GeometryReader { proxy in
-            // A clear surface takes the touches, the drawing behind it none: interactive glass on a
-            // thumb would answer them itself and swallow a double tap.
-            Rectangle()
-                .fill(.clear)
-                .contentShape(Rectangle())
-                .background {
-                    style.makeBody(configuration)
-                        .allowsHitTesting(false)
-                }
+            style.makeBody(configuration)
+                .frame(width: proxy.size.width, height: proxy.size.height)
+                // The drawing takes no touches (interactive glass on a thumb would answer them
+                // itself); a clear layer on top takes them all, so the fader's gestures get them.
+                .allowsHitTesting(false)
                 .overlay {
                     if labels == .inside {
                         titleAndValue.padding(.horizontal, Space.medium).allowsHitTesting(false)
                     }
                 }
-                .frame(width: proxy.size.width, height: proxy.size.height)
-                .gesture(drag(length: axis == .horizontal ? proxy.size.width : proxy.size.height))
-                .simultaneousGesture(TapGesture(count: 2).onEnded { reset() })
+                .overlay {
+                    Color.clear
+                        .contentShape(Rectangle())
+                        .gesture(drag(length: axis == .horizontal ? proxy.size.width : proxy.size.height), including: resetValue == nil ? .all : .subviews)
+                        // With a reset, the double tap comes first and the drag once it can't be
+                        // one: run side by side, the drag's last change could land after the
+                        // reset and undo it. A finger that moves starts the drag at once.
+                        .gesture(
+                            TapGesture(count: 2).onEnded { reset() }
+                                .exclusively(before: drag(length: axis == .horizontal ? proxy.size.width : proxy.size.height)),
+                            including: resetValue == nil ? .subviews : .all
+                        )
+                }
         }
         .frame(width: axis == .vertical ? style.breadth : nil, height: axis == .horizontal ? style.breadth : nil)
         .frame(maxWidth: axis == .horizontal ? .infinity : nil, maxHeight: axis == .vertical ? .infinity : nil)
