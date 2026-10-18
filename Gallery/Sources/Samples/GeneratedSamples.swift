@@ -388,6 +388,30 @@ enum GeneratedSamples {
             }
             .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
         """#,
+        #"ConversationPages.swift#MessageBubble, theirs and mine"#: #"""
+        VStack(spacing: Space.medium) {
+            MessageBubble(Text("What should the intro say about pure functions?"), author: Text("You"), side: .mine)
+            MessageBubble(
+                Text("Start from a bug a reader has had: a function that answered differently with the same input."),
+                author: Text("Assistant"),
+                side: .theirs
+            )
+            MessageBubble(Text("Good. Shorter?"), side: .mine)
+        }
+        """#,
+        #"ConversationPages.swift#Composer, with a microphone"#: #"""
+        Composer("Say something…", text: $model.chatDraft) {
+            Pill(isActive: model.chatListening, action: { model.chatListening.toggle() }) {
+                Image(systemName: model.chatListening ? "mic.fill" : "mic")
+                    .frame(width: Size.controlSmall, height: Size.controlSmall)
+            }
+        } send: {
+            model.chatDraft = ""
+        }
+        """#,
+        #"ConversationPages.swift#Composer, waiting for a reply"#: #"""
+        Composer("Say something…", text: .constant("Thanks!"), isBusy: true) {}
+        """#,
         #"FaderPages.swift#Glass, labels in every place"#: #"""
         Panel {
             VStack(spacing: Space.large) {

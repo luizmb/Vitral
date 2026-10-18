@@ -36,7 +36,7 @@ enum GallerySection: String, CaseIterable, Hashable {
         case .resources: [.icons, .images, .textures, .wallpapers]
         case .surfaces: [.finishes, .tints, .appearance, .backdrops, .overlays]
         case .controls: [.buttons, .selection, .pickers, .fields, .knobs, .faders]
-        case .collections: [.lists, .glassList, .cards, .iconGroups, .carousel, .tags]
+        case .collections: [.lists, .glassList, .cards, .iconGroups, .carousel, .tags, .conversation]
         case .feedback: [.banners, .emptyStates, .progress]
         case .layout: [.workspace, .code]
         }
@@ -60,7 +60,7 @@ enum GallerySection: String, CaseIterable, Hashable {
 enum GalleryPage: String, CaseIterable, Hashable {
     case colours, spacing, radii, sizes, type, materials
     case icons, images, textures, wallpapers
-    case appearance, tints, finishes, code, carousel, iconGroups, glassList, knobs, faders, backdrops, buttons, selection, pickers, fields, banners, lists, tags, cards, emptyStates, progress, overlays, workspace
+    case appearance, tints, finishes, code, carousel, iconGroups, glassList, conversation, knobs, faders, backdrops, buttons, selection, pickers, fields, banners, lists, tags, cards, emptyStates, progress, overlays, workspace
 
     var title: LocalizedStringKey {
         switch self {
@@ -80,6 +80,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .code: "Code"
         case .carousel: "Carousel"
         case .iconGroups: "Icon groups"
+        case .conversation: "Conversation"
         case .glassList: "GlassList"
         case .knobs: "Knobs"
         case .faders: "Faders"
@@ -117,6 +118,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .code: "CodeBlock, SyntaxTheme, .code"
         case .carousel: "Carousel, PageDots, SegmentedPages"
         case .iconGroups: "IconGroup, IconTile, IconTileAdd: a home screen's folder"
+        case .conversation: "MessageBubble, Composer"
         case .glassList: "GlassList, GlassSection (edge to edge or padded), Row, RowAction"
         case .knobs: "Knob, GlassKnobStyle, JogDial"
         case .faders: "Fader, GlassFaderStyle, ConsoleFaderStyle"
@@ -155,6 +157,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .code: CodePage()
         case .carousel: CarouselPage()
         case .iconGroups: IconGroupPage()
+        case .conversation: ConversationPage()
         case .glassList: GlassListPage()
         case .knobs: KnobsPage()
         case .faders: FadersPage()

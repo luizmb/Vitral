@@ -38,6 +38,8 @@ final class GalleryModel {
     var faders: [String: Double] = [:]
     var faderStarts: [String: Double] = [:]
     var iconPage = 0
+    var chatDraft = ""
+    var chatListening = false
     /// The sample whose code is shown over the Gallery.
     var shownSample: SampleCode?
     var pickedIcons: Set<Int> = []
