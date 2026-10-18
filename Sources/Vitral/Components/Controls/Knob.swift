@@ -154,8 +154,6 @@ public struct Knob: View {
 
     public var body: some View {
         GeometryReader { proxy in
-            // The drawing takes no touches (interactive glass would answer them itself); a clear
-            // disc on top takes them all.
             (style ?? environmentStyle).makeBody(
                 KnobConfiguration(
                     value: value,
@@ -167,18 +165,9 @@ public struct Knob: View {
                 )
             )
             .frame(width: proxy.size.width, height: proxy.size.height)
-            .allowsHitTesting(false)
-            .overlay {
-                Circle()
-                    .fill(.clear)
-                    .contentShape(Circle())
-                    .gesture(drag(in: proxy.size), including: resetValue == nil ? .all : .subviews)
-                    // With a reset, the double tap comes first and the drag once it can't be one.
-                    .gesture(
-                        TapGesture(count: 2).onEnded { reset() }.exclusively(before: drag(in: proxy.size)),
-                        including: resetValue == nil ? .subviews : .all
-                    )
-            }
+            .contentShape(Circle())
+            .gesture(drag(in: proxy.size))
+            .simultaneousGesture(TapGesture(count: 2).onEnded { reset() })
         }
         .aspectRatio(1, contentMode: .fit)
         .accessibilityElement()
@@ -216,7 +205,10 @@ public struct Knob: View {
                     )
                 case let .vertical(dragStart, travel):
                     if dragStart.wrappedValue == nil { dragStart.wrappedValue = value }
-                    value = scale.dragged(from: dragStart.wrappedValue ?? value, by: -drag.translation.height, over: travel)
+                    // Written only once the finger has moved, so a double tap's reset stands.
+                    if drag.translation != .zero {
+                        value = scale.dragged(from: dragStart.wrappedValue ?? value, by: -drag.translation.height, over: travel)
+                    }
                 }
             }
             .onEnded { _ in

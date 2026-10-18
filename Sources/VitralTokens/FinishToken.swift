@@ -127,6 +127,12 @@ public struct FinishToken: Hashable, Sendable {
         FinishToken(glass: glass.map { $0.tinted($0.tint ?? tint) }, fill: fill, amount: amount, sheen: sheen)
     }
 
+    /// This finish with its glass answering touch (it scales and shimmers under the finger), as a
+    /// control's should.
+    public func interactive() -> FinishToken {
+        FinishToken(glass: glass?.interactive(), fill: fill, amount: amount, sheen: sheen)
+    }
+
     /// Whether it's glass underneath.
     public var isGlass: Bool { glass != nil }
 

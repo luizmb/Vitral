@@ -231,27 +231,16 @@ public struct Fader: View {
         GeometryReader { proxy in
             style.makeBody(configuration)
                 .frame(width: proxy.size.width, height: proxy.size.height)
-                // The drawing takes no touches (interactive glass on a thumb would answer them
-                // itself); a clear layer on top takes them all, so the fader's gestures get them.
-                .allowsHitTesting(false)
                 .overlay {
                     if labels == .inside {
                         titleAndValue.padding(.horizontal, Space.medium).allowsHitTesting(false)
                     }
                 }
-                .overlay {
-                    Color.clear
-                        .contentShape(Rectangle())
-                        .gesture(drag(length: axis == .horizontal ? proxy.size.width : proxy.size.height), including: resetValue == nil ? .all : .subviews)
-                        // With a reset, the double tap comes first and the drag once it can't be
-                        // one: run side by side, the drag's last change could land after the
-                        // reset and undo it. A finger that moves starts the drag at once.
-                        .gesture(
-                            TapGesture(count: 2).onEnded { reset() }
-                                .exclusively(before: drag(length: axis == .horizontal ? proxy.size.width : proxy.size.height)),
-                            including: resetValue == nil ? .subviews : .all
-                        )
-                }
+                .contentShape(Rectangle())
+                // Side by side, so the drag (and the thumb under the finger) answers at once;
+                // waiting to rule out a double tap held every press back.
+                .gesture(drag(length: axis == .horizontal ? proxy.size.width : proxy.size.height))
+                .simultaneousGesture(TapGesture(count: 2).onEnded { reset() })
         }
         .frame(width: axis == .vertical ? style.breadth : nil, height: axis == .horizontal ? style.breadth : nil)
         .frame(maxWidth: axis == .horizontal ? .infinity : nil, maxHeight: axis == .vertical ? .infinity : nil)
@@ -296,11 +285,15 @@ public struct Fader: View {
                     )
                 case let .relative(dragStart):
                     if dragStart.wrappedValue == nil { dragStart.wrappedValue = value }
-                    value = value(
-                        at: scale.fraction(of: dragStart.wrappedValue ?? value)
-                            + (axis == .horizontal ? drag.translation.width : -drag.translation.height)
-                            / TrackGeometry.travel(length: length, thumb: style.thumbLength)
-                    )
+                    // Written only once the finger has moved: a touch that stays put (a tap, the
+                    // second of a double tap) would write back where it started, over a reset.
+                    if drag.translation != .zero {
+                        value = value(
+                            at: scale.fraction(of: dragStart.wrappedValue ?? value)
+                                + (axis == .horizontal ? drag.translation.width : -drag.translation.height)
+                                / TrackGeometry.travel(length: length, thumb: style.thumbLength)
+                        )
+                    }
                 }
             }
             .onEnded { _ in
@@ -429,7 +422,10 @@ struct GlassFader: View {
     @Environment(\.accent) private var accent
     @Environment(\.controlFinish) private var controlFinish
 
-    var thumbFinish: FinishToken { style.thumbFinish ?? controlFinish ?? .glass() }
+    /// What the thumb is made of, its glass answering the finger.
+    var thumbFinish: FinishToken {
+        (style.thumbFinish ?? controlFinish ?? .glass()).interactive()
+    }
 
     /// With marks or numbers, the track moves off the middle to make room beside it.
     var trackOffset: Double {
@@ -622,7 +618,10 @@ struct ConsoleFader: View {
                 .monospacedDigit()
                 .foregroundStyle(Color(style.scaleColour))
                 .fixedSize()
-                .position(frame.point(configuration.scale.fraction(of: tick), across: 33))
+                // Starting just past the tick, not centred on a point: a wider label (−12) would
+                // otherwise run under the tick and lose its sign.
+                .frame(width: 28, alignment: configuration.axis == .vertical ? .leading : .center)
+                .position(frame.point(configuration.scale.fraction(of: tick), across: configuration.axis == .vertical ? 42 : 33))
         }
     }
 
