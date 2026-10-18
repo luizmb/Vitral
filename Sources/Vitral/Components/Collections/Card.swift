@@ -5,8 +5,8 @@ import VitralTokens
 /// cloud). A header (a swatch stack, a tag) and a footer (an action bar) are added with
 /// `.header { }` and `.footer { }`, so a card carries only the parts it uses.
 public struct Card<Header: View, Content: View, Footer: View>: View {
-    let title: LocalizedStringKey
-    let subtitle: LocalizedStringKey?
+    let title: Text
+    let subtitle: Text?
     let header: Header
     let content: Content
     let footer: Footer
@@ -16,11 +16,11 @@ public struct Card<Header: View, Content: View, Footer: View>: View {
             VStack(alignment: .leading, spacing: Space.medium) {
                 header
                 VStack(alignment: .leading, spacing: Space.extraSmall) {
-                    Text(title)
+                    title
                         .font(.title)
                         .foregroundStyle(.ink)
                     subtitle.map { subtitle in
-                        Text(subtitle)
+                        subtitle
                             .font(.subheadline)
                             .foregroundStyle(.inkMuted)
                             .lineLimit(4)
@@ -54,12 +54,21 @@ public struct Card<Header: View, Content: View, Footer: View>: View {
 
 public extension Card where Header == EmptyView, Footer == EmptyView {
     init(_ title: LocalizedStringKey, subtitle: LocalizedStringKey? = nil, @ViewBuilder content: () -> Content) {
+        self.init(Text(title), subtitle: subtitle.map { Text($0) }, content: content)
+    }
+
+    /// A card with text already made: a name to show as it is (`Text(verbatim:)`), or styled text.
+    init(_ title: Text, subtitle: Text? = nil, @ViewBuilder content: () -> Content) {
         self.init(title: title, subtitle: subtitle, header: EmptyView(), content: content(), footer: EmptyView())
     }
 }
 
 public extension Card where Header == EmptyView, Content == EmptyView, Footer == EmptyView {
     init(_ title: LocalizedStringKey, subtitle: LocalizedStringKey? = nil) {
+        self.init(Text(title), subtitle: subtitle.map { Text($0) })
+    }
+
+    init(_ title: Text, subtitle: Text? = nil) {
         self.init(title: title, subtitle: subtitle, header: EmptyView(), content: EmptyView(), footer: EmptyView())
     }
 }
