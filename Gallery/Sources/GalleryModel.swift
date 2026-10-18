@@ -37,6 +37,18 @@ final class GalleryModel {
     var jogTouch: Double?
     var faders: [String: Double] = [:]
     var faderStarts: [String: Double] = [:]
+    var iconPage = 0
+    var pickedIcons: Set<Int> = []
+
+    /// A tap picks or unpicks while picking; otherwise it would open the icon.
+    func tapIcon(_ id: Int) {
+        if !pickedIcons.isEmpty { pickIcon(id) }
+    }
+
+    /// Holding an icon starts picking with it picked; holding a picked one unpicks it.
+    func pickIcon(_ id: Int) {
+        if pickedIcons.contains(id) { pickedIcons.remove(id) } else { pickedIcons.insert(id) }
+    }
 
     /// A fader's value, kept by name.
     func fader(_ name: String, _ initial: Double) -> Binding<Double> {
