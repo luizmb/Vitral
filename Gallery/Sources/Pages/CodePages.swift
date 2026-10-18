@@ -20,16 +20,16 @@ struct CodePage: View {
 
     var body: some View {
         Page("Code") {
-            LabelledGroup("CodeBlock(spans, theme: .neon)") {
+            Sample("CodeBlock(spans, theme: .neon)") {
                 CodeBlock(Self.sample)
             }
-            LabelledGroup("CodeBlock(plain:)") {
+            Sample("CodeBlock(plain:)") {
                 CodeBlock(plain: "swift test 2>&1 | xcsift")
             }
-            LabelledGroup("SyntaxTheme.neon") {
+            Sample("SyntaxTheme.neon") {
                 CodeBlock(SyntaxTheme.Role.allCases.map { CodeSpan("\($0.rawValue)\n", $0) }, font: .code)
             }
-            LabelledGroup("Inline, Font(.code)") {
+            Sample("Inline, Font(.code)") {
                 Panel {
                     Text("Run \(Text(verbatim: "xcodegen generate").font(Font(.code))) after adding a file.")
                         .foregroundStyle(.ink)

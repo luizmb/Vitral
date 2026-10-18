@@ -86,19 +86,30 @@ public struct SectionLabel: View {
     }
 }
 
-/// A titled group: a section label over its content.
-public struct LabelledGroup<Content: View>: View {
+/// A titled group: a section label over its content, and an optional accessory at the label's
+/// end (an info button, a count).
+public struct LabelledGroup<Content: View, Accessory: View>: View {
     let title: LocalizedStringKey
+    let accessory: Accessory
     let content: Content
 
-    public init(_ title: LocalizedStringKey, @ViewBuilder content: () -> Content) {
+    public init(
+        _ title: LocalizedStringKey,
+        @ViewBuilder accessory: () -> Accessory = { EmptyView() },
+        @ViewBuilder content: () -> Content
+    ) {
         self.title = title
+        self.accessory = accessory()
         self.content = content()
     }
 
     public var body: some View {
         VStack(alignment: .leading, spacing: Space.small) {
-            SectionLabel(title)
+            HStack(alignment: .firstTextBaseline, spacing: Space.small) {
+                SectionLabel(title)
+                Spacer(minLength: 0)
+                accessory
+            }
             content
         }
     }

@@ -40,7 +40,7 @@ struct IconGroupPage: View {
     var body: some View {
         @Bindable var model = model
         Page("Icon groups") {
-            LabelledGroup("IconGroup with a header, page dots and a footer") {
+            Sample("IconGroup with a header, page dots and a footer") {
                 IconGroup(DemoIcon.all, page: $model.iconPage) { icon in
                     IconTile(
                         Text(verbatim: icon.title),
@@ -66,7 +66,7 @@ struct IconGroupPage: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
-            LabelledGroup("IconTileAdd first, four across, two rows, no dots") {
+            Sample("IconTileAdd first, four across, two rows, no dots") {
                 IconGroup(
                     [DemoSlot.add] + DemoIcon.all.prefix(7).map(DemoSlot.icon),
                     page: .constant(0),

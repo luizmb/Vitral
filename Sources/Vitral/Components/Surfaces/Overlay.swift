@@ -33,12 +33,21 @@ public struct Overlay<Content: View>: View {
     let placement: Alignment
     let glass: GlassToken
     let obscuring: Obscuring
+    let dismiss: (@MainActor () -> Void)?
     let content: Content
 
-    public init(placement: Alignment = .center, glass: GlassToken = .scrim, obscuring: Obscuring = .none, @ViewBuilder content: () -> Content) {
+    /// - Parameter dismiss: called on a tap outside the content; without it, a tap there does nothing.
+    public init(
+        placement: Alignment = .center,
+        glass: GlassToken = .scrim,
+        obscuring: Obscuring = .none,
+        dismiss: (@MainActor () -> Void)? = nil,
+        @ViewBuilder content: () -> Content
+    ) {
         self.placement = placement
         self.glass = glass
         self.obscuring = obscuring
+        self.dismiss = dismiss
         self.content = content()
     }
 
@@ -51,7 +60,7 @@ public struct Overlay<Content: View>: View {
                 .ignoresSafeArea()
                 // Swallows touches: what's underneath isn't to be used now.
                 .contentShape(Rectangle())
-                .onTapGesture {}
+                .onTapGesture { dismiss?() }
                 .accessibilityHidden(true)
             content
                 .padding(Space.extraLarge)
@@ -71,12 +80,13 @@ public extension View {
         placement: Alignment = .center,
         glass: GlassToken = .scrim,
         obscuring: Obscuring = .none,
+        dismiss: (@MainActor () -> Void)? = nil,
         @ViewBuilder content: () -> Content
     ) -> some View {
         blur(radius: isPresented ? obscuring.blur : 0)
             .overlay {
                 if isPresented {
-                    Overlay(placement: placement, glass: glass, obscuring: obscuring, content: content)
+                    Overlay(placement: placement, glass: glass, obscuring: obscuring, dismiss: dismiss, content: content)
                 }
             }
     }
@@ -87,12 +97,13 @@ public extension View {
         placement: Alignment = .center,
         glass: GlassToken = .scrim,
         obscuring: Obscuring = .none,
+        dismiss: (@MainActor () -> Void)? = nil,
         @ViewBuilder content: (Item) -> Content
     ) -> some View {
         blur(radius: item == nil ? 0 : obscuring.blur)
             .overlay {
                 if let item {
-                    Overlay(placement: placement, glass: glass, obscuring: obscuring) { content(item) }
+                    Overlay(placement: placement, glass: glass, obscuring: obscuring, dismiss: dismiss) { content(item) }
                 }
             }
     }

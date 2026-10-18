@@ -41,16 +41,16 @@ struct FinishesPage: View {
 
     var body: some View {
         Page("Finishes", backdrop: .glow()) {
-            LabelledGroup("FinishToken, on ButtonPrimary(finish:)") {
+            Sample("FinishToken, on ButtonPrimary(finish:)") {
                 FinishGrid(finishes: Self.finishes)
             }
-            LabelledGroup("A sheen over anything: .sheen(.aqua(_:)), .sheen(gloss:glow:rim:)") {
+            Sample("A sheen over anything: .sheen(.aqua(_:)), .sheen(gloss:glow:rim:)") {
                 FinishGrid(finishes: Self.layered)
             }
-            LabelledGroup("Levels: clearance, tint, .onGlass(_:amount:), sheen strength") {
+            Sample("Levels: clearance, tint, .onGlass(_:amount:), sheen strength") {
                 FinishGrid(finishes: Self.levels)
             }
-            LabelledGroup("No finish: the system's glass") {
+            Sample("No finish: the system's glass") {
                 Panel {
                     HStack(spacing: Space.medium) {
                         ButtonPrimary("Save") {}
@@ -58,7 +58,7 @@ struct FinishesPage: View {
                     }
                 }
             }
-            LabelledGroup(".controlFinish(.glass(.clear).sheen(.aqua(0.25))): clearer, the primary tinted") {
+            Sample(".controlFinish(.glass(.clear).sheen(.aqua(0.25))): clearer, the primary tinted") {
                 Panel {
                     HStack(spacing: Space.medium) {
                         ButtonPrimary("Save") {}
@@ -67,7 +67,7 @@ struct FinishesPage: View {
                 }
                 .controlFinish(.glass(.clear).sheen(.aqua(0.25)))
             }
-            LabelledGroup("Fader thumbs and fills") {
+            Sample("Fader thumbs and fills") {
                 Panel {
                     VStack(spacing: Space.large) {
                         Fader(value: model.fader("finishGlass", 0.4), title: Text(verbatim: "glass (default)"), labels: .top, label: Text("Glass"))
@@ -96,7 +96,7 @@ struct FinishesPage: View {
                     }
                 }
             }
-            LabelledGroup(".controlFinish(.aqua(.accent)), on a whole group") {
+            Sample(".controlFinish(.aqua(.accent)), on a whole group") {
                 Panel {
                     VStack(alignment: .leading, spacing: Space.large) {
                         HStack(spacing: Space.medium) {

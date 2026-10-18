@@ -50,7 +50,7 @@ pre-render by swapping the window's root controller: it leaks appearance into la
   (`LocalizedStringKey` or `Text`). Accessibility identifiers that a component sets itself are
   hardcoded, but kept in an enum.
 - **Colours: defaults, then the environment, then the content.** A control marked with the accent
-  reads `@Environment(\.accent)`; a surface reads `@Environment(\.glassMaterial)`. Never hard-code
+  reads `@Environment(\.accent)`; a surface reads `@Environment(\.surfaceGlass)`. Never hard-code
   `.accent` in a control. A colour that belongs to the content (a tag's tint, a banner's style, a
   palette) is an init parameter with a default.
 - **SF Symbols are first-class.** Icons a component draws itself are `Glyph`s (SF Symbols by role).

@@ -19,6 +19,9 @@ struct GalleryApp: App {
                     .navigationDestination(for: GlassShowcaseRoute.self) { GlassShowcasePage(route: $0).galleryChrome($model.appearance) }
                     .navigationDestination(for: WorkspaceRoute.self) { WorkspaceSample(route: $0).galleryChrome($model.appearance) }
             }
+            .overlay(item: model.shownSample, dismiss: { model.shownSample = nil }) { sample in
+                SampleCodePanel(sample: sample) { model.shownSample = nil }
+            }
             .appearance(model.appearance)
             .environment(model)
         }

@@ -8,14 +8,14 @@ struct TintsPage: View {
 
     var body: some View {
         Page("Tints and accents") {
-            LabelledGroup("Tag(style: .tint(_:))") {
+            Sample("Tag(style: .tint(_:))") {
                 FlowLayout(spacing: Space.small) {
                     ForEach(Tint.allCases, id: \.self) { tint in
                         Tag(Text(verbatim: tint.rawValue), style: .tint(tint))
                     }
                 }
             }
-            LabelledGroup(".surface(tint.surface)") {
+            Sample(".surface(tint.surface)") {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: Space.small)], spacing: Space.small) {
                     ForEach(Tint.allCases, id: \.self) { tint in
                         Row(LocalizedStringKey(tint.rawValue), subtitle: "Compartment")
@@ -32,13 +32,13 @@ struct TintsPage: View {
                         .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
                 }
             }
-            LabelledGroup("Accent and counter-accent") {
+            Sample("Accent and counter-accent") {
                 HStack(alignment: .top, spacing: Space.medium) {
                     AccentColumn(title: ".primary")
                     AccentColumn(title: ".counter").accent(.counter)
                 }
             }
-            LabelledGroup("Two series") {
+            Sample("Two series") {
                 Panel { TwoSeries().frame(height: 140) }
             }
         }

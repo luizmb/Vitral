@@ -8,7 +8,7 @@ struct FadersPage: View {
 
     var body: some View {
         Page("Faders") {
-            LabelledGroup("Glass, labels in every place") {
+            Sample("Glass, labels in every place") {
                 Panel {
                     VStack(spacing: Space.large) {
                         Fader(value: model.fader("plain", 0.4), label: Text("Level"))
@@ -19,7 +19,7 @@ struct FadersPage: View {
                     }
                 }
             }
-            LabelledGroup("Control Centre's way: thick, the value inside") {
+            Sample("Control Centre's way: thick, the value inside") {
                 HStack(spacing: Space.large) {
                     Fader(
                         value: model.fader("brightness", 70),
@@ -38,7 +38,7 @@ struct FadersPage: View {
                     .frame(height: 160)
                 }
             }
-            LabelledGroup("Lightroom's way: from the centre, gradients, double tap to reset") {
+            Sample("Lightroom's way: from the centre, gradients, double tap to reset") {
                 Panel {
                     VStack(spacing: Space.large) {
                         Fader(
@@ -84,7 +84,7 @@ struct FadersPage: View {
                     }
                 }
             }
-            LabelledGroup("Vertical glass, with marks and numbers") {
+            Sample("Vertical glass, with marks and numbers") {
                 HStack(spacing: Space.extraLarge) {
                     ForEach(["Low", "Mid", "High"], id: \.self) { band in
                         VStack(spacing: Space.small) {
@@ -105,7 +105,7 @@ struct FadersPage: View {
                 }
                 .frame(maxWidth: .infinity)
             }
-            LabelledGroup("A mixing desk: dB faders, pushed from anywhere on the strip") {
+            Sample("A mixing desk: dB faders, pushed from anywhere on the strip") {
                 MixerDesk()
             }
         }

@@ -106,7 +106,7 @@ struct WallpapersPage: View {
         Page("Wallpapers") {
             BackdropKey()
             BackdropShelves(shelves: BackdropCatalogue.wallpapers, tileHeight: 150)
-            LabelledGroup("Credits") {
+            Sample("Credits") {
                 PanelList {
                     ForEach(Wallpaper.all, id: \.name) { wallpaper in
                         Row(LocalizedStringKey(wallpaper.title), subtitle: LocalizedStringKey(wallpaper.credit))

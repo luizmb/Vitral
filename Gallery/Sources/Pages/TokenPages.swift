@@ -159,10 +159,10 @@ struct GlassPage: View {
                         .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
                 }
             }
-            LabelledGroup("active") {
+            Sample("active") {
                 Panel(glass: .active) { TagCloud(["Chosen", "glass"]) }
             }
-            LabelledGroup("FinishToken: what a control's surface is made of") {
+            Sample("FinishToken: what a control's surface is made of") {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 96), spacing: Space.medium)], spacing: Space.medium) {
                     ForEach(FinishesPage.finishes + FinishesPage.layered, id: \.name) { entry in
                         VStack(spacing: Space.extraSmall) {
