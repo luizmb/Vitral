@@ -165,3 +165,28 @@ struct RowActionButton: View {
         }
     }
 }
+
+/// A form on the backdrop: the platform's own (its sections, its controls, its keyboard handling),
+/// every row on the environment's glass instead of the system's grey, with the system's insets
+/// kept, so plain controls (a `TextField`, a `Toggle`, a `Stepper`) sit in it as they would in a
+/// `Form`. For rows that pad themselves (`Row`), use `GlassList`.
+public struct GlassForm<Content: View>: View {
+    let content: Content
+
+    @Environment(\.accent) private var accent
+
+    public init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+
+    public var body: some View {
+        Form {
+            content
+                .listRowBackground(GlassRowBackground())
+                .listRowSeparatorTint(Color(.hairline))
+        }
+        .scrollContentBackground(.hidden)
+        .environment(\.defaultMinListRowHeight, Size.hitTarget)
+        .tint(Color(accent.base))
+    }
+}

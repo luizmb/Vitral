@@ -91,3 +91,26 @@ struct CompartmentRow: View {
         ]
     }
 }
+
+/// A form of plain controls on glass rows, the system's sections and insets kept.
+struct GlassFormPage: View {
+    var body: some View {
+        GlassForm {
+            Section("Song") {
+                TextField("Title", text: .constant("Highway to Hell"))
+                TextField("Artist", text: .constant("AC/DC"))
+            }
+            Section("Playback") {
+                Toggle("Count in", isOn: .constant(true))
+                Stepper("Bars before: 2", value: .constant(2), in: 0 ... 8)
+                Picker("Click", selection: .constant(1)) {
+                    Text("Off").tag(0)
+                    Text("Quarters").tag(1)
+                    Text("Eighths").tag(2)
+                }
+            }
+        }
+        .background { Backdrop(.grid()) }
+        .navigationTitle("GlassForm")
+    }
+}
