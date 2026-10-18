@@ -54,6 +54,48 @@ struct GlassShape<S: Shape>: ViewModifier {
     @Environment(\.glassMaterial) private var environmentMaterial
 
     func body(content: Content) -> some View {
-        content.glassEffect(.token(material ?? environmentMaterial), in: shape)
+        content.glassLayer(material ?? environmentMaterial, in: shape)
+    }
+}
+
+extension View {
+    /// `material` behind this view, cut to `shape`: the system's glass, or for `sheer` its tint
+    /// and a sheen drawn over the backdrop, nothing behind blurred.
+    func glassLayer(_ material: GlassToken, in shape: some Shape) -> some View {
+        modifier(GlassMaterial(material: material, shape: shape))
+    }
+}
+
+struct GlassMaterial<S: Shape>: ViewModifier {
+    let material: GlassToken
+    let shape: S
+
+    func body(content: Content) -> some View {
+        if material.variant == .sheer {
+            content.background { SheerGlass(tint: material.tint, shape: shape) }
+        } else {
+            content.glassEffect(.token(material), in: shape)
+        }
+    }
+}
+
+/// Glass that blurs nothing: a faint tint, and light catching its top.
+struct SheerGlass<S: Shape>: View {
+    let tint: ColorToken?
+    let shape: S
+
+    var body: some View {
+        shape
+            .fill(Color(tint ?? ColorToken.fixedWhite.opacity(0.08)))
+            .overlay {
+                shape.fill(
+                    LinearGradient(
+                        colors: [Color(ColorToken.fixedWhite.opacity(0.28)), Color(ColorToken.fixedWhite.opacity(0.04)), .clear],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+            }
+            .allowsHitTesting(false)
     }
 }

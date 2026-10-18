@@ -6,6 +6,10 @@ public struct GlassToken: Hashable, Sendable {
         case regular
         /// Mostly clear: for glass over media, with a dimmed backdrop.
         case clear
+        /// Barely there: nothing behind it blurred, only its tint and a sheen from above say it's
+        /// glass. For small pieces over a busy backdrop (a node on a canvas) that must stay sharp.
+        /// It doesn't answer touch.
+        case sheer
     }
 
     public var variant: Variant
@@ -31,6 +35,7 @@ public struct GlassToken: Hashable, Sendable {
 public extension GlassToken {
     static let regular = GlassToken(.regular)
     static let clear = GlassToken(.clear)
+    static let sheer = GlassToken(.sheer)
     /// Clear glass behind a veil of the backdrop colour, `amount` strong (0 ... 1): a dial between
     /// `clear` (0) and nearly opaque (1). Vitral's default is `veiled(0.45)`: the backdrop shows
     /// through, the text on it still reads.

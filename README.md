@@ -85,7 +85,7 @@ illustration for a state, use a symbol.
 
 | Group | Components |
 |---|---|
-| Finishes | `FinishToken` (glass, solid, gradient, texture, chrome, Aqua's gel; `.gel`, `.with(.gloss, .glow, .rim)` over any), `.controlFinish(_:)`, `.finish(_:in:)` |
+| Finishes | `FinishToken` (glass regular, clear or sheer, tinted; solid, gradient, texture, chrome, Aqua's gel; `.overGlass(_:amount:)` to mix any over glass; `.gel(_:)`, `.with(.gloss, .glow, .rim, strength:)` over any), `.controlFinish(_:)`, `.finish(_:in:)` |
 | Buttons | `Pill`, `ButtonPrimary`, `ButtonSecondary` (both take `finish:`), `ButtonLabel`, `ActionBar`, `ActionBarButton` |
 | Selection | `Checkbox`, `ToggleSwitch`, `SelectionMark` |
 | Layout | `Page`, `Panel`, `PanelList`, `Row` (`.trailing`, `.disclosure`, `.rowState`), `LabelledGroup`, `SectionLabel`, `Hairline` |

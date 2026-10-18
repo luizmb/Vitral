@@ -50,7 +50,8 @@ public struct ButtonLabel: View {
     }
 }
 
-/// The main action on a screen: accent-filled glass. One per screen, ideally. While `isBusy` it
+/// The main action on a screen: the system's accent-filled glass, or a finish (`finish:`, or the
+/// environment's `.controlFinish(_:)`) for a clearer glass, a gel, a texture. One per screen, ideally. While `isBusy` it
 /// shows a spinner and takes no taps.
 public struct ButtonPrimary: View {
     let label: ButtonLabel
@@ -74,10 +75,11 @@ public struct ButtonPrimary: View {
         self.action = action
     }
 
-    /// Its own finish, else the environment's; under a glass finish the glass becomes the accent,
-    /// the finish's layers kept, so the main action still stands out.
+    /// Its own finish, else the environment's, its untinted glass tinted with the accent so the
+    /// main action still stands out (as the system's prominent glass does). Neither: the system's
+    /// prominent glass.
     var resolvedFinish: FinishToken? {
-        finish ?? controlFinish.map { $0.replacingGlass(with: .solid(accent.base)) }
+        finish ?? controlFinish.map { $0.tintingGlass(accent.base.opacity(0.6)) }
     }
 
     public var body: some View {
@@ -94,7 +96,8 @@ public struct ButtonPrimary: View {
     }
 }
 
-/// Any other action: clear glass.
+/// Any other action: the system's glass, or a finish (`finish:`, or the environment's
+/// `.controlFinish(_:)`).
 public struct ButtonSecondary: View {
     let label: ButtonLabel
     let finish: FinishToken?

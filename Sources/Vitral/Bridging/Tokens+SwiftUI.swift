@@ -193,10 +193,19 @@ extension Font.Weight {
 }
 
 public extension Glass {
+    /// The system's glass for `token`; `sheer` is none (Vitral draws it, see `glassLayer(_:in:)`).
     static func token(_ token: GlassToken) -> Glass {
-        (token.variant == .clear ? Glass.clear : .regular)
+        variant(token.variant)
             .tint(token.tint.map(Color.init))
             .interactive(token.isInteractive)
+    }
+
+    private static func variant(_ variant: GlassToken.Variant) -> Glass {
+        switch variant {
+        case .regular: .regular
+        case .clear: .clear
+        case .sheer: .identity
+        }
     }
 }
 

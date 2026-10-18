@@ -16,10 +16,25 @@ struct FinishesPage: View {
     ]
 
     static let layered: [(name: String, finish: FinishToken)] = [
-        ("glass(.clear).gel", .glass(.clear).gel),
-        ("solid.gel", .solid(.washGreen).gel),
+        ("glass(.clear).gel(0.4)", .glass(.clear).gel(0.4)),
+        ("solid.gel()", .solid(.washGreen).gel()),
         ("gradient.with(.gloss)", .gradient([.washAmber, .counterAccent]).with(.gloss)),
         ("texture.with(.gloss, .rim)", .texture(.wood).with(.gloss, .rim))
+    ]
+
+    /// The dials: how clear the glass is, how tinted, how much is mixed over it, how strong the
+    /// gel is.
+    static let levels: [(name: String, finish: FinishToken)] = [
+        ("glass(.regular)", .glass(.regular)),
+        ("glass(.clear)", .glass(.clear)),
+        ("glass(.sheer)", .glass(.sheer)),
+        ("clear, accent 0.3", .glass(GlassToken(.clear, tint: ColorToken.accent.opacity(0.3)))),
+        ("aqua.overGlass(amount: 0.15)", .aqua(.accent).overGlass(.clear, amount: 0.15)),
+        ("aqua.overGlass(amount: 0.4)", .aqua(.accent).overGlass(.clear, amount: 0.4)),
+        ("texture.overGlass(amount: 0.3)", .texture(.denim).overGlass(.clear, amount: 0.3)),
+        ("gradient.overGlass(amount: 0.5)", .gradient([.washViolet, .washPink]).overGlass(.clear, amount: 0.5)),
+        ("glass(.clear).gel(0.2)", .glass(.clear).gel(0.2)),
+        ("glass(.clear).gel(0.6)", .glass(.clear).gel(0.6))
     ]
 
     @Environment(GalleryModel.self) private var model
@@ -29,8 +44,28 @@ struct FinishesPage: View {
             LabelledGroup("FinishToken, on ButtonPrimary(finish:)") {
                 FinishGrid(finishes: Self.finishes)
             }
-            LabelledGroup("Aqua's layers over anything: .gel, .with(.gloss, .glow, .rim)") {
+            LabelledGroup("Aqua's layers over anything: .gel(_:), .with(.gloss, .glow, .rim, strength:)") {
                 FinishGrid(finishes: Self.layered)
+            }
+            LabelledGroup("Levels: clearance, tint, .overGlass(_:amount:), gel strength") {
+                FinishGrid(finishes: Self.levels)
+            }
+            LabelledGroup("No finish: the system's glass") {
+                Panel {
+                    HStack(spacing: Space.medium) {
+                        ButtonPrimary("Save") {}
+                        ButtonSecondary("Cancel") {}
+                    }
+                }
+            }
+            LabelledGroup(".controlFinish(.glass(.clear).gel(0.25)): clearer, the primary tinted") {
+                Panel {
+                    HStack(spacing: Space.medium) {
+                        ButtonPrimary("Save") {}
+                        ButtonSecondary("Cancel") {}
+                    }
+                }
+                .controlFinish(.glass(.clear).gel(0.25))
             }
             LabelledGroup("Fader thumbs and fills") {
                 Panel {
@@ -38,9 +73,9 @@ struct FinishesPage: View {
                         Fader(value: model.fader("finishGlass", 0.4), title: Text(verbatim: "glass (default)"), labels: .top, label: Text("Glass"))
                         Fader(
                             value: model.fader("finishGel", 0.6),
-                            title: Text(verbatim: "thumb: .glass(.clear).gel"),
+                            title: Text(verbatim: "thumb: .glass(.clear).gel(0.4)"),
                             labels: .top,
-                            style: GlassFaderStyle(thumbFinish: .glass(.clear).gel),
+                            style: GlassFaderStyle(thumbFinish: .glass(.clear).gel(0.4)),
                             label: Text("Gel")
                         )
                         Fader(
@@ -53,9 +88,9 @@ struct FinishesPage: View {
                         Fader(
                             value: model.fader("finishCentre", 64),
                             scale: ValueScale(0 ... 100, precision: 0),
-                            title: Text(verbatim: "Control Centre's, fill: .gradient.gel"),
+                            title: Text(verbatim: "Control Centre's, fill: .gradient.gel()"),
                             labels: .inside,
-                            style: GlassFaderStyle(trackThickness: 44, thumb: .none, fillFinish: .gradient([.washViolet, .washPink]).gel),
+                            style: GlassFaderStyle(trackThickness: 44, thumb: .none, fillFinish: .gradient([.washViolet, .washPink]).gel()),
                             label: Text("Level")
                         )
                     }
