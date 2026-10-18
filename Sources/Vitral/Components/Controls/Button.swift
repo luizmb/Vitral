@@ -60,6 +60,7 @@ public struct ButtonPrimary: View {
 
     @Environment(\.accent) private var accent
     @Environment(\.controlFinish) private var controlFinish
+    @Environment(\.rendersGlass) private var rendersGlass
 
     public init(
         _ title: LocalizedStringKey,
@@ -77,9 +78,9 @@ public struct ButtonPrimary: View {
 
     /// Its own finish, else the environment's, its untinted glass tinted with the accent so the
     /// main action still stands out (as the system's prominent glass does). Neither: the system's
-    /// prominent glass.
+    /// prominent glass, or the accent where glass can't be drawn.
     var resolvedFinish: FinishToken? {
-        finish ?? controlFinish.map { $0.tintingGlass(accent.base.opacity(0.6)) }
+        finish ?? controlFinish.map { $0.tintingGlass(accent.base.opacity(0.6)) } ?? (rendersGlass ? nil : .solid(accent.base))
     }
 
     public var body: some View {
@@ -104,6 +105,7 @@ public struct ButtonSecondary: View {
     let action: @MainActor () -> Void
 
     @Environment(\.controlFinish) private var controlFinish
+    @Environment(\.rendersGlass) private var rendersGlass
 
     public init(
         _ title: LocalizedStringKey,
@@ -120,11 +122,12 @@ public struct ButtonSecondary: View {
     }
 
     /// Under an Aqua finish a secondary button is Aqua's silver gel, as on the Mac; any other
-    /// finish it takes as it is.
+    /// finish it takes as it is. Neither: the system's glass, or a plain glass finish (which draws
+    /// a plain surface) where glass can't be drawn.
     var resolvedFinish: FinishToken? {
         finish ?? controlFinish.map { shared in
             if case .gel = shared.fill, shared.glass == nil { .aqua(.fixedSilver) } else { shared }
-        }
+        } ?? (rendersGlass ? nil : .glass())
     }
 
     public var body: some View {

@@ -118,6 +118,10 @@ Modifiers that take tokens: `.foregroundStyle(_:)`, `.font(_:)`, `.glassSurface(
 `.glassCapsule(_:)`, `.surfaceGlass(_:)`, `.finish(_:in:)`, `.controlFinish(_:)`, `.accent(_:)`,
 `.surface(_:cornerRadius:)`, `.appearance(_:)`.
 
+Snapshot tests outside a real window (a package's test target) can't draw glass: set
+`.environment(\.rendersGlass, false)` there and every Vitral glass draws a plain surface of the
+same shape, so the pictures still check layout.
+
 ## Gallery
 
 `Gallery/` is an app that shows every token, resource and component, built only from Vitral

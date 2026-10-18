@@ -340,7 +340,7 @@ struct GlassKnob: View {
         ZStack {
             Circle()
                 .fill(.clear)
-                .glassEffect(.regular.interactive(), in: Circle())
+                .glassLayer(GlassToken.regular.interactive(), in: Circle())
             faceFill(diameter: diameter * min(max(style.faceSize, 0), 1))
             pointerMark(diameter: diameter)
         }
@@ -545,7 +545,7 @@ public struct JogDial: View {
             ZStack {
                 Circle()
                     .fill(.clear)
-                    .glassEffect(.regular.interactive(), in: Circle())
+                    .glassLayer(GlassToken.regular.interactive(), in: Circle())
                 ForEach(0 ..< marks, id: \.self) { index in
                     Capsule()
                         .fill(Color(.inkFaint))
@@ -562,7 +562,7 @@ public struct JogDial: View {
                     .rotationEffect(.degrees(rotation))
                 Circle()
                     .fill(.clear)
-                    .glassEffect(.regular, in: Circle())
+                    .glassLayer(.regular, in: Circle())
                     .frame(width: side * 0.3, height: side * 0.3)
             }
             .frame(width: proxy.size.width, height: proxy.size.height)

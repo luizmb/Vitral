@@ -44,6 +44,11 @@ public extension EnvironmentValues {
     @Entry var surfaceGlass: GlassToken = .veiled()
     /// The accent Vitral's controls are marked with: `.primary` unless set (`.accent(_:)`).
     @Entry var accent: AccentToken = .primary
+    /// Whether glass can be drawn here. Glass needs a real window to refract what's behind it; an
+    /// offscreen renderer (a package's snapshot tests) draws none, leaving text floating with no
+    /// surface. Set `false` there and every Vitral glass draws a plain surface of the same shape
+    /// instead, so the pictures still check layout.
+    @Entry var rendersGlass = true
 }
 
 /// Glass in a shape, from the given glass or the environment's.
@@ -70,12 +75,31 @@ struct GlassLayer<S: Shape>: ViewModifier {
     let glass: GlassToken
     let shape: S
 
+    @Environment(\.rendersGlass) private var rendersGlass
+
     // One path for every variant: a branch around `glassEffect` blanked whole
-    // `GlassEffectContainer`s. `sheer` is the system's identity glass with Vitral's layer behind.
+    // `GlassEffectContainer`s. `sheer` is the system's identity glass with Vitral's layer behind;
+    // without glass to draw, identity glass over a plain surface.
     func body(content: Content) -> some View {
         content
             .background { SheerGlass(tint: glass.tint, shape: shape).opacity(glass.variant == .sheer ? 1 : 0) }
-            .glassEffect(.token(glass), in: shape)
+            .background { PlainSurface(tint: glass.tint, shape: shape).opacity(rendersGlass ? 0 : 1) }
+            .glassEffect(rendersGlass ? .token(glass) : .identity, in: shape)
+    }
+}
+
+/// What glass is drawn as where it can't be: the backdrop's colour, raised a little, its tint over
+/// it and a hairline round it.
+struct PlainSurface<S: Shape>: View {
+    let tint: ColorToken?
+    let shape: S
+
+    var body: some View {
+        shape
+            .fill(Color(.neutralSurface))
+            .overlay { shape.fill(Color(tint ?? ColorToken.fixedWhite.opacity(0))) }
+            .overlay { shape.stroke(Color(.hairline), lineWidth: 1) }
+            .allowsHitTesting(false)
     }
 }
 
