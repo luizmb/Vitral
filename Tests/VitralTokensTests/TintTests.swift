@@ -34,6 +34,11 @@ import VitralTokens
         #expect(FinishToken.aqua(.accent).with(.gloss).tone == .accent)
     }
 
+    @Test func replacingGlassKeepsTheLayers() {
+        #expect(FinishToken.glass(.clear).gel.replacingGlass(with: .solid(.accent)) == FinishToken.solid(.accent).gel)
+        #expect(FinishToken.chrome.replacingGlass(with: .solid(.accent)) == .chrome)
+    }
+
     @Test func gelIsEveryLayer() {
         #expect(FinishToken.solid(.accent).gel == .layered(.solid(.accent), [.gloss, .glow, .rim]))
     }

@@ -74,8 +74,14 @@ public struct ButtonPrimary: View {
         self.action = action
     }
 
+    /// Its own finish, else the environment's; under a glass finish the glass becomes the accent,
+    /// the finish's layers kept, so the main action still stands out.
+    var resolvedFinish: FinishToken? {
+        finish ?? controlFinish.map { $0.replacingGlass(with: .solid(accent.base)) }
+    }
+
     public var body: some View {
-        if let finish = finish ?? controlFinish {
+        if let finish = resolvedFinish {
             Button(action: action) { label }
                 .disabled(label.isBusy)
                 .buttonStyle(FinishButtonStyle(finish: finish))
