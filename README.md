@@ -57,7 +57,7 @@ Every colour has a default from the tokens, and two ways to change it:
 
 - **The environment, for a whole area.** `.accent(_:)` sets the accent every control below is
   marked with: buttons, checkboxes, toggles, tag toggles, action bars, progress bars, page dots
-  (`.primary` by default; `.counter`, or your own `AccentToken`). `.glassMaterial(_:)` sets the
+  (`.primary` by default; `.counter`, or your own `AccentToken`). `.surfaceGlass(_:)` sets the
   glass every surface below is made of (`.veiled()` by default). Apply them to a screen, a section
   or a single control.
 - **An init parameter, when the colour belongs to the content.** A tag's `style: .tint(.pink)`,
@@ -81,36 +81,53 @@ takes an `Image` (a button's or tag's icon, an empty state's artwork), any SF Sy
 moments (errors, empty screens) where a symbol is too small to carry the message; when there's no
 illustration for a state, use a symbol.
 
+## Glass and finishes
+
+Two tokens say what things are made of:
+
+- **`GlassToken`** is the system's glass for a surface (a panel, a card, a sheet): how clear it is
+  (`.regular`, `.clear`, `.sheer`, `.veiled(_:)`), tinted or not, answering touch or not.
+  `.glassSurface(_:cornerRadius:)` and `.glassCapsule(_:)` put it under a view;
+  `.surfaceGlass(_:)` sets it for every surface below.
+- **`FinishToken`** is what a control's face is made of (a button, a thumb, a cap), in three layers
+  from the bottom up: `glass` (or none), a `fill` (a colour, gradient, texture, chrome or Aqua's
+  gel; on glass, `amount` of it shows), and a `sheen` (gloss, glow and rim, each 0 ... 1).
+  `.controlFinish(_:)` sets it for every control below; `.finish(_:in:)` puts it under any view.
+
+```swift
+.glass(.clear)                                  // clear glass
+.aqua(.accent)                                  // Aqua's gel: the gel fill and the whole sheen
+.aqua(.accent).onGlass(.clear, amount: 0.2)     // clear glass with a hint of Aqua
+.glass(.clear).sheen(gloss: 0.2, glow: 0.2)     // clear glass, lightly glossed
+```
+
 ## Components
+
+In `Sources/Vitral/Components`, a folder per group, as in the Gallery.
 
 | Group | Components |
 |---|---|
-| Finishes | `FinishToken` (glass regular, clear or sheer, tinted; solid, gradient, texture, chrome, Aqua's gel; `.overGlass(_:amount:)` to mix any over glass; `.gel(_:)`, `.with(.gloss, .glow, .rim, strength:)` over any), `.controlFinish(_:)`, `.finish(_:in:)` |
-| Buttons | `Pill`, `ButtonPrimary`, `ButtonSecondary` (both take `finish:`), `ButtonLabel`, `ActionBar`, `ActionBarButton` |
-| Selection | `Checkbox`, `ToggleSwitch`, `SelectionMark` |
-| Layout | `Page`, `Panel`, `PanelList`, `Row` (`.trailing`, `.disclosure`, `.rowState`), `LabelledGroup`, `SectionLabel`, `Hairline` |
-| Dials | `Knob` (`.circular`, `.vertical(dragStart:)`; any start and end angle), `KnobStyle`, `GlassKnobStyle`, `.knobStyle(_:)`, `JogDial`, `ValueScale` (range, step, precision, taper) |
-| Faders | `Fader` (horizontal or vertical; `.absolute` or `.relative(dragStart:)`; `centre`, `detents`, `resetValue`; labels on any side or inside), `FaderStyle`, `GlassFaderStyle`, `ConsoleFaderStyle`, `.faderStyle(_:)` |
-| Lists | `GlassList` (the platform list on the backdrop), `GlassSection`, `RowState`, `.rowActions([RowAction])` |
-| Tags and colour | `Tag`, `TagCloud`, `FlowLayout`, `Swatch`, `SwatchStack`, `Stat` |
-| Cards | `Card` with optional `.header { }` and `.footer { }`, `CardAdd` |
-| Fields | `FieldText`, `FieldSecure`, `FieldSearch`, `FieldContainer`, with `FieldStatus` |
-| Pickers | `SegmentedControlGlass`, `RadioList`, `StepperJump`, `AppearancePicker` |
-| Feedback | `Banner`, `EmptyState`, `ErrorScreen`, `ProgressPanel` |
-| Paging | `Carousel` (`.slide`, `.flip`), `PageDots` (the native page control on iOS), `SegmentedPages` |
-| Workspace | `Workspace` (`.leading`, `.trailing`, `.bottom`, optionally with `pages:`), `PanelSize`, `PanelToggle`, `.workspaceToolbar`, `.panelAnimation`, `.panelTransition` |
-| Code | `CodeBlock`, `CodeSpan`, `SyntaxTheme` (`.neon`), `TypeToken.code` |
-| Edges | `EdgeFade` (a soft fade where content runs under a bar) |
-| Overlays | `Overlay` (glass over what's behind, content at a placement, `obscuring:` blur and dim), `.overlay(isPresented:)`, `.overlay(item:)`, `.progressOverlay(_:)` |
-| Backdrops | `Backdrop`: patterns (grid, dots, guilloche), drawn materials (`.busFloor(angle:)`, `.wood`, …), textures, aurora, glow, waves, laser, contours, fractal, images |
+| Surfaces | `Backdrop` (patterns, drawn materials, textures, aurora, glow, waves, laser, contours, fractal, images), `Overlay` (`.overlay(isPresented:)`, `.overlay(item:)`, `dismiss:` on a tap outside), `AppearancePicker`, `EdgeFade` |
+| Controls | `Pill`, `ButtonPrimary`, `ButtonSecondary` (both take `finish:`), `ButtonLabel`, `ActionBar`, `ActionBarButton`, `ToggleButtonLatched`, `Checkbox`, `ToggleSwitch`, `SelectionMark`, `SegmentedControlGlass`, `RadioList`, `StepperJump`, `FieldText`, `FieldSecure`, `FieldSearch` (`FieldStatus`) |
+| Dials and faders | `Knob` (`.circular`, `.vertical(dragStart:)`), `GlassKnobStyle`, `JogDial`, `Fader` (horizontal or vertical, `.absolute` or `.relative(dragStart:)`, `centre`, `detents`, `resetValue`, `onEditingEnded`), `GlassFaderStyle`, `ConsoleFaderStyle`, `ValueScale` (range, step, precision; linear, log, power or breakpoint tapers, in values or decibels; `.consoleGain()`; a number or decibel readout) |
+| Collections | `Panel`, `PanelList`, `Row`, `GlassList` (`backdrop:`), `GlassSection` (`rows: .edgeToEdge` or `.padded` for plain controls), `.rowActions(_:)`, `Card` (`.header { }`, `.footer { }`), `CardAdd`, `IconGroup` (a home screen's folder: paged grid, optional header, footer, dots), `IconTile`, `IconTileAdd`, `Carousel`, `PageDots`, `SegmentedPages`, `Tag`, `TagToggle`, `TagCloud`, `FlowLayout`, `Swatch`, `SwatchStack` (`monograms:`), `Monogram` (`ColorToken.stable(for:)`, `Initials`), `Stat` |
+| Feedback | `Banner`, `EmptyState`, `ErrorScreen`, `ProgressPanel`, `.progressOverlay(_:)` |
+| Layout and content | `Page`, `LabelledGroup` (with an `accessory:`), `SectionLabel`, `Hairline`, `Workspace` (`PanelSize`, `PanelToggle`, `.workspaceToolbar`), `.adaptiveSheet()`, `CodeBlock`, `CodeSpan`, `SyntaxTheme` |
 
 Modifiers that take tokens: `.foregroundStyle(_:)`, `.font(_:)`, `.glassSurface(_:cornerRadius:)`,
-`.glassCapsule(_:)`, `.glassMaterial(_:)`, `.surface(_:cornerRadius:)`, `.appearance(_:)`.
+`.glassCapsule(_:)`, `.surfaceGlass(_:)`, `.finish(_:in:)`, `.controlFinish(_:)`, `.accent(_:)`,
+`.surface(_:cornerRadius:)`, `.appearance(_:)`.
+
+Snapshot tests outside a real window (a package's test target) can't draw glass: set
+`.environment(\.rendersGlass, false)` there and every Vitral glass draws a plain surface of the
+same shape, so the pictures still check layout.
 
 ## Gallery
 
 `Gallery/` is an app that shows every token, resource and component, built only from Vitral
-itself. It also hosts the snapshot tests, because glass only renders in a real window.
+itself. It also hosts the snapshot tests, because glass only renders in a real window. Every
+sample has an ⓘ that shows its code: before each build, `Gallery/Scripts/ExtractSamples.swift`
+copies each `Sample("title") { … }` body out of the pages, so the code shown is the code that ran.
 
 ```bash
 cd Gallery

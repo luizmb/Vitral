@@ -118,7 +118,7 @@ struct KnobsPage: View {
                     label: Text("Treble")
                 )
             }
-            LabelledGroup(".knobStyle(_:) on a panel: every knob in it, one line") {
+            Sample(".knobStyle(_:) on a panel: every knob in it, one line") {
                 HStack(spacing: Space.large) {
                     ForEach(["Bass", "Middle", "Treble"], id: \.self) { name in
                         VStack(spacing: Space.small) {
@@ -134,7 +134,7 @@ struct KnobsPage: View {
                 .background { Backdrop(.texture(.leather)) }
                 .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
             }
-            LabelledGroup("JogDial: endless, in steps of 15°") {
+            Sample("JogDial: endless, in steps of 15°") {
                 VStack(spacing: Space.medium) {
                     JogDial(rotation: $model.jogRotation, lastTouch: $model.jogTouch, label: Text("Scrub"))
                         .frame(width: 200)
@@ -162,39 +162,46 @@ struct KnobGrid<Content: View>: View {
 
 /// A knob with its caption under it.
 struct KnobSample<Content: View>: View {
-    let caption: LocalizedStringKey
+    let caption: String
+    let file: String
     let content: Content
 
-    init(_ caption: LocalizedStringKey, @ViewBuilder content: () -> Content) {
+    init(_ caption: String, file: String = #fileID, @ViewBuilder content: () -> Content) {
         self.caption = caption
+        self.file = file
         self.content = content()
     }
 
     var body: some View {
         VStack(spacing: Space.small) {
             content.frame(width: 110, height: 130)
-            Text(caption)
-                .font(.detail)
-                .foregroundStyle(.inkMuted)
-                .multilineTextAlignment(.center)
+            HStack(alignment: .firstTextBaseline, spacing: Space.extraSmall) {
+                Text(LocalizedStringKey(caption))
+                    .font(.detail)
+                    .foregroundStyle(.inkMuted)
+                    .multilineTextAlignment(.center)
+                SampleInfoButton(title: caption, file: file)
+            }
         }
     }
 }
 
 /// An amp's panel: a knob on its backdrop, a caption over it.
 struct AmpPanel<Content: View>: View {
-    let caption: LocalizedStringKey
+    let caption: String
+    let file: String
     let backdrop: BackdropStyle
     let content: Content
 
-    init(_ caption: LocalizedStringKey, backdrop: BackdropStyle, @ViewBuilder content: () -> Content) {
+    init(_ caption: String, file: String = #fileID, backdrop: BackdropStyle, @ViewBuilder content: () -> Content) {
         self.caption = caption
+        self.file = file
         self.backdrop = backdrop
         self.content = content()
     }
 
     var body: some View {
-        LabelledGroup(caption) {
+        Sample(caption, file: file) {
             content
                 .frame(width: 150)
                 .padding(Space.large)

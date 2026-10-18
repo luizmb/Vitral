@@ -21,57 +21,20 @@ public extension View {
     }
 }
 
-/// Puts a finish under a view: glass on the view, anything else behind it.
+/// Puts a finish under a view: glass on the view itself (the fill and sheen between the glass and
+/// the content), anything else behind it.
 struct FinishModifier<S: InsettableShape>: ViewModifier {
     let finish: FinishToken
     let shape: S
 
     func body(content: Content) -> some View {
-        if finish.isGlass {
+        if let glass = finish.glass {
             content
-                .background { OnGlass(finish: finish, shape: shape) }
-                .glassLayer(finish.glassMaterial ?? GlassToken.clear.interactive(), in: shape)
+                .background { FillAndSheen(finish: finish, shape: shape) }
+                .glassLayer(glass, in: shape)
                 .overlay { GlassRim(shape: shape) }
         } else {
             content.background { FinishedShape(finish: finish, shape: shape) }
-        }
-    }
-}
-
-extension FinishToken {
-    /// The glass under a glass finish, when one is given.
-    var glassMaterial: GlassToken? {
-        switch self {
-        case let .glass(material): material
-        case let .mixed(_, glass, _): glass
-        case let .layered(base, _, _): base.glassMaterial
-        default: nil
-        }
-    }
-
-    /// Aqua's layers over it.
-    var effects: Set<FinishEffect> {
-        switch self {
-        case let .layered(base, effects, _): effects.union(base.effects)
-        default: []
-        }
-    }
-}
-
-/// What a glass finish lays over its glass: what's mixed in, then Aqua's layers.
-struct OnGlass<S: InsettableShape>: View {
-    let finish: FinishToken
-    let shape: S
-
-    var body: some View {
-        switch finish {
-        case let .mixed(mixed, _, amount):
-            FinishedShape(finish: mixed, shape: shape).opacity(amount)
-        case let .layered(base, effects, strength):
-            OnGlass(finish: base, shape: shape)
-                .overlay { GelLayers(tone: base.tone, effects: effects, strength: strength, shape: shape) }
-        default:
-            Color.clear
         }
     }
 }
@@ -87,82 +50,91 @@ public struct FinishedShape<S: InsettableShape>: View {
     }
 
     public var body: some View {
-        switch finish {
-        case let .glass(material):
-            GlassFinish(material: material, shape: shape)
-        case let .solid(colour):
-            shape.fill(Color(colour)).overlay { Rim(shape: shape) }
-        case let .gradient(colours):
-            shape.fill(LinearGradient(colors: colours.map { Color($0) }, startPoint: .top, endPoint: .bottom)).overlay { Rim(shape: shape) }
-        case let .texture(texture):
-            Image(texture).resizable(resizingMode: .tile).clipShape(shape).overlay { Rim(shape: shape) }
-        case let .aqua(colour):
-            AquaGel(colour: colour, shape: shape)
-        case .chrome:
-            shape
-                .fill(LinearGradient(colors: [.chromeHighlight, .chromeMid, .chromeShadow, .chromeMid].map { Color($0) }, startPoint: .top, endPoint: .bottom))
-                .overlay { shape.strokeBorder(Color(.chromeShadow), lineWidth: 0.75) }
-        case let .mixed(mixed, glass, amount):
-            FinishedShape(finish: mixed, shape: shape)
-                .opacity(amount)
-                .glassLayer(glass ?? GlassToken.clear.interactive(), in: shape)
+        if let glass = finish.glass {
+            FillAndSheen(finish: finish, shape: shape)
+                .glassLayer(glass, in: shape)
                 .overlay { GlassRim(shape: shape) }
-        case let .layered(base, effects, strength):
-            FinishedShape(finish: base, shape: shape)
-                .overlay { GelLayers(tone: base.tone, effects: effects, strength: strength, shape: shape) }
+        } else {
+            FillAndSheen(finish: finish, shape: shape)
         }
     }
 }
 
-/// Aqua's layers over a shape: the glow, the gloss, the rim, each when asked for.
-struct GelLayers<S: InsettableShape>: View {
+/// A finish's fill (`amount` of it on glass) and its sheen over it.
+struct FillAndSheen<S: InsettableShape>: View {
+    let finish: FinishToken
+    let shape: S
+
+    var body: some View {
+        ZStack {
+            finish.fill.map { fill in
+                FillShape(fill: fill, shape: shape, edged: finish.glass == nil).opacity(finish.glass == nil ? 1 : finish.amount)
+            }
+            if !finish.sheen.isNone {
+                SheenLayers(tone: finish.tone, sheen: finish.sheen, shape: shape)
+            }
+        }
+    }
+}
+
+/// A shape filled: a colour, a gradient, a texture, chrome or gel; `edged` gives it a light edge,
+/// as it has when it isn't on glass.
+struct FillShape<S: InsettableShape>: View {
+    let fill: FinishToken.Fill
+    let shape: S
+    let edged: Bool
+
+    var body: some View {
+        switch fill {
+        case let .colour(colour):
+            shape.fill(Color(colour)).overlay { if edged { Rim(shape: shape) } }
+        case let .gradient(colours):
+            shape.fill(LinearGradient(colors: colours.map { Color($0) }, startPoint: .top, endPoint: .bottom)).overlay { if edged { Rim(shape: shape) } }
+        case let .texture(texture):
+            Image(texture).resizable(resizingMode: .tile).clipShape(shape).overlay { if edged { Rim(shape: shape) } }
+        case .chrome:
+            shape
+                .fill(LinearGradient(colors: [.chromeHighlight, .chromeMid, .chromeShadow, .chromeMid].map { Color($0) }, startPoint: .top, endPoint: .bottom))
+                .overlay { shape.strokeBorder(Color(.chromeShadow), lineWidth: 0.75) }
+        case let .gel(colour):
+            GelBody(colour: colour, shape: shape, shadowed: edged)
+        }
+    }
+}
+
+/// Aqua's light over a shape: the glow, the gloss and the rim, each as strong as the sheen says.
+struct SheenLayers<S: InsettableShape>: View {
     let tone: ColorToken
-    let effects: Set<FinishEffect>
-    /// How strong the layers are (0 ... 1).
-    var strength: Double = 1
+    let sheen: FinishToken.Sheen
     let shape: S
 
     var body: some View {
         GeometryReader { proxy in
             ZStack {
-                if effects.contains(.glow) {
+                if sheen.glow > 0 {
                     // Light passing through, gathering at the bottom.
                     shape.fill(
                         RadialGradient(
-                            colors: [Color(tone).mix(with: .white, by: 0.6).opacity(0.85 * strength), .clear],
+                            colors: [Color(tone).mix(with: .white, by: 0.6).opacity(0.85 * sheen.glow), .clear],
                             center: UnitPoint(x: 0.5, y: 1),
                             startRadius: 0,
                             endRadius: max(proxy.size.width, proxy.size.height) * 0.6
                         )
                     )
                 }
-                if effects.contains(.gloss) {
+                if sheen.gloss > 0 {
                     Capsule()
-                        .fill(LinearGradient(colors: [Color(ColorToken.fixedWhite.opacity(0.9 * strength)), Color(ColorToken.fixedWhite.opacity(0.08 * strength))], startPoint: .top, endPoint: .bottom))
+                        .fill(LinearGradient(colors: [Color(ColorToken.fixedWhite.opacity(0.9 * sheen.gloss)), Color(ColorToken.fixedWhite.opacity(0.08 * sheen.gloss))], startPoint: .top, endPoint: .bottom))
                         .frame(width: proxy.size.width * 0.84, height: proxy.size.height * 0.48)
                         .position(x: proxy.size.width / 2, y: proxy.size.height * 0.28)
                 }
-                if effects.contains(.rim) {
-                    shape.strokeBorder(Color(tone).mix(with: .black, by: 0.4).opacity(strength), lineWidth: 0.8)
+                if sheen.rim > 0 {
+                    shape.strokeBorder(Color(tone).mix(with: .black, by: 0.4).opacity(sheen.rim), lineWidth: 0.8)
                 }
             }
             .clipShape(shape)
         }
         .allowsHitTesting(false)
-    }
-}
-
-/// Glass with a rim: a lighter, clearer glass than a panel's (answering touch unless a material
-/// is given, which keeps its own), and a bright edge catching the light from above, so a small
-/// control reads as a piece of glass rather than a white disc.
-struct GlassFinish<S: InsettableShape>: View {
-    let material: GlassToken?
-    let shape: S
-
-    var body: some View {
-        Color.clear
-            .glassLayer(material ?? GlassToken.clear.interactive(), in: shape)
-            .overlay { GlassRim(shape: shape) }
     }
 }
 
@@ -192,11 +164,12 @@ struct Rim<S: InsettableShape>: View {
     }
 }
 
-/// Aqua's gel: the colour darkening towards the top and lighter at the bottom, under the gloss,
-/// the glow and the rim.
-struct AquaGel<S: InsettableShape>: View {
+/// Aqua's gel body: the colour darkening towards the top and lighter at the bottom, with the
+/// shadow a drop of gel casts when it stands on its own.
+struct GelBody<S: InsettableShape>: View {
     let colour: ColorToken
     let shape: S
+    let shadowed: Bool
 
     var body: some View {
         shape
@@ -207,7 +180,6 @@ struct AquaGel<S: InsettableShape>: View {
                     endPoint: .bottom
                 )
             )
-            .overlay { GelLayers(tone: colour, effects: [.glow, .gloss, .rim], shape: shape) }
-            .shadow(color: Color(colour).mix(with: .black, by: 0.3).opacity(0.45), radius: 3, y: 2)
+            .shadow(color: Color(colour).mix(with: .black, by: 0.3).opacity(shadowed ? 0.45 : 0), radius: 3, y: 2)
     }
 }

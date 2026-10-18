@@ -8,14 +8,14 @@ import VitralTokens
 struct ButtonsPage: View {
     var body: some View {
         Page("Buttons") {
-            LabelledGroup("Pill") {
+            Sample("Pill") {
                 HStack(spacing: Space.medium) {
                     Pill { Label("12 compartments", systemImage: "circle.grid.2x2").padding(.horizontal, Space.medium).frame(height: Size.controlMedium) }
                     Pill(isActive: true, action: {}) { Image(systemName: "link").frame(width: Size.controlMedium, height: Size.controlMedium) }
                     Pill(action: {}) { Image(systemName: "plus").frame(width: Size.controlMedium, height: Size.controlMedium) }
                 }
             }
-            LabelledGroup("ButtonPrimary") {
+            Sample("ButtonPrimary") {
                 Panel {
                     VStack(alignment: .leading, spacing: Space.medium) {
                         ButtonPrimary("Calculate", icon: Image(.play), fillsWidth: true) {}
@@ -26,7 +26,7 @@ struct ButtonsPage: View {
                     }
                 }
             }
-            LabelledGroup("ButtonSecondary") {
+            Sample("ButtonSecondary") {
                 Panel {
                     VStack(alignment: .leading, spacing: Space.medium) {
                         ButtonSecondary("Try again", icon: Image(.retry), fillsWidth: true) {}
@@ -37,7 +37,17 @@ struct ButtonsPage: View {
                     }
                 }
             }
-            LabelledGroup("ActionBar") {
+            Sample("ToggleButtonLatched: a desk's mute and solo") {
+                Panel {
+                    HStack(spacing: Space.small) {
+                        ToggleButtonLatched(Text(verbatim: "M"), isOn: .constant(true), accessibilityLabel: Text("Mute"))
+                        ToggleButtonLatched(Text(verbatim: "S"), isOn: .constant(true), lit: .warning, litInk: .fixedBlack, accessibilityLabel: Text("Solo"))
+                        ToggleButtonLatched(Text(verbatim: "M"), isOn: .constant(false), accessibilityLabel: Text("Mute"))
+                        ToggleButtonLatched(Text(verbatim: "S"), isOn: .constant(false), lit: .warning, litInk: .fixedBlack, accessibilityLabel: Text("Solo"))
+                    }
+                }
+            }
+            Sample("ActionBar") {
                 Panel(padding: 0) {
                     ActionBar {
                         ActionBarButton("Edit", icon: Image(systemName: "pencil"), accessibilityLabel: "Edit") {}
@@ -54,19 +64,19 @@ struct ButtonsPage: View {
 struct SelectionPage: View {
     var body: some View {
         Page("Checkboxes and toggles") {
-            LabelledGroup("Checkbox") {
+            Sample("Checkbox") {
                 PanelList {
                     Checkbox("Track this compartment", isOn: .constant(true)).padding(.horizontal, Space.large)
                     Checkbox("Intake", isOn: .constant(false)).padding(.horizontal, Space.large)
                 }
             }
-            LabelledGroup("ToggleSwitch") {
+            Sample("ToggleSwitch") {
                 PanelList {
                     ToggleSwitch("Logarithmic axis", isOn: .constant(true)).padding(.horizontal, Space.large)
                     ToggleSwitch("Show grid", isOn: .constant(false)).padding(.horizontal, Space.large)
                 }
             }
-            LabelledGroup("SelectionMark") {
+            Sample("SelectionMark") {
                 Panel {
                     HStack(spacing: Space.extraLarge) {
                         SelectionMark(isSelected: true)
@@ -83,14 +93,14 @@ struct SelectionPage: View {
 struct ListsPage: View {
     var body: some View {
         Page("Panels and rows") {
-            LabelledGroup("Panel") {
+            Sample("Panel") {
                 Panel {
                     Text("Content on glass, padded.")
                         .font(.body)
                         .foregroundStyle(.ink)
                 }
             }
-            LabelledGroup("PanelList and Row") {
+            Sample("PanelList and Row") {
                 PanelList {
                     Row("Title only")
                     Row("With a subtitle", subtitle: "A second, quieter line")
@@ -99,7 +109,7 @@ struct ListsPage: View {
                     Row("Disclosure", showsDisclosure: true)
                 }
             }
-            LabelledGroup("Hairline") {
+            Sample("Hairline") {
                 Panel {
                     VStack(spacing: Space.medium) {
                         Hairline()
@@ -117,12 +127,12 @@ struct ListsPage: View {
 struct TagsPage: View {
     var body: some View {
         Page("Tags and swatches") {
-            LabelledGroup("Tag and TagCloud") {
+            Sample("Tag and TagCloud") {
                 Panel {
                     TagCloud(["Nuclear", "Dosimetry", "ICRP 137", "Inhalation", "Type S", "48 compartments", "Plasma"])
                 }
             }
-            LabelledGroup("Tag styles") {
+            Sample("Tag styles") {
                 Panel {
                     TagCloud {
                         Tag("Plain")
@@ -132,7 +142,7 @@ struct TagsPage: View {
                     }
                 }
             }
-            LabelledGroup("TagToggle") {
+            Sample("TagToggle") {
                 Panel {
                     TagCloud {
                         TagToggle("#swift", isOn: .constant(true))
@@ -142,7 +152,7 @@ struct TagsPage: View {
                     }
                 }
             }
-            LabelledGroup("Swatch and SwatchStack") {
+            Sample("Swatch and SwatchStack") {
                 Panel {
                     VStack(alignment: .leading, spacing: Space.medium) {
                         HStack(spacing: Space.small) {
@@ -157,7 +167,20 @@ struct TagsPage: View {
                     }
                 }
             }
-            LabelledGroup("Stat") {
+            Sample("Monogram and SwatchStack(monograms:): a name's own colour") {
+                Panel {
+                    VStack(alignment: .leading, spacing: Space.medium) {
+                        HStack(spacing: Space.small) {
+                            Monogram("AC/DC", diameter: 44)
+                            Monogram("Black Sabbath", diameter: 44)
+                            Monogram("Deep Purple", diameter: 44)
+                            Monogram("Iron Maiden", diameter: 44)
+                        }
+                        SwatchStack(monograms: ["Highway to Hell", "Paranoid", "Smoke on the Water", "The Trooper"])
+                    }
+                }
+            }
+            Sample("Stat") {
                 Panel {
                     HStack(spacing: Space.large) {
                         Stat(icon: Image(systemName: "square.stack.3d.up"), value: Text(verbatim: "48"), accessibilityLabel: Text("48 compartments"))
@@ -172,13 +195,13 @@ struct TagsPage: View {
 struct CardsPage: View {
     var body: some View {
         Page("Cards") {
-            LabelledGroup("CardAdd") {
+            Sample("CardAdd") {
                 CardAdd("New blank model") {}
             }
-            LabelledGroup("Title and subtitle") {
+            Sample("Title and subtitle") {
                 Card("Validation", subtitle: "Model to validate the software")
             }
-            LabelledGroup("With header and content") {
+            Sample("With header and content") {
                 Card("U-234 Inhalation", subtitle: "ICRP 137, Type S") {
                     HStack(spacing: Space.large) {
                         Stat(icon: Image(systemName: "square.stack.3d.up"), value: Text(verbatim: "48"), accessibilityLabel: Text("48 compartments"))
@@ -193,7 +216,7 @@ struct CardsPage: View {
                     }
                 }
             }
-            LabelledGroup("With a footer") {
+            Sample("With a footer") {
                 Card("Codeine → Morphine", subtitle: "Two substances, one metabolism") {
                     TagCloud(["Pharmacology", "PK"])
                 }
@@ -222,7 +245,7 @@ enum ChartScale: Hashable, Sendable {
 struct PickersPage: View {
     var body: some View {
         Page("Pickers") {
-            LabelledGroup("SegmentedControlGlass") {
+            Sample("SegmentedControlGlass") {
                 Panel {
                     VStack(spacing: Space.medium) {
                         SegmentedControlGlass(selection: .constant(ChartScale.logarithmic), options: [
@@ -237,14 +260,14 @@ struct PickersPage: View {
                     }
                 }
             }
-            LabelledGroup("RadioList") {
+            Sample("RadioList") {
                 RadioList(selection: .constant(Method.birchall), options: [
                     ChoiceOption(Method.birchall, title: "Birchall", detail: Text(verbatim: "exact")),
                     ChoiceOption(Method.rungeKutta4, title: "Runge-Kutta 4", detail: Text(verbatim: "fixed step")),
                     ChoiceOption(Method.rungeKutta45, title: "Runge-Kutta 45", detail: Text(verbatim: "adaptive"))
                 ])
             }
-            LabelledGroup("StepperJump") {
+            Sample("StepperJump") {
                 Panel {
                     VStack(spacing: Space.medium) {
                         StepperJump(value: .constant(200), fine: 1, coarse: 20)
@@ -259,7 +282,7 @@ struct PickersPage: View {
 struct FieldsPage: View {
     var body: some View {
         Page("Fields") {
-            LabelledGroup("FieldText") {
+            Sample("FieldText") {
                 Panel {
                     VStack(spacing: Space.medium) {
                         FieldText("Name", text: .constant(""))
@@ -268,7 +291,7 @@ struct FieldsPage: View {
                     }
                 }
             }
-            LabelledGroup("Statuses") {
+            Sample("Statuses") {
                 Panel {
                     VStack(spacing: Space.medium) {
                         FieldText("Email", text: .constant("luiz@ios.lu"), keyboard: .email, status: .success(Text("Looks right.")))
@@ -281,12 +304,12 @@ struct FieldsPage: View {
                     }
                 }
             }
-            LabelledGroup("FieldSecure") {
+            Sample("FieldSecure") {
                 Panel {
                     FieldSecure("Personal access token", text: .constant("ghp_secret"))
                 }
             }
-            LabelledGroup("FieldSearch") {
+            Sample("FieldSearch") {
                 Panel {
                     VStack(spacing: Space.medium) {
                         FieldSearch("Name, artist or tag", text: .constant(""))
@@ -301,7 +324,7 @@ struct FieldsPage: View {
 struct BannersPage: View {
     var body: some View {
         Page("Banners") {
-            LabelledGroup("Presets") {
+            Sample("Presets") {
                 VStack(spacing: Space.medium) {
                     Banner("Calculated in 0.4 s.", style: .info)
                     Banner("Saved to GitHub.", style: .success)
@@ -310,13 +333,13 @@ struct BannersPage: View {
                     Banner("Times are in days.", style: .neutral)
                 }
             }
-            LabelledGroup("Custom") {
+            Sample("Custom") {
                 Banner(
                     "Recording: every change is kept.",
                     style: .custom(foreground: .accent, background: ColorToken.accent.opacity(0.12), icon: Image(systemName: "record.circle"))
                 )
             }
-            LabelledGroup("With an action") {
+            Sample("With an action") {
                 Banner("This file changed on disk while you were editing it.", style: .warning)
                     .trailing { ButtonSecondary("Reload", size: .small) {} }
             }
@@ -327,23 +350,23 @@ struct BannersPage: View {
 struct EmptyStatesPage: View {
     var body: some View {
         Page("Empty and error states") {
-            LabelledGroup("EmptyState with an illustration and an action") {
+            Sample("EmptyState with an illustration and an action") {
                 Panel {
                     EmptyState("No models yet", message: Text("Make one from scratch, or import a file."), illustration: .empty)
                         .actions { ButtonPrimary("New model", icon: Image(.add)) {} }
                 }
             }
-            LabelledGroup("EmptyState with a symbol") {
+            Sample("EmptyState with a symbol") {
                 Panel {
                     EmptyState("Nothing selected", message: Text("Tap a track to edit it here."), icon: Image(systemName: "hand.tap"))
                 }
             }
-            LabelledGroup("ErrorScreen with retry") {
+            Sample("ErrorScreen with retry") {
                 Panel {
                     ErrorScreen("Couldn't sync", message: Text("GitHub didn't answer for \(30) seconds."), illustration: .offline) {}
                 }
             }
-            LabelledGroup("ErrorScreen without retry") {
+            Sample("ErrorScreen without retry") {
                 Panel {
                     ErrorScreen("This file can't be read", message: Text("It isn't a model Vitral knows."))
                 }
@@ -355,16 +378,16 @@ struct EmptyStatesPage: View {
 struct ProgressPage: View {
     var body: some View {
         Page("Progress") {
-            LabelledGroup("ProgressPanel, with a fraction") {
+            Sample("ProgressPanel, with a fraction") {
                 ProgressPanel("Importing 3 of 12", detail: Text(verbatim: "Highway to Hell.wav"), fraction: 0.25)
             }
-            LabelledGroup("ProgressPanel, the task and the whole job") {
+            Sample("ProgressPanel, the task and the whole job") {
                 ProgressPanel("Importing 3 of 12", detail: Text(verbatim: "Hells Bells.wav"), fraction: 0.6, overall: 0.2)
             }
-            LabelledGroup("ProgressPanel, without one") {
+            Sample("ProgressPanel, without one") {
                 ProgressPanel("Pushing to GitHub", detail: Text(verbatim: "feature/new-article"))
             }
-            LabelledGroup(".progressOverlay(_:)") {
+            Sample(".progressOverlay(_:)") {
                 OverlaySample(title: "Back in Black", subtitle: "AC/DC")
                     .progressOverlay(ProgressPanel("Importing 3 of 12", detail: Text(verbatim: "Hells Bells.wav"), fraction: 0.6, overall: 0.2))
                     .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
@@ -377,14 +400,14 @@ struct ProgressPage: View {
 struct OverlaysPage: View {
     var body: some View {
         Page("Overlays") {
-            LabelledGroup("Overlay, centred") {
+            Sample("Overlay, centred") {
                 OverlaySample(title: "Inhalation", subtitle: "Twelve compartments")
                     .overlay(isPresented: true) {
                         Tag("Locked while syncing", icon: Image(.lock), style: .tint(.blue))
                     }
                     .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
             }
-            LabelledGroup("Overlay(placement: .bottom)") {
+            Sample("Overlay(placement: .bottom)") {
                 OverlaySample(title: "Inhalation", subtitle: "Twelve compartments")
                     .overlay(isPresented: true, placement: .bottom) {
                         Banner("Saved to your library", style: .success)
@@ -392,23 +415,23 @@ struct OverlaysPage: View {
                     }
                     .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
             }
-            LabelledGroup("obscuring: .strong, a heavy blur") {
+            Sample("obscuring: .strong, a heavy blur") {
                 OverlaySample(title: "Inhalation", subtitle: "Twelve compartments")
                     .overlay(isPresented: true, obscuring: .strong) {
                         Tag("Locked while syncing", icon: Image(.lock), style: .tint(.blue))
                     }
                     .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
             }
-            LabelledGroup("obscuring: .dark, darkened") {
+            Sample("obscuring: .dark, darkened") {
                 OverlaySample(title: "Inhalation", subtitle: "Twelve compartments")
                     .overlay(isPresented: true, obscuring: .dark) {
                         ButtonPrimary("Unlock") {}
                     }
                     .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
             }
-            LabelledGroup("Overlay(placement: .topTrailing, material: .clear)") {
+            Sample("Overlay(placement: .topTrailing, glass: .clear)") {
                 OverlaySample(title: "Inhalation", subtitle: "Twelve compartments")
-                    .overlay(isPresented: true, placement: .topTrailing, material: .clear) {
+                    .overlay(isPresented: true, placement: .topTrailing, glass: .clear) {
                         Tag("Draft", icon: Image(.info), style: .tint(.amber))
                     }
                     .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))

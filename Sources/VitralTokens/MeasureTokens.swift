@@ -32,6 +32,10 @@ public enum Size {
     public static let selectionMark = 21.0
     /// One circle of a swatch stack.
     public static let swatch = 22.0
+    /// An icon in an icon group, an app icon's size.
+    public static let icon = 62.0
+    /// A tile in an icon group: the icon, a title of up to two lines and a line under it.
+    public static let iconTile = 116.0
     /// A divider's thickness.
     public static let hairline = 0.5
     /// The widest a small floating panel grows (progress, a short message): it reads as one

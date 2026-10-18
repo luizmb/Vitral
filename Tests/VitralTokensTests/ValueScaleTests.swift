@@ -1,5 +1,5 @@
 import Testing
-import VitralTokens
+@testable import VitralTokens
 
 @Suite struct ValueScaleTests {
     @Test func linearFractionsAndValuesRoundTrip() {
@@ -90,5 +90,61 @@ import VitralTokens
     @Test func detentsPullWhenClose() {
         #expect(TrackGeometry.snapped(0.51, to: [0.5]) == 0.5)
         #expect(TrackGeometry.snapped(0.6, to: [0.5]) == 0.6)
+    }
+}
+
+@Suite struct BreakpointTaperTests {
+    let scale = ValueScale(0 ... 10, precision: 3, taper: .breakpoints([.init(0, 0), .init(0.5, 2), .init(1, 10)]))
+
+    @Test func valuesFollowTheLinesBetweenBreakpoints() {
+        #expect(scale.value(at: 0.25) == 1)
+        #expect(scale.value(at: 0.75) == 6)
+        #expect(scale.fraction(of: 1) == 0.25)
+        #expect(scale.fraction(of: 6) == 0.75)
+    }
+
+    @Test func pastTheEndsTheEndsHold() {
+        let short = ValueScale(0 ... 10, taper: .breakpoints([.init(0.2, 2), .init(0.8, 8)]))
+        #expect(short.value(at: 0.1) == 2)
+        #expect(short.value(at: 0.9) == 8)
+        #expect(short.fraction(of: 1) == 0.2)
+        #expect(short.fraction(of: 9) == 0.8)
+    }
+
+    @Test func consoleGainPutsUnityTwoThirdsUp() {
+        let gain = ValueScale.consoleGain()
+        #expect(abs(gain.fraction(of: 1) - 2.0 / 3.0) < 0.000_1)
+        #expect(gain.value(at: 2.0 / 3.0) == 1)
+        #expect(abs(gain.fraction(of: ValueScale.gain(decibels: -12)) - 1.0 / 3.0) < 0.000_1)
+        #expect(gain.value(at: 1) == 2)
+    }
+
+    @Test func consoleGainIsSilentAtTheBottomAndBelowTheFloor() {
+        let gain = ValueScale.consoleGain()
+        #expect(gain.value(at: 0) == 0)
+        #expect(gain.fraction(of: 0) == 0)
+        #expect(gain.fraction(of: ValueScale.gain(decibels: -80)) == 0)
+    }
+
+    @Test func decibelReadoutIsSignedWithSilenceForNone() {
+        let gain = ValueScale.consoleGain()
+        #expect(gain.formatted(1) == "0.0")
+        #expect(gain.formatted(2) == "+6.0")
+        #expect(gain.formatted(0.5) == "\u{2212}6.0")
+        #expect(gain.formatted(0) == "−∞")
+    }
+}
+
+@Suite struct MonogramTests {
+    @Test func initialsAreTheFirstTwoWords() {
+        #expect(Initials.of("Highway to Hell") == "HT")
+        #expect(Initials.of("paranoid") == "P")
+        #expect(Initials.of("") == "")
+    }
+
+    @Test func aNameKeepsItsColour() {
+        #expect(ColorToken.stable(for: "AC/DC") == ColorToken.stable(for: "AC/DC"))
+        #expect(ColorToken.fnv1a("") == 0xCBF2_9CE4_8422_2325)
+        #expect(ColorToken.stable(for: "x", palette: []) == .inkMuted)
     }
 }

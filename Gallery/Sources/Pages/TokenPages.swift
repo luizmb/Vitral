@@ -109,7 +109,7 @@ struct RadiiPage: View {
             PanelList {
                 ForEach(Self.entries, id: \.name) { entry in
                     Row(LocalizedStringKey(entry.name), detail: Text("\(entry.value.formatted()) pt")) {
-                        Panel(material: .active, cornerRadius: entry.value, padding: 0) { EmptyView() }
+                        Panel(glass: .active, cornerRadius: entry.value, padding: 0) { EmptyView() }
                             .frame(width: Size.controlLarge, height: Size.controlLarge)
                     }
                     .padding(.vertical, Space.extraSmall)
@@ -141,7 +141,7 @@ struct TypePage: View {
     }
 }
 
-struct MaterialsPage: View {
+struct GlassPage: View {
     /// From clear to regular, the veil the dial in between.
     nonisolated static let ladder: [(name: String, token: GlassToken)] = [
         ("clear", .clear),
@@ -152,17 +152,17 @@ struct MaterialsPage: View {
     ]
 
     var body: some View {
-        Page("Materials") {
+        Page("Glass") {
             ForEach(MaterialLadder.backdrops, id: \.name) { backdrop in
                 LabelledGroup(LocalizedStringKey("Over \(backdrop.name)")) {
                     MaterialLadder(backdrop: backdrop.style)
                         .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
                 }
             }
-            LabelledGroup("active") {
-                Panel(material: .active) { TagCloud(["Chosen", "glass"]) }
+            Sample("active") {
+                Panel(glass: .active) { TagCloud(["Chosen", "glass"]) }
             }
-            LabelledGroup("FinishToken: what a control's surface is made of") {
+            Sample("FinishToken: what a control's surface is made of") {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 96), spacing: Space.medium)], spacing: Space.medium) {
                     ForEach(FinishesPage.finishes + FinishesPage.layered, id: \.name) { entry in
                         VStack(spacing: Space.extraSmall) {
@@ -184,7 +184,7 @@ struct MaterialLadder: View {
 
     var body: some View {
         VStack(spacing: Space.small) {
-            ForEach(MaterialsPage.ladder, id: \.name) { entry in
+            ForEach(GlassPage.ladder, id: \.name) { entry in
                 Row(LocalizedStringKey(entry.name), subtitle: "Glass over the backdrop")
                     .glassSurface(entry.token, cornerRadius: Radius.medium)
             }

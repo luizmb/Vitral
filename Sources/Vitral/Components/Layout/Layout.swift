@@ -18,18 +18,18 @@ public struct Hairline: View {
 
 /// Glass holding its content, padded.
 public struct Panel<Content: View>: View {
-    let material: GlassToken?
+    let glass: GlassToken?
     let cornerRadius: Double
     let padding: Double
     let content: Content
 
     public init(
-        material: GlassToken? = nil,
+        glass: GlassToken? = nil,
         cornerRadius: Double = Radius.card,
         padding: Double = Space.large,
         @ViewBuilder content: () -> Content
     ) {
-        self.material = material
+        self.glass = glass
         self.cornerRadius = cornerRadius
         self.padding = padding
         self.content = content()
@@ -39,7 +39,7 @@ public struct Panel<Content: View>: View {
         content
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .glassSurface(material, cornerRadius: cornerRadius)
+            .glassSurface(glass, cornerRadius: cornerRadius)
     }
 }
 
@@ -86,19 +86,30 @@ public struct SectionLabel: View {
     }
 }
 
-/// A titled group: a section label over its content.
-public struct LabelledGroup<Content: View>: View {
+/// A titled group: a section label over its content, and an optional accessory at the label's
+/// end (an info button, a count).
+public struct LabelledGroup<Content: View, Accessory: View>: View {
     let title: LocalizedStringKey
+    let accessory: Accessory
     let content: Content
 
-    public init(_ title: LocalizedStringKey, @ViewBuilder content: () -> Content) {
+    public init(
+        _ title: LocalizedStringKey,
+        @ViewBuilder accessory: () -> Accessory = { EmptyView() },
+        @ViewBuilder content: () -> Content
+    ) {
         self.title = title
+        self.accessory = accessory()
         self.content = content()
     }
 
     public var body: some View {
         VStack(alignment: .leading, spacing: Space.small) {
-            SectionLabel(title)
+            HStack(alignment: .firstTextBaseline, spacing: Space.small) {
+                SectionLabel(title)
+                Spacer(minLength: 0)
+                accessory
+            }
             content
         }
     }

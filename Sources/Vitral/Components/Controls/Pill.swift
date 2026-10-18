@@ -15,7 +15,7 @@ public struct Pill<Content: View>: View {
         self.content = content()
     }
 
-    var material: GlassToken {
+    var glass: GlassToken {
         (isActive ? GlassToken.active : .regular).interactive(action != nil)
     }
 
@@ -32,6 +32,6 @@ public struct Pill<Content: View>: View {
     var capsule: some View {
         content
             .foregroundStyle(.ink)
-            .glassCapsule(material)
+            .glassCapsule(glass)
     }
 }

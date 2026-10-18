@@ -84,7 +84,8 @@ public extension View {
 /// A fader: a thumb along a track, horizontal or vertical, between the scale's ends. A `centre`
 /// makes it two-way (pan, exposure), filling from the middle; `detents` pull the thumb onto
 /// values it passes near (0 dB, the centre); a double tap returns it to `resetValue`. Stateless:
-/// the value is the binding's.
+/// the value is the binding's. `onEditingEnded` is called when an edit is done (the finger lifts,
+/// a double tap resets, VoiceOver adjusts): the moment to commit it, or to mark an undo step.
 public struct Fader: View {
     @Binding var value: Double
     let scale: ValueScale
@@ -96,6 +97,7 @@ public struct Fader: View {
     let title: Text?
     let labels: FaderLabelPlacement
     let given: AnyFaderStyle?
+    let onEditingEnded: () -> Void
     let label: Text
 
     @Environment(\.faderStyle) private var environmentStyle
@@ -117,11 +119,12 @@ public struct Fader: View {
         title: Text? = nil,
         labels: FaderLabelPlacement = .none,
         style: some FaderStyle & Sendable,
+        onEditingEnded: @escaping () -> Void = {},
         label: Text
     ) {
         self.init(
             value: value, scale: scale, axis: axis, interaction: interaction, centre: centre, detents: detents,
-            resetValue: resetValue, title: title, labels: labels, given: AnyFaderStyle(style), label: label
+            resetValue: resetValue, title: title, labels: labels, given: AnyFaderStyle(style), onEditingEnded: onEditingEnded, label: label
         )
     }
 
@@ -136,11 +139,12 @@ public struct Fader: View {
         resetValue: Double? = nil,
         title: Text? = nil,
         labels: FaderLabelPlacement = .none,
+        onEditingEnded: @escaping () -> Void = {},
         label: Text
     ) {
         self.init(
             value: value, scale: scale, axis: axis, interaction: interaction, centre: centre, detents: detents,
-            resetValue: resetValue, title: title, labels: labels, given: nil, label: label
+            resetValue: resetValue, title: title, labels: labels, given: nil, onEditingEnded: onEditingEnded, label: label
         )
     }
 
@@ -155,6 +159,7 @@ public struct Fader: View {
         title: Text?,
         labels: FaderLabelPlacement,
         given: AnyFaderStyle?,
+        onEditingEnded: @escaping () -> Void,
         label: Text
     ) {
         self._value = value
@@ -167,6 +172,7 @@ public struct Fader: View {
         self.title = title
         self.labels = labels
         self.given = given
+        self.onEditingEnded = onEditingEnded
         self.label = label
     }
 
@@ -223,16 +229,23 @@ public struct Fader: View {
 
     var track: some View {
         GeometryReader { proxy in
-            style.makeBody(configuration)
-                .frame(width: proxy.size.width, height: proxy.size.height)
+            // A clear surface takes the touches, the drawing behind it none: interactive glass on a
+            // thumb would answer them itself and swallow a double tap.
+            Rectangle()
+                .fill(.clear)
+                .contentShape(Rectangle())
+                .background {
+                    style.makeBody(configuration)
+                        .allowsHitTesting(false)
+                }
                 .overlay {
                     if labels == .inside {
                         titleAndValue.padding(.horizontal, Space.medium).allowsHitTesting(false)
                     }
                 }
-                .contentShape(Rectangle())
+                .frame(width: proxy.size.width, height: proxy.size.height)
                 .gesture(drag(length: axis == .horizontal ? proxy.size.width : proxy.size.height))
-                .simultaneousGesture(TapGesture(count: 2).onEnded { if let resetValue { value = resetValue } })
+                .simultaneousGesture(TapGesture(count: 2).onEnded { reset() })
         }
         .frame(width: axis == .vertical ? style.breadth : nil, height: axis == .horizontal ? style.breadth : nil)
         .frame(maxWidth: axis == .horizontal ? .infinity : nil, maxHeight: axis == .vertical ? .infinity : nil)
@@ -245,6 +258,15 @@ public struct Fader: View {
             case .decrement: value = scale.stepped(value, by: -1)
             @unknown default: break
             }
+            onEditingEnded()
+        }
+    }
+
+    /// Back to `resetValue`, as one whole edit.
+    func reset() {
+        if let resetValue {
+            value = resetValue
+            onEditingEnded()
         }
     }
 
@@ -277,6 +299,7 @@ public struct Fader: View {
             }
             .onEnded { _ in
                 if case let .relative(dragStart) = interaction { dragStart.wrappedValue = nil }
+                onEditingEnded()
             }
     }
 }
@@ -524,22 +547,27 @@ struct GlassFader: View {
 /// scale printed beside it.
 public struct ConsoleFaderStyle: FaderStyle, Sendable {
     let ticks: [Double]
+    let unity: Double
     let lowestLabel: String?
     let slotColour: ColorToken
     let scaleColour: ColorToken
     let lineColour: ColorToken
 
     /// - Parameters:
-    ///   - ticks: the values printed on the scale (+10, 0, −10 … for dB).
+    ///   - ticks: the values printed on the scale, in the scale's own values (+10, 0, −10 … on a
+    ///     decibel scale; gains, `ValueScale.gain(decibels:)`, on a `consoleGain` one).
+    ///   - unity: the tick printed boldest and longest (0 dB; a gain of 1).
     ///   - lowestLabel: what the scale says at its lowest, when there's a tick there (−∞).
     public init(
         ticks: [Double],
+        unity: Double = 0,
         lowestLabel: String? = "−∞",
         slotColour: ColorToken = .fixedBlack,
         scaleColour: ColorToken = .inkMuted,
         lineColour: ColorToken = .fixedWhite
     ) {
         self.ticks = ticks
+        self.unity = unity
         self.lowestLabel = lowestLabel
         self.slotColour = slotColour
         self.scaleColour = scaleColour
@@ -581,10 +609,10 @@ struct ConsoleFader: View {
         ZStack {
             Rectangle()
                 .fill(Color(style.scaleColour))
-                .frame(width: frame.size(along: 1, across: tick == 0 ? 10 : 6).width, height: frame.size(along: 1, across: tick == 0 ? 10 : 6).height)
+                .frame(width: frame.size(along: 1, across: tick == style.unity ? 10 : 6).width, height: frame.size(along: 1, across: tick == style.unity ? 10 : 6).height)
                 .position(frame.point(configuration.scale.fraction(of: tick), across: 20))
             Text(verbatim: tick <= configuration.scale.lower ? (style.lowestLabel ?? configuration.scale.formatted(tick, places: 0)) : label(tick))
-                .font(.caption2.weight(tick == 0 ? .bold : .medium))
+                .font(.caption2.weight(tick == style.unity ? .bold : .medium))
                 .monospacedDigit()
                 .foregroundStyle(Color(style.scaleColour))
                 .fixedSize()
@@ -592,8 +620,12 @@ struct ConsoleFader: View {
         }
     }
 
+    /// A tick as the scale writes it, signed above zero on a plain number scale (a decibel
+    /// readout signs its own).
     func label(_ tick: Double) -> String {
-        tick > 0 ? "+" + configuration.scale.formatted(tick, places: 0) : configuration.scale.formatted(tick, places: 0)
+        configuration.scale.readout == .number && tick > 0
+            ? "+" + configuration.scale.formatted(tick, places: 0)
+            : configuration.scale.formatted(tick, places: 0)
     }
 
     /// The metal cap: brushed chrome, ridges across for the finger, and a white line where it reads.

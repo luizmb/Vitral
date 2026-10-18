@@ -29,14 +29,14 @@ import VitralTokens
 
 @Suite struct FinishTokenTests {
     @Test func layersKeepTheBasesColourAndTone() {
-        #expect(FinishToken.solid(.accent).gel().isColoured)
-        #expect(FinishToken.glass().gel().isColoured == false)
-        #expect(FinishToken.aqua(.accent).with(.gloss).tone == .accent)
+        #expect(FinishToken.solid(.accent).sheen(.aqua()).isColoured)
+        #expect(FinishToken.glass().sheen(.aqua()).isColoured == false)
+        #expect(FinishToken.aqua(.accent).sheen(gloss: 1).tone == .accent)
     }
 
     @Test func tintingGlassTintsOnlyUntintedGlass() {
         let tint = ColorToken.accent.opacity(0.6)
-        #expect(FinishToken.glass(.clear).gel(0.3).tintingGlass(tint) == FinishToken.glass(GlassToken.clear.tinted(tint)).gel(0.3))
+        #expect(FinishToken.glass(.clear).sheen(.aqua(0.3)).tintingGlass(tint) == FinishToken.glass(GlassToken.clear.tinted(tint)).sheen(.aqua(0.3)))
         #expect(FinishToken.glass().tintingGlass(tint) == .glass(GlassToken.clear.interactive().tinted(tint)))
         #expect(FinishToken.glass(GlassToken.clear.tinted(.washGreen)).tintingGlass(tint) == .glass(GlassToken.clear.tinted(.washGreen)))
         #expect(FinishToken.chrome.tintingGlass(tint) == .chrome)
@@ -49,13 +49,13 @@ import VitralTokens
     }
 
     @Test func overGlassIsGlassReadingAsItsMixOnlyPastHalf() {
-        #expect(FinishToken.aqua(.accent).overGlass(.clear, amount: 0.3).isGlass)
-        #expect(FinishToken.aqua(.accent).overGlass(.clear, amount: 0.3).isColoured == false)
-        #expect(FinishToken.aqua(.accent).overGlass(.clear, amount: 0.7).isColoured)
-        #expect(FinishToken.aqua(.accent).overGlass(amount: 2) == .mixed(.aqua(.accent), glass: nil, amount: 1))
+        #expect(FinishToken.aqua(.accent).onGlass(.clear, amount: 0.3).isGlass)
+        #expect(FinishToken.aqua(.accent).onGlass(.clear, amount: 0.3).isColoured == false)
+        #expect(FinishToken.aqua(.accent).onGlass(.clear, amount: 0.7).isColoured)
+        #expect(FinishToken.aqua(.accent).onGlass(amount: 2) == FinishToken(glass: GlassToken.clear.interactive(), fill: .gel(.accent), amount: 1, sheen: .aqua()))
     }
 
     @Test func gelIsEveryLayer() {
-        #expect(FinishToken.solid(.accent).gel(0.5) == .layered(.solid(.accent), [.gloss, .glow, .rim], strength: 0.5))
+        #expect(FinishToken.solid(.accent).sheen(.aqua(0.5)) == FinishToken(fill: .colour(.accent), sheen: FinishToken.Sheen(gloss: 0.5, glow: 0.5, rim: 0.5)))
     }
 }

@@ -16,10 +16,10 @@ struct FinishesPage: View {
     ]
 
     static let layered: [(name: String, finish: FinishToken)] = [
-        ("glass(.clear).gel(0.4)", .glass(.clear).gel(0.4)),
-        ("solid.gel()", .solid(.washGreen).gel()),
-        ("gradient.with(.gloss)", .gradient([.washAmber, .counterAccent]).with(.gloss)),
-        ("texture.with(.gloss, .rim)", .texture(.wood).with(.gloss, .rim))
+        ("glass(.clear).sheen(.aqua(0.4))", .glass(.clear).sheen(.aqua(0.4))),
+        ("solid.sheen(.aqua())", .solid(.washGreen).sheen(.aqua())),
+        ("gradient.sheen(gloss: 1)", .gradient([.washAmber, .counterAccent]).sheen(gloss: 1)),
+        ("texture.sheen(gloss: 1, rim: 1)", .texture(.wood).sheen(gloss: 1, rim: 1))
     ]
 
     /// The dials: how clear the glass is, how tinted, how much is mixed over it, how strong the
@@ -29,28 +29,28 @@ struct FinishesPage: View {
         ("glass(.clear)", .glass(.clear)),
         ("glass(.sheer)", .glass(.sheer)),
         ("clear, accent 0.3", .glass(GlassToken(.clear, tint: ColorToken.accent.opacity(0.3)))),
-        ("aqua.overGlass(amount: 0.15)", .aqua(.accent).overGlass(.clear, amount: 0.15)),
-        ("aqua.overGlass(amount: 0.4)", .aqua(.accent).overGlass(.clear, amount: 0.4)),
-        ("texture.overGlass(amount: 0.3)", .texture(.denim).overGlass(.clear, amount: 0.3)),
-        ("gradient.overGlass(amount: 0.5)", .gradient([.washViolet, .washPink]).overGlass(.clear, amount: 0.5)),
-        ("glass(.clear).gel(0.2)", .glass(.clear).gel(0.2)),
-        ("glass(.clear).gel(0.6)", .glass(.clear).gel(0.6))
+        ("aqua.onGlass(amount: 0.15)", .aqua(.accent).onGlass(.clear, amount: 0.15)),
+        ("aqua.onGlass(amount: 0.4)", .aqua(.accent).onGlass(.clear, amount: 0.4)),
+        ("texture.onGlass(amount: 0.3)", .texture(.denim).onGlass(.clear, amount: 0.3)),
+        ("gradient.onGlass(amount: 0.5)", .gradient([.washViolet, .washPink]).onGlass(.clear, amount: 0.5)),
+        ("glass(.clear).sheen(.aqua(0.2))", .glass(.clear).sheen(.aqua(0.2))),
+        ("glass(.clear).sheen(.aqua(0.6))", .glass(.clear).sheen(.aqua(0.6)))
     ]
 
     @Environment(GalleryModel.self) private var model
 
     var body: some View {
         Page("Finishes", backdrop: .glow()) {
-            LabelledGroup("FinishToken, on ButtonPrimary(finish:)") {
+            Sample("FinishToken, on ButtonPrimary(finish:)") {
                 FinishGrid(finishes: Self.finishes)
             }
-            LabelledGroup("Aqua's layers over anything: .gel(_:), .with(.gloss, .glow, .rim, strength:)") {
+            Sample("A sheen over anything: .sheen(.aqua(_:)), .sheen(gloss:glow:rim:)") {
                 FinishGrid(finishes: Self.layered)
             }
-            LabelledGroup("Levels: clearance, tint, .overGlass(_:amount:), gel strength") {
+            Sample("Levels: clearance, tint, .onGlass(_:amount:), sheen strength") {
                 FinishGrid(finishes: Self.levels)
             }
-            LabelledGroup("No finish: the system's glass") {
+            Sample("No finish: the system's glass") {
                 Panel {
                     HStack(spacing: Space.medium) {
                         ButtonPrimary("Save") {}
@@ -58,24 +58,24 @@ struct FinishesPage: View {
                     }
                 }
             }
-            LabelledGroup(".controlFinish(.glass(.clear).gel(0.25)): clearer, the primary tinted") {
+            Sample(".controlFinish(.glass(.clear).sheen(.aqua(0.25))): clearer, the primary tinted") {
                 Panel {
                     HStack(spacing: Space.medium) {
                         ButtonPrimary("Save") {}
                         ButtonSecondary("Cancel") {}
                     }
                 }
-                .controlFinish(.glass(.clear).gel(0.25))
+                .controlFinish(.glass(.clear).sheen(.aqua(0.25)))
             }
-            LabelledGroup("Fader thumbs and fills") {
+            Sample("Fader thumbs and fills") {
                 Panel {
                     VStack(spacing: Space.large) {
                         Fader(value: model.fader("finishGlass", 0.4), title: Text(verbatim: "glass (default)"), labels: .top, label: Text("Glass"))
                         Fader(
                             value: model.fader("finishGel", 0.6),
-                            title: Text(verbatim: "thumb: .glass(.clear).gel(0.4)"),
+                            title: Text(verbatim: "thumb: .glass(.clear).sheen(.aqua(0.4))"),
                             labels: .top,
-                            style: GlassFaderStyle(thumbFinish: .glass(.clear).gel(0.4)),
+                            style: GlassFaderStyle(thumbFinish: .glass(.clear).sheen(.aqua(0.4))),
                             label: Text("Gel")
                         )
                         Fader(
@@ -88,15 +88,15 @@ struct FinishesPage: View {
                         Fader(
                             value: model.fader("finishCentre", 64),
                             scale: ValueScale(0 ... 100, precision: 0),
-                            title: Text(verbatim: "Control Centre's, fill: .gradient.gel()"),
+                            title: Text(verbatim: "Control Centre's, fill: .gradient.sheen(.aqua())"),
                             labels: .inside,
-                            style: GlassFaderStyle(trackThickness: 44, thumb: .none, fillFinish: .gradient([.washViolet, .washPink]).gel()),
+                            style: GlassFaderStyle(trackThickness: 44, thumb: .none, fillFinish: .gradient([.washViolet, .washPink]).sheen(.aqua())),
                             label: Text("Level")
                         )
                     }
                 }
             }
-            LabelledGroup(".controlFinish(.aqua(.accent)), on a whole group") {
+            Sample(".controlFinish(.aqua(.accent)), on a whole group") {
                 Panel {
                     VStack(alignment: .leading, spacing: Space.large) {
                         HStack(spacing: Space.medium) {

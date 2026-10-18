@@ -2,7 +2,7 @@ import SwiftUI
 import VitralTokens
 
 /// What sits under the glass. Glass shows what's behind it, so over a flat colour it reads flat;
-/// a pattern or a material gives it something to bend.
+/// a pattern or a glass gives it something to bend.
 public enum BackdropStyle: Sendable {
     /// Graph paper: a fine line every `spacing` points and a stronger one every fifth. `origin` is
     /// where the grid's (0, 0) lands and `scale` its zoom, so a canvas that pans and zooms can slide

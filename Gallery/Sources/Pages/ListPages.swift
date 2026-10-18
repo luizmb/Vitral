@@ -31,7 +31,7 @@ struct GlassListPage: View {
 
     var body: some View {
         @Bindable var model = model
-        GlassList(selection: $model.selectedCompartment) {
+        GlassList(selection: $model.selectedCompartment, backdrop: .glow()) {
             GlassSection("Compartments", trailing: { Text(verbatim: "\(model.compartments.count)") }) {
                 ForEach(model.compartments) { compartment in
                     CompartmentRow(compartment: compartment, state: state(of: compartment), model: model)
@@ -52,8 +52,12 @@ struct GlassListPage: View {
                 Row("Highlighted", subtitle: "Firing, playing, just changed").rowState(.highlighted())
                 Row("Dimmed", subtitle: "Missing, unavailable").rowState(.dimmed)
             }
+            GlassSection("Plain controls: rows: .padded", rows: .padded) {
+                TextField("Title", text: .constant("Highway to Hell"))
+                Toggle("Count in", isOn: .constant(true))
+                Stepper("Bars before: 2", value: .constant(2), in: 0 ... 8)
+            }
         }
-        .background { Backdrop(.glow()) }
         .environment(\.editMode, $model.editMode)
         .toolbar { EditButton() }
         .navigationTitle("GlassList")
@@ -91,3 +95,4 @@ struct CompartmentRow: View {
         ]
     }
 }
+

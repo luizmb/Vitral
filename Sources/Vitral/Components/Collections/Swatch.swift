@@ -20,7 +20,8 @@ public struct Swatch: View {
             .overlay(Circle().strokeBorder(Color(.hairline), lineWidth: 1))
             .overlay {
                 label
-                    .font(.caption2.weight(.bold))
+                    // A big swatch is an icon: its initials grow with it.
+                    .font((diameter >= Size.controlMedium ? Font.title3 : .caption2).weight(.bold))
                     .foregroundStyle(.onAccent)
                     .shadow(radius: 1)
                     .minimumScaleFactor(0.5)

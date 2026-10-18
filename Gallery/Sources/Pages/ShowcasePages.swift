@@ -13,11 +13,11 @@ struct GlassShowcasePage: View {
 
     var body: some View {
         Page(LocalizedStringKey(route.name), backdrop: BackdropCatalogue.style(named: route.name)) {
-            ForEach(MaterialsPage.ladder, id: \.name) { rung in
+            ForEach(GlassPage.ladder, id: \.name) { rung in
                 LabelledGroup(LocalizedStringKey(rung.name)) {
                     GlassSampler()
                 }
-                .glassMaterial(rung.token)
+                .surfaceGlass(rung.token)
             }
         }
     }
@@ -50,7 +50,7 @@ struct GlassSampler: View {
 struct AppearancePage: View {
     var body: some View {
         Page("Appearance") {
-            LabelledGroup("AppearancePicker") {
+            Sample("AppearancePicker") {
                 AppearancePicker(selection: .constant(.system))
             }
             ForEach([Appearance.light, .dark], id: \.self) { appearance in

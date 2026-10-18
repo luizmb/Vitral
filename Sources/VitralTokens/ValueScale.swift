@@ -12,6 +12,39 @@ public struct ValueScale: Hashable, Sendable {
         case logarithmic
         /// Bunched at the low end for an exponent above 1, at the high end below 1.
         case power(Double)
+        /// Straight lines between breakpoints, each a value at a place along the control, for a
+        /// travel shaped exactly (a desk's gain fader, a camera's stops). The values rise with the
+        /// fractions; past the first and last breakpoints the control holds their values, and the
+        /// range still bounds what comes out.
+        case breakpoints([Breakpoint], measure: Measure = .value)
+    }
+
+    /// A value at a place along the control, `fraction` 0 ... 1 from the lowest.
+    public struct Breakpoint: Hashable, Sendable {
+        public var fraction: Double
+        public var value: Double
+
+        public init(_ fraction: Double, _ value: Double) {
+            self.fraction = fraction
+            self.value = value
+        }
+    }
+
+    /// What a taper's breakpoints are written in.
+    public enum Measure: Hashable, Sendable {
+        /// The values themselves.
+        case value
+        /// Decibels of a gain (a multiplier on amplitude, 1 for unity): the values are gains, the
+        /// breakpoints decibels. The first breakpoint is the floor: at or below it, silence (0).
+        case decibels
+    }
+
+    /// How a value is written.
+    public enum Readout: Hashable, Sendable {
+        /// The value, with the scale's decimal places.
+        case number
+        /// A gain in signed decibels (+6.0, −12.0), and `silence` for none.
+        case decibels(silence: String = "−∞")
     }
 
     public var lower: Double
@@ -19,17 +52,53 @@ public struct ValueScale: Hashable, Sendable {
     public var step: Double?
     public var precision: Int
     public var taper: Taper
+    public var readout: Readout
 
     /// - Parameters:
     ///   - range: the lowest and highest values.
     ///   - step: values land on multiples of it from the lowest; `nil` for any value.
-    ///   - precision: decimal places shown, and kept.
-    public init(_ range: ClosedRange<Double> = 0 ... 1, step: Double? = nil, precision: Int = 2, taper: Taper = .linear) {
+    ///   - precision: decimal places kept, and shown by a `.number` readout.
+    ///   - readout: how the value is written.
+    public init(
+        _ range: ClosedRange<Double> = 0 ... 1,
+        step: Double? = nil,
+        precision: Int = 2,
+        taper: Taper = .linear,
+        readout: Readout = .number
+    ) {
         self.lower = range.lowerBound
         self.upper = range.upperBound
         self.step = step
         self.precision = precision
         self.taper = taper
+        self.readout = readout
+    }
+
+    /// A mixing desk's gain fader: gains from silence to `headroom` decibels above unity, unity
+    /// `unity` of the way up, the `working` decibels below it over the next stretch down (where
+    /// most rides live, so the finest control is there), falling to `floor` decibels and then
+    /// silence at the bottom. Written in decibels.
+    public static func consoleGain(
+        unity: Double = 2.0 / 3.0,
+        headroom: Double = 20 * log10(2.0),
+        working: Double = -12,
+        floor: Double = -60,
+        precision: Int = 4
+    ) -> ValueScale {
+        ValueScale(
+            0 ... pow(10, headroom / 20),
+            precision: precision,
+            taper: .breakpoints(
+                [Breakpoint(0, floor), Breakpoint(unity / 2, working), Breakpoint(unity, 0), Breakpoint(1, headroom)],
+                measure: .decibels
+            ),
+            readout: .decibels()
+        )
+    }
+
+    /// The gain `decibels` stands for: 1 at 0 dB, 2 at about +6.
+    public static func gain(decibels: Double) -> Double {
+        pow(10, decibels / 20)
     }
 
     var span: Double { upper - lower }
@@ -60,9 +129,9 @@ public struct ValueScale: Hashable, Sendable {
         value(at: fraction(of: start) + distance / max(length, 1))
     }
 
-    /// `value` with its decimal places.
+    /// `value` as the readout writes it.
     public func formatted(_ value: Double) -> String {
-        String(format: "%.\(max(precision, 0))f", value)
+        formatted(value, places: readout == .number ? precision : 1)
     }
 
     /// Values for marks along the control: each step when there are at most `limit` of them,
@@ -86,9 +155,24 @@ public struct ValueScale: Hashable, Sendable {
         (0 ... 6).first { places in abs((interval * pow(10, Double(places))).rounded() - interval * pow(10, Double(places))) < 1e-9 } ?? 6
     }
 
-    /// `value` written with `places` decimal places, whatever the scale's precision.
+    /// `value` as the readout writes it, with `places` decimal places whatever the precision.
     public func formatted(_ value: Double, places: Int) -> String {
-        String(format: "%.\(max(places, 0))f", value)
+        switch readout {
+        case .number:
+            String(format: "%.\(max(places, 0))f", value)
+        case let .decibels(silence):
+            value > 0 ? Self.signed(20 * log10(value), places: places) : silence
+        }
+    }
+
+    /// `decibels` with its sign, a real minus below zero.
+    static func signed(_ decibels: Double, places: Int) -> String {
+        signed(String(format: "%.\(max(places, 0))f", abs(decibels)), positive: decibels > 0)
+    }
+
+    /// A magnitude already written, with its sign; none for zero.
+    static func signed(_ written: String, positive: Bool) -> String {
+        Double(written) == 0 ? written : (positive ? "+" : "\u{2212}") + written
     }
 
     /// How many steps the range holds (infinite without a step).
@@ -101,6 +185,8 @@ public struct ValueScale: Hashable, Sendable {
         switch taper {
         case .logarithmic where lower > 0: log(value / lower) / log(upper / lower)
         case let .power(exponent) where exponent > 0: pow(linearFraction(value), 1 / exponent)
+        case let .breakpoints(points, measure) where points.count > 1:
+            Self.fraction(of: measured(value, in: measure), along: points)
         default: linearFraction(value)
         }
     }
@@ -110,8 +196,52 @@ public struct ValueScale: Hashable, Sendable {
         switch taper {
         case .logarithmic where lower > 0: lower * pow(upper / lower, fraction)
         case let .power(exponent) where exponent > 0: lower + span * pow(fraction, exponent)
+        case let .breakpoints(points, measure) where points.count > 1:
+            unmeasured(Self.value(at: fraction, along: points), in: measure, floor: points[0].value)
         default: lower + span * fraction
         }
+    }
+
+    /// `value` in the breakpoints' measure.
+    func measured(_ value: Double, in measure: Measure) -> Double {
+        switch measure {
+        case .value: value
+        case .decibels: value > 0 ? 20 * log10(value) : -.infinity
+        }
+    }
+
+    /// A value from the breakpoints' measure: silence at or under the floor, in decibels.
+    func unmeasured(_ value: Double, in measure: Measure, floor: Double) -> Double {
+        switch measure {
+        case .value: value
+        case .decibels: value <= floor ? 0 : Self.gain(decibels: value)
+        }
+    }
+
+    /// Where `value` sits along the lines between `points`: the first and last points' places
+    /// beyond them.
+    static func fraction(of value: Double, along points: [Breakpoint]) -> Double {
+        zip(points, points.dropFirst())
+            .first { _, next in value < next.value }
+            .map { point, next in
+                value <= point.value
+                    ? point.fraction
+                    : point.fraction + (next.fraction - point.fraction) * (value - point.value) / (next.value - point.value)
+            }
+            ?? points[points.count - 1].fraction
+    }
+
+    /// The value at `fraction` along the lines between `points`: the first and last points'
+    /// values beyond them.
+    static func value(at fraction: Double, along points: [Breakpoint]) -> Double {
+        zip(points, points.dropFirst())
+            .first { _, next in fraction < next.fraction }
+            .map { point, next in
+                fraction <= point.fraction
+                    ? point.value
+                    : point.value + (next.value - point.value) * (fraction - point.fraction) / (next.fraction - point.fraction)
+            }
+            ?? points[points.count - 1].value
     }
 
     func linearFraction(_ value: Double) -> Double {

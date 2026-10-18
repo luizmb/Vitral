@@ -1,101 +1,142 @@
-/// What a control's surface is made of (a thumb, a cap, a button): a material built from the
-/// other tokens. Glass by default; or a solid colour, a gradient, a texture, chrome, or Aqua's gel
-/// (a saturated body glowing lighter at the bottom, a gloss over its top half). Each is a dial,
-/// not a look: how clear the glass is (`GlassToken`'s variant) and how tinted, how much of a
-/// colour, gradient, texture or gel is mixed over it (`.overGlass(_:amount:)`), how strong Aqua's
-/// layers are over any of them (`.gel(_:)`, `.with(_:strength:)`). A plain value, so a theme in
-/// the app's state can hold one; Vitral's bridging draws it, as it draws glass.
-public enum FinishToken: Hashable, Sendable {
-    /// Liquid glass: `material`, or clear glass answering touch; with a bright rim.
-    case glass(GlassToken? = nil)
-    case solid(ColorToken)
+/// What a control's surface is made of (a thumb, a cap, a button), in three layers from the
+/// bottom up:
+///
+/// 1. `glass`: the system's glass, or none.
+/// 2. `fill`: a colour, a gradient, a texture, chrome or Aqua's gel; on glass, `amount` of it
+///    shows (0 ... 1), so glass can carry a hint of a colour.
+/// 3. `sheen`: Aqua's light on top, each part as strong as asked (gloss, glow, rim).
+///
+/// ```swift
+/// .glass(.clear)                                         // clear glass
+/// .solid(.accent)                                        // a flat colour
+/// .aqua(.accent)                                         // Aqua's gel: the gel fill, full sheen
+/// .aqua(.accent).onGlass(.clear, amount: 0.2)            // clear glass with a hint of Aqua
+/// .glass(.clear).sheen(gloss: 0.2, glow: 0.2)            // clear glass, lightly glossed
+/// ```
+///
+/// A plain value, so a theme in the app's state can hold one; Vitral's bridging draws it.
+public struct FinishToken: Hashable, Sendable {
+    /// What colours a finish.
+    public enum Fill: Hashable, Sendable {
+        case colour(ColorToken)
+        /// Top to bottom.
+        case gradient([ColorToken])
+        case texture(Texture)
+        /// Polished metal.
+        case chrome
+        /// Aqua's gel body: the colour, darker at the top and lighter at the bottom.
+        case gel(ColorToken)
+    }
+
+    /// Aqua's light over a finish, each part 0 (none) ... 1.
+    public struct Sheen: Hashable, Sendable {
+        /// A white sheen over the top half, inset from the sides.
+        public var gloss: Double
+        /// Light gathering at the bottom, in the finish's own colour.
+        public var glow: Double
+        /// A darker edge, as a gel's.
+        public var rim: Double
+
+        public init(gloss: Double = 0, glow: Double = 0, rim: Double = 0) {
+            self.gloss = Self.unit(gloss)
+            self.glow = Self.unit(glow)
+            self.rim = Self.unit(rim)
+        }
+
+        public static let none = Sheen()
+
+        /// All three, `strength` strong: Aqua's whole sheen.
+        public static func aqua(_ strength: Double = 1) -> Sheen {
+            Sheen(gloss: strength, glow: strength, rim: strength)
+        }
+
+        public var isNone: Bool { self == .none }
+
+        static func unit(_ value: Double) -> Double { min(1, max(0, value)) }
+    }
+
+    public var glass: GlassToken?
+    public var fill: Fill?
+    /// How much of the fill shows over the glass (0 ... 1); without glass the fill is whole.
+    public var amount: Double
+    public var sheen: Sheen
+
+    public init(glass: GlassToken? = nil, fill: Fill? = nil, amount: Double = 1, sheen: Sheen = .none) {
+        self.glass = glass
+        self.fill = fill
+        self.amount = Sheen.unit(amount)
+        self.sheen = sheen
+    }
+
+    /// Glass: `glass`, or clear glass answering touch, with a bright rim.
+    public static func glass(_ glass: GlassToken? = nil) -> FinishToken {
+        FinishToken(glass: glass ?? GlassToken.clear.interactive())
+    }
+
+    public static func solid(_ colour: ColorToken) -> FinishToken {
+        FinishToken(fill: .colour(colour))
+    }
+
     /// Top to bottom.
-    case gradient([ColorToken])
-    case texture(Texture)
-    /// Aqua's gel, in `colour`.
-    case aqua(ColorToken)
+    public static func gradient(_ colours: [ColorToken]) -> FinishToken {
+        FinishToken(fill: .gradient(colours))
+    }
+
+    public static func texture(_ texture: Texture) -> FinishToken {
+        FinishToken(fill: .texture(texture))
+    }
+
     /// Polished chrome.
-    case chrome
-    /// `finish` over `glass` (clear glass answering touch when not given), `amount` of it
-    /// (0 ... 1): glass with a touch of a colour, a gradient, a texture or Aqua's gel.
-    indirect case mixed(FinishToken, glass: GlassToken?, amount: Double)
-    /// A finish with Aqua's layers over it, `strength` strong (0 ... 1): the gloss, the glow, the
-    /// rim, on glass, a colour, a gradient or a texture alike.
-    indirect case layered(FinishToken, Set<FinishEffect>, strength: Double)
+    public static let chrome = FinishToken(fill: .chrome)
 
-    /// This finish with `effects` over it, `strength` strong (0 ... 1).
-    public func with(_ effects: FinishEffect..., strength: Double = 1) -> FinishToken {
-        .layered(self, Set(effects), strength: strength)
+    /// Aqua's gel in `colour`: the gel fill under the whole sheen.
+    public static func aqua(_ colour: ColorToken) -> FinishToken {
+        FinishToken(fill: .gel(colour), sheen: .aqua())
     }
 
-    /// This finish as a gel: the gloss, the glow and the rim over it, `strength` strong (0 ... 1;
-    /// on glass, a little keeps it clear).
-    public func gel(_ strength: Double = 1) -> FinishToken {
-        with(.gloss, .glow, .rim, strength: strength)
+    /// This finish's fill over `glass` (clear glass answering touch when not given), `amount` of
+    /// it showing (0 ... 1); its sheen kept.
+    public func onGlass(_ glass: GlassToken? = nil, amount: Double) -> FinishToken {
+        FinishToken(glass: glass ?? self.glass ?? GlassToken.clear.interactive(), fill: fill, amount: amount, sheen: sheen)
     }
 
-    /// This finish laid over `glass`, `amount` of it (0 ... 1): `.aqua(.accent).overGlass(.clear,
-    /// amount: 0.3)` is clear glass with a hint of Aqua.
-    public func overGlass(_ glass: GlassToken? = nil, amount: Double) -> FinishToken {
-        .mixed(self, glass: glass, amount: min(1, max(0, amount)))
+    /// This finish with `sheen` on top.
+    public func sheen(_ sheen: Sheen) -> FinishToken {
+        FinishToken(glass: glass, fill: fill, amount: amount, sheen: sheen)
     }
 
-    /// Whether it's a colour, so text on it reads in the light ink rather than the dark.
+    /// This finish with Aqua's light on top, each part as strong as given (0 ... 1).
+    public func sheen(gloss: Double = 0, glow: Double = 0, rim: Double = 0) -> FinishToken {
+        sheen(Sheen(gloss: gloss, glow: glow, rim: rim))
+    }
+
+    /// Whether it reads as a colour, so text on it takes the light ink rather than the dark: a
+    /// colour, gradient or gel showing at least half, or glass tinted strongly.
     public var isColoured: Bool {
-        switch self {
-        case .solid, .gradient, .aqua: true
-        // Glass tinted strongly enough to read as the colour.
-        case let .glass(material): (material?.tint).map { $0.light.alpha >= 0.4 } ?? false
+        switch fill {
+        case .colour, .gradient, .gel: glass == nil || amount >= 0.5
         case .texture, .chrome: false
-        case let .mixed(finish, _, amount): amount >= 0.5 && finish.isColoured
-        case let .layered(base, _, _): base.isColoured
+        case nil: (glass?.tint).map { $0.light.alpha >= 0.4 } ?? false
         }
     }
 
-    /// This finish with its untinted glass tinted `tint`, everything else kept: how a primary
-    /// button stands out under a glass finish, as the system's prominent glass does.
+    /// This finish with its glass tinted `tint` when the glass has no tint of its own, everything
+    /// else kept: how a primary button stands out under a glass finish, as the system's prominent
+    /// glass does.
     public func tintingGlass(_ tint: ColorToken) -> FinishToken {
-        switch self {
-        case let .glass(material): .glass(Self.tinting(material, tint))
-        case let .mixed(finish, glass, amount): .mixed(finish, glass: Self.tinting(glass, tint), amount: amount)
-        case let .layered(base, effects, strength): .layered(base.tintingGlass(tint), effects, strength: strength)
-        default: self
-        }
-    }
-
-    private static func tinting(_ material: GlassToken?, _ tint: ColorToken) -> GlassToken {
-        (material ?? GlassToken.clear.interactive()).tinted(material?.tint ?? tint)
+        FinishToken(glass: glass.map { $0.tinted($0.tint ?? tint) }, fill: fill, amount: amount, sheen: sheen)
     }
 
     /// Whether it's glass underneath.
-    public var isGlass: Bool {
-        switch self {
-        case .glass, .mixed: true
-        case let .layered(base, _, _): base.isGlass
-        default: false
-        }
-    }
+    public var isGlass: Bool { glass != nil }
 
     /// The colour light picks up passing through it, for the glow.
     public var tone: ColorToken {
-        switch self {
-        case let .solid(colour), let .aqua(colour): colour
+        switch fill {
+        case let .colour(colour), let .gel(colour): colour
         case let .gradient(colours): colours.last ?? .fixedWhite
-        case let .glass(material): material?.tint?.opacity(1) ?? .fixedWhite
         case .texture, .chrome: .fixedWhite
-        case let .mixed(finish, _, _): finish.tone
-        case let .layered(base, _, _): base.tone
+        case nil: glass?.tint?.opacity(1) ?? .fixedWhite
         }
     }
 }
-
-/// One of Aqua's layers, to put over any finish.
-public enum FinishEffect: Hashable, Sendable {
-    /// A white sheen over the top half, inset from the sides.
-    case gloss
-    /// Light gathering at the bottom, in the finish's own colour.
-    case glow
-    /// A darker edge, as a gel's.
-    case rim
-}
-
