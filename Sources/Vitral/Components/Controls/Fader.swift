@@ -229,14 +229,21 @@ public struct Fader: View {
 
     var track: some View {
         GeometryReader { proxy in
-            style.makeBody(configuration)
-                .frame(width: proxy.size.width, height: proxy.size.height)
+            // A clear surface takes the touches, the drawing behind it none: interactive glass on a
+            // thumb would answer them itself and swallow a double tap.
+            Rectangle()
+                .fill(.clear)
+                .contentShape(Rectangle())
+                .background {
+                    style.makeBody(configuration)
+                        .allowsHitTesting(false)
+                }
                 .overlay {
                     if labels == .inside {
                         titleAndValue.padding(.horizontal, Space.medium).allowsHitTesting(false)
                     }
                 }
-                .contentShape(Rectangle())
+                .frame(width: proxy.size.width, height: proxy.size.height)
                 .gesture(drag(length: axis == .horizontal ? proxy.size.width : proxy.size.height))
                 .simultaneousGesture(TapGesture(count: 2).onEnded { reset() })
         }

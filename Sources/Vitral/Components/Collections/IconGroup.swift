@@ -181,6 +181,19 @@ public struct IconTile<Icon: View>: View {
     }
 
     public var body: some View {
+        // A button, not a tap gesture: in a scroll view (a group's pages scroll) SwiftUI places a
+        // tap gesture's hits off from where the tile is drawn; a button's are where it is. A hold
+        // is a long press that wins over the button, so lifting the finger after it doesn't tap too.
+        Button(action: tap) { face }
+            .buttonStyle(IconTileButtonStyle())
+            .highPriorityGesture(LongPressGesture(minimumDuration: 0.45).onEnded { _ in hold?() }, including: hold == nil ? .subviews : .all)
+            .opacity(isPicked == false ? 0.6 : 1)
+            .accessibilityElement(children: .combine)
+            .accessibilityAddTraits(isPicked == true ? .isSelected : [])
+            .modifier(OptionalAccessibility(label: accessibilityLabel, hint: accessibilityHint))
+    }
+
+    var face: some View {
         VStack(spacing: Space.extraSmall) {
             icon
                 .frame(width: Size.icon, height: Size.icon)
@@ -203,13 +216,15 @@ public struct IconTile<Icon: View>: View {
         }
         .frame(maxWidth: .infinity, alignment: .top)
         .contentShape(Rectangle())
-        .onTapGesture(perform: tap)
-        .onLongPressGesture { hold?() }
-        .opacity(isPicked == false ? 0.6 : 1)
-        .accessibilityElement(children: .combine)
-        .accessibilityAddTraits(.isButton)
-        .accessibilityAddTraits(isPicked == true ? .isSelected : [])
-        .modifier(OptionalAccessibility(label: accessibilityLabel, hint: accessibilityHint))
+    }
+}
+
+/// A tile pressed: a little smaller while the finger is down, as a home screen's icons are.
+struct IconTileButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.94 : 1)
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
     }
 }
 

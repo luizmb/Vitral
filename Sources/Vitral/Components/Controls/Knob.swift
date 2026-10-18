@@ -70,7 +70,8 @@ public extension View {
 /// A knob: turn it round, or drag it up and down, between the scale's ends. Stateless: the value
 /// is the binding's (a vertical drag also keeps where it started, in the app's state). It is as
 /// big as its frame, square. It looks as `style` says, else as the environment's `.knobStyle`.
-/// `onEditingEnded` is called when an edit is done (the finger lifts, VoiceOver adjusts).
+/// A double tap returns it to `resetValue` (a pan's centre). `onEditingEnded` is called when an
+/// edit is done (the finger lifts, a double tap resets, VoiceOver adjusts).
 public struct Knob: View {
     @Binding var value: Double
     let scale: ValueScale
@@ -78,6 +79,7 @@ public struct Knob: View {
     let startAngle: Double
     let endAngle: Double
     let style: AnyKnobStyle?
+    let resetValue: Double?
     let onEditingEnded: () -> Void
     let label: Text
 
@@ -94,12 +96,13 @@ public struct Knob: View {
         startAngle: Double = -135,
         endAngle: Double = 135,
         style: some KnobStyle & Sendable,
+        resetValue: Double? = nil,
         onEditingEnded: @escaping () -> Void = {},
         label: Text
     ) {
         self.init(
             value: value, scale: scale, interaction: interaction, startAngle: startAngle, endAngle: endAngle,
-            anyStyle: AnyKnobStyle(style), onEditingEnded: onEditingEnded, label: label
+            anyStyle: AnyKnobStyle(style), resetValue: resetValue, onEditingEnded: onEditingEnded, label: label
         )
     }
 
@@ -110,12 +113,13 @@ public struct Knob: View {
         interaction: KnobInteraction = .circular,
         startAngle: Double = -135,
         endAngle: Double = 135,
+        resetValue: Double? = nil,
         onEditingEnded: @escaping () -> Void = {},
         label: Text
     ) {
         self.init(
             value: value, scale: scale, interaction: interaction, startAngle: startAngle, endAngle: endAngle,
-            anyStyle: nil, onEditingEnded: onEditingEnded, label: label
+            anyStyle: nil, resetValue: resetValue, onEditingEnded: onEditingEnded, label: label
         )
     }
 
@@ -126,6 +130,7 @@ public struct Knob: View {
         startAngle: Double,
         endAngle: Double,
         anyStyle: AnyKnobStyle?,
+        resetValue: Double?,
         onEditingEnded: @escaping () -> Void,
         label: Text
     ) {
@@ -135,6 +140,7 @@ public struct Knob: View {
         self.startAngle = startAngle
         self.endAngle = endAngle
         self.style = anyStyle
+        self.resetValue = resetValue
         self.onEditingEnded = onEditingEnded
         self.label = label
     }
@@ -148,19 +154,27 @@ public struct Knob: View {
 
     public var body: some View {
         GeometryReader { proxy in
-            (style ?? environmentStyle).makeBody(
-                KnobConfiguration(
-                    value: value,
-                    fraction: scale.fraction(of: value),
-                    scale: scale,
-                    startAngle: startAngle,
-                    endAngle: endAngle,
-                    isDragging: isDragging
-                )
-            )
-            .frame(width: proxy.size.width, height: proxy.size.height)
-            .contentShape(Circle())
-            .gesture(drag(in: proxy.size))
+            // A clear disc takes the touches, the drawing behind it none: interactive glass would
+            // answer them itself.
+            Circle()
+                .fill(.clear)
+                .contentShape(Circle())
+                .background {
+                    (style ?? environmentStyle).makeBody(
+                        KnobConfiguration(
+                            value: value,
+                            fraction: scale.fraction(of: value),
+                            scale: scale,
+                            startAngle: startAngle,
+                            endAngle: endAngle,
+                            isDragging: isDragging
+                        )
+                    )
+                    .allowsHitTesting(false)
+                }
+                .frame(width: proxy.size.width, height: proxy.size.height)
+                .gesture(drag(in: proxy.size))
+                .simultaneousGesture(TapGesture(count: 2).onEnded { reset() })
         }
         .aspectRatio(1, contentMode: .fit)
         .accessibilityElement()
@@ -172,6 +186,14 @@ public struct Knob: View {
             case .decrement: value = scale.stepped(value, by: -1)
             @unknown default: break
             }
+            onEditingEnded()
+        }
+    }
+
+    /// Back to `resetValue`, as one whole edit.
+    func reset() {
+        if let resetValue {
+            value = resetValue
             onEditingEnded()
         }
     }

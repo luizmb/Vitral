@@ -85,6 +85,10 @@ struct GlassLayer<S: Shape>: ViewModifier {
             .background { SheerGlass(tint: glass.tint, shape: shape).opacity(glass.variant == .sheer ? 1 : 0) }
             .background { PlainSurface(tint: glass.tint, shape: shape).opacity(rendersGlass ? 0 : 1) }
             .glassEffect(rendersGlass ? .token(glass) : .identity, in: shape)
+            // Glass is a surface: all of it takes touches, not just what's drawn on it. A plain
+            // button holding a card would otherwise answer only on its text, and a tap on the
+            // card's empty glass would fall through to whatever is behind.
+            .contentShape(shape)
     }
 }
 
