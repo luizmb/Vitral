@@ -116,9 +116,11 @@ struct FadersPage: View {
 struct MixerDesk: View {
     @Environment(GalleryModel.self) private var model
 
-    /// −60 to +10 dB, unity three quarters of the way up, as a desk's faders are laid out.
-    static let decibels = ValueScale(-60 ... 10, precision: 1, taper: .power(0.54))
-    static let ticks: [Double] = [10, 5, 0, -5, -10, -20, -30, -40, -60]
+    /// Gains from silence to +6 dB, unity two thirds of the way up, the finest control in the
+    /// twelve decibels below it, as a desk's faders are laid out.
+    static let gain = ValueScale.consoleGain()
+    /// Printed in decibels, placed by the gains they stand for, silence at the bottom.
+    static let ticks: [Double] = [6, 0, -6, -12, -24, -40].map(ValueScale.gain(decibels:)) + [0]
 
     var body: some View {
         HStack(spacing: Space.small) {
@@ -135,16 +137,16 @@ struct MixerDesk: View {
                     )
                     .frame(width: 70)
                     Fader(
-                        value: model.fader("level\(channel)", 0),
-                        scale: Self.decibels,
+                        value: model.fader("level\(channel)", 1),
+                        scale: Self.gain,
                         axis: .vertical,
                         interaction: .relative(dragStart: model.faderStart("level\(channel)")),
-                        detents: [0],
-                        resetValue: 0,
+                        detents: [1],
+                        resetValue: 1,
                         label: Text("\(channel) level")
                     )
                     .frame(height: 260)
-                    Text(verbatim: Self.decibels.formatted(model.fader("level\(channel)", 0).wrappedValue) + " dB")
+                    Text(verbatim: Self.gain.formatted(model.fader("level\(channel)", 1).wrappedValue) + " dB")
                         .font(.caption2.weight(.semibold))
                         .monospacedDigit()
                         .foregroundStyle(Color(.fixedWhite))
@@ -157,7 +159,7 @@ struct MixerDesk: View {
             }
         }
         // One line sets the look of every level fader on the desk; the pans set their own.
-        .faderStyle(ConsoleFaderStyle(ticks: Self.ticks, scaleColour: .fixedWhite))
+        .faderStyle(ConsoleFaderStyle(ticks: Self.ticks, unity: 1, scaleColour: .fixedWhite))
         .padding(Space.small)
         .background { Backdrop(.texture(.metalPlate)) }
         .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))

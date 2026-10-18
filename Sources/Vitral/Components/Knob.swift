@@ -70,6 +70,7 @@ public extension View {
 /// A knob: turn it round, or drag it up and down, between the scale's ends. Stateless: the value
 /// is the binding's (a vertical drag also keeps where it started, in the app's state). It is as
 /// big as its frame, square. It looks as `style` says, else as the environment's `.knobStyle`.
+/// `onEditingEnded` is called when an edit is done (the finger lifts, VoiceOver adjusts).
 public struct Knob: View {
     @Binding var value: Double
     let scale: ValueScale
@@ -77,6 +78,7 @@ public struct Knob: View {
     let startAngle: Double
     let endAngle: Double
     let style: AnyKnobStyle?
+    let onEditingEnded: () -> Void
     let label: Text
 
     @Environment(\.knobStyle) private var environmentStyle
@@ -92,9 +94,13 @@ public struct Knob: View {
         startAngle: Double = -135,
         endAngle: Double = 135,
         style: some KnobStyle & Sendable,
+        onEditingEnded: @escaping () -> Void = {},
         label: Text
     ) {
-        self.init(value: value, scale: scale, interaction: interaction, startAngle: startAngle, endAngle: endAngle, anyStyle: AnyKnobStyle(style), label: label)
+        self.init(
+            value: value, scale: scale, interaction: interaction, startAngle: startAngle, endAngle: endAngle,
+            anyStyle: AnyKnobStyle(style), onEditingEnded: onEditingEnded, label: label
+        )
     }
 
     /// A knob in the environment's style (`.knobStyle(_:)`, glass unless set).
@@ -104,9 +110,13 @@ public struct Knob: View {
         interaction: KnobInteraction = .circular,
         startAngle: Double = -135,
         endAngle: Double = 135,
+        onEditingEnded: @escaping () -> Void = {},
         label: Text
     ) {
-        self.init(value: value, scale: scale, interaction: interaction, startAngle: startAngle, endAngle: endAngle, anyStyle: nil, label: label)
+        self.init(
+            value: value, scale: scale, interaction: interaction, startAngle: startAngle, endAngle: endAngle,
+            anyStyle: nil, onEditingEnded: onEditingEnded, label: label
+        )
     }
 
     init(
@@ -116,6 +126,7 @@ public struct Knob: View {
         startAngle: Double,
         endAngle: Double,
         anyStyle: AnyKnobStyle?,
+        onEditingEnded: @escaping () -> Void,
         label: Text
     ) {
         self._value = value
@@ -124,6 +135,7 @@ public struct Knob: View {
         self.startAngle = startAngle
         self.endAngle = endAngle
         self.style = anyStyle
+        self.onEditingEnded = onEditingEnded
         self.label = label
     }
 
@@ -160,6 +172,7 @@ public struct Knob: View {
             case .decrement: value = scale.stepped(value, by: -1)
             @unknown default: break
             }
+            onEditingEnded()
         }
     }
 
@@ -182,6 +195,7 @@ public struct Knob: View {
             }
             .onEnded { _ in
                 if case let .vertical(dragStart, _) = interaction { dragStart.wrappedValue = nil }
+                onEditingEnded()
             }
     }
 }
