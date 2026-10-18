@@ -90,7 +90,8 @@ struct GelLayers<S: InsettableShape>: View {
     }
 }
 
-/// Glass with a rim: a lighter, clearer glass than a panel's, and a bright edge catching the light
+/// Glass with a rim: a lighter, clearer glass than a panel's (answering touch unless a material
+/// is given, which keeps its own), and a bright edge catching the light
 /// from above, so a small control reads as a piece of glass rather than a white disc.
 struct GlassFinish<S: InsettableShape>: View {
     let material: GlassToken?
@@ -100,7 +101,7 @@ struct GlassFinish<S: InsettableShape>: View {
 
     var body: some View {
         Color.clear
-            .glassEffect(.token((material ?? .clear).interactive()), in: shape)
+            .glassEffect(.token(material ?? GlassToken.clear.interactive()), in: shape)
             .overlay {
                 shape.strokeBorder(
                     LinearGradient(colors: [Color(ColorToken.fixedWhite.opacity(0.95)), Color(ColorToken.fixedWhite.opacity(0.15))], startPoint: .top, endPoint: .bottom),
