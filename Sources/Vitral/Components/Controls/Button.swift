@@ -166,9 +166,10 @@ struct FinishButtonStyle: ButtonStyle {
             // The label leaves the glass style its vertical padding; this finish adds the same.
             .padding(.vertical, Space.medium / 2)
             .padding(.horizontal, Space.medium)
-            .finish(finish, in: Capsule())
-            .scaleEffect(configuration.isPressed ? 0.96 : 1)
-            .brightness(configuration.isPressed ? -0.06 : 0)
-            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+            .finish(finish.interactive(), in: Capsule())
+            // The press is the glass's own, the instant the finger lands, as the system's glass
+            // buttons answer: a button's pressed state comes late in a scroll view (it waits to see
+            // whether the touch is a scroll). Without glass, clear interactive glass answers.
+            .glassEffect(finish.isGlass ? .identity : Glass.clear.interactive(), in: Capsule())
     }
 }
