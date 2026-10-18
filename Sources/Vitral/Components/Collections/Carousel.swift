@@ -155,16 +155,23 @@ struct NativePageControl: UIViewRepresentable {
 
     func updateUIView(_ control: UIPageControl, context: Context) {
         context.coordinator.onChange = onChange
-        control.numberOfPages = count
-        control.currentPage = current
-        control.currentPageIndicatorTintColor = UIColor(Color(currentColour))
-        control.pageIndicatorTintColor = UIColor(Color(otherColour))
+        // Only what changed: SwiftUI updates the control on every environment change, and each
+        // assignment re-lays it out (and the colours are new objects every time).
+        if control.numberOfPages != count { control.numberOfPages = count }
+        if control.currentPage != current { control.currentPage = current }
+        if context.coordinator.colours != [currentColour, otherColour] {
+            context.coordinator.colours = [currentColour, otherColour]
+            control.currentPageIndicatorTintColor = UIColor(Color(currentColour))
+            control.pageIndicatorTintColor = UIColor(Color(otherColour))
+        }
     }
 
-    /// Passes UIKit's value-changed event on to the latest `onChange`; it holds no page of its own.
+    /// Passes UIKit's value-changed event on to the latest `onChange`, and remembers the colours it
+    /// last gave the control; it holds no page of its own.
     @MainActor
     final class Relay: NSObject {
         var onChange: @MainActor (Int) -> Void
+        var colours: [ColorToken] = []
 
         init(onChange: @escaping @MainActor (Int) -> Void) {
             self.onChange = onChange

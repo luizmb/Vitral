@@ -3,10 +3,13 @@ import VitralTokens
 
 /// A summary on glass: a title, an optional subtitle and any content under them (stats, a tag
 /// cloud). A header (a swatch stack, a tag) and a footer (an action bar) are added with
-/// `.header { }` and `.footer { }`, so a card carries only the parts it uses.
+/// `.header { }` and `.footer { }`, so a card carries only the parts it uses. The subtitle wraps to
+/// four lines unless `.subtitleLines(_:reservesSpace:)` says otherwise.
 public struct Card<Header: View, Content: View, Footer: View>: View {
     let title: Text
     let subtitle: Text?
+    var subtitleLines = 4
+    var reservesSubtitleSpace = false
     let header: Header
     let content: Content
     let footer: Footer
@@ -23,7 +26,7 @@ public struct Card<Header: View, Content: View, Footer: View>: View {
                         subtitle
                             .font(.subheadline)
                             .foregroundStyle(.inkMuted)
-                            .lineLimit(4)
+                            .lineLimit(subtitleLines, reservesSpace: reservesSubtitleSpace)
                     }
                 }
                 content
@@ -37,7 +40,19 @@ public struct Card<Header: View, Content: View, Footer: View>: View {
 
     /// Puts `header` above the title.
     public func header<NewHeader: View>(@ViewBuilder _ header: () -> NewHeader) -> Card<NewHeader, Content, Footer> {
-        Card<NewHeader, Content, Footer>(title: title, subtitle: subtitle, header: header(), content: content, footer: footer)
+        Card<NewHeader, Content, Footer>(
+            title: title, subtitle: subtitle, subtitleLines: subtitleLines, reservesSubtitleSpace: reservesSubtitleSpace,
+            header: header(), content: content, footer: footer
+        )
+    }
+
+    /// The subtitle wraps to `lines`; `reservesSpace` keeps that many lines' height however short
+    /// it is, so cards side by side in a grid line up.
+    public func subtitleLines(_ lines: Int, reservesSpace: Bool = true) -> Card {
+        Card(
+            title: title, subtitle: subtitle, subtitleLines: lines, reservesSubtitleSpace: reservesSpace,
+            header: header, content: content, footer: footer
+        )
     }
 
     /// Puts `footer` along the bottom edge, under a hairline.
@@ -45,6 +60,8 @@ public struct Card<Header: View, Content: View, Footer: View>: View {
         Card<Header, Content, VStack<TupleView<(Hairline, NewFooter)>>>(
             title: title,
             subtitle: subtitle,
+            subtitleLines: subtitleLines,
+            reservesSubtitleSpace: reservesSubtitleSpace,
             header: header,
             content: content,
             footer: VStack(spacing: 0) { Hairline(); footer() }
