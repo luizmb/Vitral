@@ -99,8 +99,10 @@ struct PlainSurface<S: Shape>: View {
     let shape: S
 
     var body: some View {
+        // Opaque, as frosted glass reads: the backdrop's colour, raised a touch.
         shape
-            .fill(Color(.neutralSurface))
+            .fill(Color(.backdrop))
+            .overlay { shape.fill(Color(.neutralSurface)) }
             .overlay { shape.fill(Color(tint ?? ColorToken.fixedWhite.opacity(0))) }
             .overlay { shape.stroke(Color(.hairline), lineWidth: 1) }
             .allowsHitTesting(false)
