@@ -2,15 +2,19 @@ import SwiftUI
 import Vitral
 import VitralTokens
 
-/// The Gallery's three shelves.
+/// The Gallery's shelves: the tokens and resources, then the components by what they're for.
 enum GallerySection: String, CaseIterable, Hashable {
-    case tokens, resources, components
+    case tokens, resources, surfaces, controls, collections, feedback, layout
 
     var title: LocalizedStringKey {
         switch self {
         case .tokens: "Tokens"
         case .resources: "Resources"
-        case .components: "Components"
+        case .surfaces: "Surfaces"
+        case .controls: "Controls"
+        case .collections: "Collections"
+        case .feedback: "Feedback"
+        case .layout: "Layout and content"
         }
     }
 
@@ -18,7 +22,11 @@ enum GallerySection: String, CaseIterable, Hashable {
         switch self {
         case .tokens: "The values everything is built from: colours, spacing, radii, sizes, type and glass."
         case .resources: "Icons and images that ship with Vitral, and wallpapers an app can take."
-        case .components: "Stateless SwiftUI views, small ones composed into bigger ones."
+        case .surfaces: "What things are made of and sit on: glass, finishes, tints, backdrops, overlays."
+        case .controls: "What a finger changes: buttons, toggles, pickers, fields, knobs, faders."
+        case .collections: "Many things at once: lists, cards, icon groups, carousels, tags."
+        case .feedback: "What the app says back: banners, empty and error states, progress."
+        case .layout: "How a screen is laid out, and code on it."
         }
     }
 
@@ -26,7 +34,11 @@ enum GallerySection: String, CaseIterable, Hashable {
         switch self {
         case .tokens: [.colours, .spacing, .radii, .sizes, .type, .materials]
         case .resources: [.icons, .images, .textures, .wallpapers]
-        case .components: [.appearance, .tints, .finishes, .code, .carousel, .iconGroups, .glassList, .knobs, .faders, .backdrops, .buttons, .selection, .pickers, .fields, .banners, .lists, .tags, .cards, .emptyStates, .progress, .overlays, .workspace]
+        case .surfaces: [.finishes, .tints, .appearance, .backdrops, .overlays]
+        case .controls: [.buttons, .selection, .pickers, .fields, .knobs, .faders]
+        case .collections: [.lists, .glassList, .cards, .iconGroups, .carousel, .tags]
+        case .feedback: [.banners, .emptyStates, .progress]
+        case .layout: [.workspace, .code]
         }
     }
 
@@ -35,7 +47,11 @@ enum GallerySection: String, CaseIterable, Hashable {
         switch self {
         case .tokens: [.accent, .warning, .danger, .ink, .inkFaint]
         case .resources: [.inkMuted, .accentTop]
-        case .components: [.accentBottom, .accentTop, .neutralSurface]
+        case .surfaces: [.washTeal, .washViolet, .washPink]
+        case .controls: [.accent, .counterAccent]
+        case .collections: [.washAmber, .washGreen, .washTeal, .washViolet]
+        case .feedback: [.info, .success, .warning, .danger]
+        case .layout: [.neutralSurface, .ink]
         }
     }
 }
@@ -53,7 +69,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .radii: "Corner radii"
         case .sizes: "Sizes"
         case .type: "Type"
-        case .materials: "Materials"
+        case .materials: "Glass"
         case .icons: "Icons"
         case .images: "Images"
         case .textures: "Textures"
@@ -90,14 +106,14 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .radii: "Concentric corners"
         case .sizes: "Controls, marks and hairlines"
         case .type: "Dynamic Type styles"
-        case .materials: "Glass, and finishes: solid, gradient, texture, chrome, Aqua"
+        case .materials: "GlassToken: regular, clear, sheer, veiled, tinted"
         case .icons: "Glyphs, by role"
         case .images: "Illustrations for empty and error states"
         case .textures: "Every repeating pattern, by glass"
         case .wallpapers: "Full-size: generated, and photos an app copies in"
         case .appearance: "AppearancePicker, .appearance(_:)"
         case .tints: "Tint, .accent(.counter)"
-        case .finishes: "Glass, solid, gradient, texture, chrome, Aqua's gel"
+        case .finishes: "FinishToken: glass, a fill, a sheen"
         case .code: "CodeBlock, SyntaxTheme, .code"
         case .carousel: "Carousel, PageDots, SegmentedPages"
         case .iconGroups: "IconGroup, IconTile, IconTileAdd: a home screen's folder"
@@ -128,7 +144,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .radii: RadiiPage()
         case .sizes: SizesPage()
         case .type: TypePage()
-        case .materials: MaterialsPage()
+        case .materials: GlassPage()
         case .icons: IconsPage()
         case .images: ImagesPage()
         case .textures: TexturesPage()

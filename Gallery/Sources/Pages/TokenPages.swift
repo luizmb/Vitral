@@ -141,7 +141,7 @@ struct TypePage: View {
     }
 }
 
-struct MaterialsPage: View {
+struct GlassPage: View {
     /// From clear to regular, the veil the dial in between.
     nonisolated static let ladder: [(name: String, token: GlassToken)] = [
         ("clear", .clear),
@@ -152,7 +152,7 @@ struct MaterialsPage: View {
     ]
 
     var body: some View {
-        Page("Materials") {
+        Page("Glass") {
             ForEach(MaterialLadder.backdrops, id: \.name) { backdrop in
                 LabelledGroup(LocalizedStringKey("Over \(backdrop.name)")) {
                     MaterialLadder(backdrop: backdrop.style)
@@ -184,7 +184,7 @@ struct MaterialLadder: View {
 
     var body: some View {
         VStack(spacing: Space.small) {
-            ForEach(MaterialsPage.ladder, id: \.name) { entry in
+            ForEach(GlassPage.ladder, id: \.name) { entry in
                 Row(LocalizedStringKey(entry.name), subtitle: "Glass over the backdrop")
                     .glassSurface(entry.token, cornerRadius: Radius.medium)
             }
