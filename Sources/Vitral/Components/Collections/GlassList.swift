@@ -13,16 +13,26 @@ import VitralTokens
 public struct GlassList<Selection: Hashable, Content: View>: View {
     let selection: Binding<Selection?>?
     let backdrop: BackdropStyle?
+    let rows: GlassRows?
     let content: Content
 
     @Environment(\.accent) private var accent
 
     /// A list whose rows are picked: tapping one reports its `tag` through `selection` (from the
     /// app's state, dispatching the choice). Show the chosen row with `.rowState(.selected)`.
-    /// - Parameter backdrop: drawn behind the list; `nil` (the default) for whatever is behind it.
-    public init(selection: Binding<Selection?>, backdrop: BackdropStyle? = nil, @ViewBuilder content: () -> Content) {
+    /// - Parameters:
+    ///   - backdrop: drawn behind the list; `nil` (the default) for whatever is behind it.
+    ///   - rows: puts the rows of plain `Section`s on glass too, placed this way; `nil` (the
+    ///     default) leaves that to each `GlassSection`.
+    public init(
+        selection: Binding<Selection?>,
+        backdrop: BackdropStyle? = nil,
+        rows: GlassRows? = nil,
+        @ViewBuilder content: () -> Content
+    ) {
         self.selection = selection
         self.backdrop = backdrop
+        self.rows = rows
         self.content = content()
     }
 
@@ -47,18 +57,28 @@ public struct GlassList<Selection: Hashable, Content: View>: View {
     @ViewBuilder
     var list: some View {
         if let selection {
-            List(selection: selection) { content }
+            List(selection: selection) { styledRows }
         } else {
-            List { content }
+            List { styledRows }
+        }
+    }
+
+    @ViewBuilder
+    var styledRows: some View {
+        if let rows {
+            content.modifier(GlassRowStyle(rows: rows))
+        } else {
+            content
         }
     }
 }
 
 public extension GlassList where Selection == Never {
     /// A list nothing is picked from.
-    init(backdrop: BackdropStyle? = nil, @ViewBuilder content: () -> Content) {
+    init(backdrop: BackdropStyle? = nil, rows: GlassRows? = nil, @ViewBuilder content: () -> Content) {
         self.selection = nil
         self.backdrop = backdrop
+        self.rows = rows
         self.content = content()
     }
 }
@@ -93,12 +113,7 @@ public struct GlassSection<Trailing: View, Content: View>: View {
 
     public var body: some View {
         Section {
-            content
-                .listRowInsets(rows == .edgeToEdge ? EdgeInsets() : nil)
-                .listRowBackground(GlassRowBackground())
-                .listRowSeparatorTint(Color(.hairline))
-                // One chevron for every row: rows that lead somewhere say so with `.disclosure()`.
-                .navigationLinkIndicatorVisibility(.hidden)
+            content.modifier(GlassRowStyle(rows: rows))
         } header: {
             if title != nil || Trailing.self != EmptyView.self {
                 HStack {
@@ -117,6 +132,21 @@ public struct GlassSection<Trailing: View, Content: View>: View {
 public extension GlassSection where Trailing == EmptyView {
     init(_ title: LocalizedStringKey? = nil, rows: GlassRows = .edgeToEdge, @ViewBuilder content: () -> Content) {
         self.init(title, rows: rows, trailing: { EmptyView() }, content: content)
+    }
+}
+
+/// Rows on the environment's glass, placed as `rows` says, with hairline separators. Edge to edge
+/// (Vitral's rows), the system's chevron is hidden: rows that lead somewhere say so with
+/// `.disclosure()`. Padded (plain controls), it stays.
+struct GlassRowStyle: ViewModifier {
+    let rows: GlassRows
+
+    func body(content: Content) -> some View {
+        content
+            .listRowInsets(rows == .edgeToEdge ? EdgeInsets() : nil)
+            .listRowBackground(GlassRowBackground())
+            .listRowSeparatorTint(Color(.hairline))
+            .navigationLinkIndicatorVisibility(rows == .edgeToEdge ? .hidden : .automatic)
     }
 }
 
