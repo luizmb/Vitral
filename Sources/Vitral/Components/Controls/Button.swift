@@ -18,13 +18,18 @@ public enum ButtonSize: Hashable, Sendable {
 /// A button's content: an optional icon and a title. Every button style draws this, so they all
 /// size and align alike. While `isBusy`, a spinner takes the icon's place.
 public struct ButtonLabel: View {
-    let title: LocalizedStringKey
+    let title: Text
     let icon: Image?
     let size: ButtonSize
     let fillsWidth: Bool
     let isBusy: Bool
 
     public init(_ title: LocalizedStringKey, icon: Image? = nil, size: ButtonSize = .large, fillsWidth: Bool = false, isBusy: Bool = false) {
+        self.init(Text(title), icon: icon, size: size, fillsWidth: fillsWidth, isBusy: isBusy)
+    }
+
+    /// A title already made: a localised resource from the app's state, a name shown as it is.
+    public init(_ title: Text, icon: Image? = nil, size: ButtonSize = .large, fillsWidth: Bool = false, isBusy: Bool = false) {
         self.title = title
         self.icon = icon
         self.size = size
@@ -39,7 +44,7 @@ public struct ButtonLabel: View {
             } else {
                 icon
             }
-            Text(title)
+            title
         }
         .font(size.type)
         .lineLimit(1)
@@ -64,6 +69,20 @@ public struct ButtonPrimary: View {
 
     public init(
         _ title: LocalizedStringKey,
+        icon: Image? = nil,
+        size: ButtonSize = .large,
+        fillsWidth: Bool = false,
+        isBusy: Bool = false,
+        finish: FinishToken? = nil,
+        action: @escaping @MainActor () -> Void
+    ) {
+        self.label = ButtonLabel(title, icon: icon, size: size, fillsWidth: fillsWidth, isBusy: isBusy)
+        self.finish = finish
+        self.action = action
+    }
+
+    public init(
+        _ title: Text,
         icon: Image? = nil,
         size: ButtonSize = .large,
         fillsWidth: Bool = false,
@@ -109,6 +128,20 @@ public struct ButtonSecondary: View {
 
     public init(
         _ title: LocalizedStringKey,
+        icon: Image? = nil,
+        size: ButtonSize = .large,
+        fillsWidth: Bool = false,
+        isBusy: Bool = false,
+        finish: FinishToken? = nil,
+        action: @escaping @MainActor () -> Void
+    ) {
+        self.label = ButtonLabel(title, icon: icon, size: size, fillsWidth: fillsWidth, isBusy: isBusy)
+        self.finish = finish
+        self.action = action
+    }
+
+    public init(
+        _ title: Text,
         icon: Image? = nil,
         size: ButtonSize = .large,
         fillsWidth: Bool = false,
