@@ -13,9 +13,53 @@ public extension View {
         environment(\.controlFinish, finish)
     }
 
-    /// Fills the space behind this view with `finish`, cut to `shape`.
+    /// Makes this view's surface `finish`, cut to `shape`. Glass is applied to the view itself, as
+    /// SwiftUI's glass is (its layers between the glass and the content), so the glass never
+    /// refracts the content on it; any other finish fills the space behind.
     func finish(_ finish: FinishToken, in shape: some InsettableShape) -> some View {
-        background { FinishedShape(finish: finish, shape: shape) }
+        modifier(FinishModifier(finish: finish, shape: shape))
+    }
+}
+
+/// Puts a finish under a view: glass on the view, anything else behind it.
+struct FinishModifier<S: InsettableShape>: ViewModifier {
+    let finish: FinishToken
+    let shape: S
+
+    func body(content: Content) -> some View {
+        if finish.isGlass {
+            content
+                .background { GelLayers(tone: finish.tone, effects: finish.effects, strength: 0.35, shape: shape) }
+                .glassEffect(.token(finish.glassMaterial ?? GlassToken.clear.interactive()), in: shape)
+                .overlay {
+                    shape.strokeBorder(
+                        LinearGradient(colors: [Color(ColorToken.fixedWhite.opacity(0.95)), Color(ColorToken.fixedWhite.opacity(0.15))], startPoint: .top, endPoint: .bottom),
+                        lineWidth: 1.2
+                    )
+                    .allowsHitTesting(false)
+                }
+        } else {
+            content.background { FinishedShape(finish: finish, shape: shape) }
+        }
+    }
+}
+
+extension FinishToken {
+    /// The glass under a glass finish, when one is given.
+    var glassMaterial: GlassToken? {
+        switch self {
+        case let .glass(material): material
+        case let .layered(base, _): base.glassMaterial
+        default: nil
+        }
+    }
+
+    /// Aqua's layers over it.
+    var effects: Set<FinishEffect> {
+        switch self {
+        case let .layered(base, effects): effects.union(base.effects)
+        default: []
+        }
     }
 }
 
