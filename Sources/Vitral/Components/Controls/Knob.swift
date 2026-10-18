@@ -154,27 +154,31 @@ public struct Knob: View {
 
     public var body: some View {
         GeometryReader { proxy in
-            // A clear disc takes the touches, the drawing behind it none: interactive glass would
-            // answer them itself.
-            Circle()
-                .fill(.clear)
-                .contentShape(Circle())
-                .background {
-                    (style ?? environmentStyle).makeBody(
-                        KnobConfiguration(
-                            value: value,
-                            fraction: scale.fraction(of: value),
-                            scale: scale,
-                            startAngle: startAngle,
-                            endAngle: endAngle,
-                            isDragging: isDragging
-                        )
+            // The drawing takes no touches (interactive glass would answer them itself); a clear
+            // disc on top takes them all.
+            (style ?? environmentStyle).makeBody(
+                KnobConfiguration(
+                    value: value,
+                    fraction: scale.fraction(of: value),
+                    scale: scale,
+                    startAngle: startAngle,
+                    endAngle: endAngle,
+                    isDragging: isDragging
+                )
+            )
+            .frame(width: proxy.size.width, height: proxy.size.height)
+            .allowsHitTesting(false)
+            .overlay {
+                Circle()
+                    .fill(.clear)
+                    .contentShape(Circle())
+                    .gesture(drag(in: proxy.size), including: resetValue == nil ? .all : .subviews)
+                    // With a reset, the double tap comes first and the drag once it can't be one.
+                    .gesture(
+                        TapGesture(count: 2).onEnded { reset() }.exclusively(before: drag(in: proxy.size)),
+                        including: resetValue == nil ? .subviews : .all
                     )
-                    .allowsHitTesting(false)
-                }
-                .frame(width: proxy.size.width, height: proxy.size.height)
-                .gesture(drag(in: proxy.size))
-                .simultaneousGesture(TapGesture(count: 2).onEnded { reset() })
+            }
         }
         .aspectRatio(1, contentMode: .fit)
         .accessibilityElement()
