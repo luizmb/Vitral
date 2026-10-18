@@ -70,29 +70,29 @@ struct GlassMaterial<S: Shape>: ViewModifier {
     let material: GlassToken
     let shape: S
 
+    // One path for every variant: a branch around `glassEffect` blanked whole
+    // `GlassEffectContainer`s. `sheer` is the system's identity glass with Vitral's layer behind.
     func body(content: Content) -> some View {
-        if material.variant == .sheer {
-            content.background { SheerGlass(tint: material.tint, shape: shape) }
-        } else {
-            content.glassEffect(.token(material), in: shape)
-        }
+        content
+            .background { SheerGlass(tint: material.tint, shape: shape).opacity(material.variant == .sheer ? 1 : 0) }
+            .glassEffect(.token(material), in: shape)
     }
 }
 
-/// Glass that blurs nothing: a faint tint, and light catching its top.
+/// Glass that blurs nothing: crystal clear, its tint (if any) and light catching its top.
 struct SheerGlass<S: Shape>: View {
     let tint: ColorToken?
     let shape: S
 
     var body: some View {
         shape
-            .fill(Color(tint ?? ColorToken.fixedWhite.opacity(0.08)))
+            .fill(Color(tint ?? ColorToken.fixedWhite.opacity(0)))
             .overlay {
                 shape.fill(
                     LinearGradient(
-                        colors: [Color(ColorToken.fixedWhite.opacity(0.28)), Color(ColorToken.fixedWhite.opacity(0.04)), .clear],
+                        colors: [Color(ColorToken.fixedWhite.opacity(0.12)), .clear],
                         startPoint: .top,
-                        endPoint: .bottom
+                        endPoint: UnitPoint(x: 0.5, y: 0.4)
                     )
                 )
             }
