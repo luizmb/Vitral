@@ -196,12 +196,12 @@ public struct Knob: View {
     func drag(in size: CGSize) -> some Gesture {
         DragGesture(minimumDistance: 0)
             .onChanged { drag in
-                // As a fader: written on landing and past the slop, never for a tap's wobble, so a
-                // double tap's reset stands.
+                // As a fader: only a drag past the slop writes, and a tap's landing too unless the
+                // knob resets on a double tap (whose second touch arrives after the reset).
                 let moved = TrackGeometry.isDragging(dx: drag.translation.width, dy: drag.translation.height)
                 switch interaction {
                 case .circular:
-                    guard moved || drag.translation == .zero else { return }
+                    guard moved || (drag.translation == .zero && resetValue == nil) else { return }
                     value = scale.value(
                         at: DialGeometry.fraction(
                             forAngle: DialGeometry.angle(dx: drag.location.x - size.width / 2, dy: drag.location.y - size.height / 2),
