@@ -54,7 +54,7 @@ struct CarouselSample: View {
                     TagCloud(card.tags.map { LocalizedStringKey($0) })
                 }
             }
-            PageDots(CarouselCard.all.map(\.id), selection: $selection)
+            PageDots(CarouselCard.all.map(\.id), selection: $selection, pageLabel: { Text("Page \($0) of \($1)") })
         }
         .padding(.vertical, Space.extraLarge)
         .background { Backdrop(.waves()) }

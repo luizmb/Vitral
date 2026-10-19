@@ -84,12 +84,16 @@ public struct Carousel<Item: Identifiable, Content: View>: View where Item.ID: S
 public struct PageDots<ID: Hashable & Sendable>: View {
     @Binding var selection: ID?
     let ids: [ID]
+    let pageLabel: (Int, Int) -> Text
 
     @Environment(\.accent) private var accent
 
-    public init(_ ids: [ID], selection: Binding<ID?>) {
+    /// - Parameter pageLabel: what VoiceOver says for a page's dot, given its number and the count
+    ///   ("Page 2 of 5"), where the dots are Vitral's own (on iOS the system's control reads itself).
+    public init(_ ids: [ID], selection: Binding<ID?>, pageLabel: @escaping (Int, Int) -> Text) {
         self.ids = ids
         self._selection = selection
+        self.pageLabel = pageLabel
     }
 
     var index: Int {
@@ -115,6 +119,8 @@ public struct PageDots<ID: Hashable & Sendable>: View {
                         .contentShape(Circle())
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(pageLabel(page + 1, ids.count))
+                .accessibilityAddTraits(id == selection ? .isSelected : [])
             }
         }
         .padding(.horizontal, Space.small)

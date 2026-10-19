@@ -189,7 +189,7 @@ public struct FieldSearch: View {
     let clearLabel: LocalizedStringKey
 
     /// - Parameter clearLabel: what VoiceOver says for the clear button.
-    public init(_ placeholder: LocalizedStringKey, text: Binding<String>, clearLabel: LocalizedStringKey = "Clear") {
+    public init(_ placeholder: LocalizedStringKey, text: Binding<String>, clearLabel: LocalizedStringKey) {
         self.placeholder = placeholder
         self._text = text
         self.clearLabel = clearLabel

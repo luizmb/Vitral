@@ -37,6 +37,8 @@ struct FormsPage: View {
                         entries: model.formEntries,
                         draft: $model.formDraft,
                         placeholder: "Another name",
+                        addTitle: "Add",
+                        removeLabel: { Text("Remove \($0)") },
                         onRemove: { model.formEntries.remove(at: $0) },
                         onAdd: {
                             model.formEntries.append(model.formDraft.trimmingCharacters(in: .whitespaces))

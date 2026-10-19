@@ -41,7 +41,7 @@ struct IconGroupPage: View {
         @Bindable var model = model
         Page("Icon groups") {
             Sample("IconGroup with a header, page dots and a footer") {
-                IconGroup(DemoIcon.all, page: $model.iconPage) { icon in
+                IconGroup(DemoIcon.all, page: $model.iconPage, pageLabel: { Text("Page \($0) of \($1)") }) { icon in
                     IconTile(
                         Text(verbatim: icon.title),
                         subtitle: Text(verbatim: icon.subtitle),
@@ -72,7 +72,7 @@ struct IconGroupPage: View {
                     page: .constant(0),
                     columns: 4,
                     rows: 2,
-                    showsPageControl: false
+                    pageLabel: nil
                 ) { slot in
                     switch slot {
                     case .add:

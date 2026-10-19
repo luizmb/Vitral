@@ -86,31 +86,28 @@ public struct ErrorScreen: View {
     let title: LocalizedStringKey
     let message: Text?
     let illustration: Illustration
-    let retryTitle: LocalizedStringKey
-    let onRetry: (@MainActor () -> Void)?
+    let retry: (title: LocalizedStringKey, action: @MainActor () -> Void)?
 
     /// - Parameters:
     ///   - message: what happened, in the reader's terms. `Text` so it can carry values
     ///     ("Couldn't reach \(host)").
-    ///   - onRetry: shows a "try again" button when given.
+    ///   - retry: a button to try again, its title and what it does; none when nil.
     public init(
         _ title: LocalizedStringKey,
         message: Text? = nil,
         illustration: Illustration = .error,
-        retryTitle: LocalizedStringKey = "Try again",
-        onRetry: (@MainActor () -> Void)? = nil
+        retry: (title: LocalizedStringKey, action: @MainActor () -> Void)? = nil
     ) {
         self.title = title
         self.message = message
         self.illustration = illustration
-        self.retryTitle = retryTitle
-        self.onRetry = onRetry
+        self.retry = retry
     }
 
     public var body: some View {
         EmptyState(title, message: message, illustration: illustration)
             .actions {
-                onRetry.map { retry in ButtonPrimary(retryTitle, icon: Image(.retry), action: retry) }
+                retry.map { retry in ButtonPrimary(retry.title, icon: Image(.retry), action: retry.action) }
             }
     }
 }

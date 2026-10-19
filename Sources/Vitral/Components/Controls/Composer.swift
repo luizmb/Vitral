@@ -24,7 +24,7 @@ public struct Composer<Accessory: View>: View {
         text: Binding<String>,
         isEditable: Bool = true,
         isBusy: Bool = false,
-        sendLabel: LocalizedStringKey = "Send",
+        sendLabel: LocalizedStringKey,
         @ViewBuilder accessory: () -> Accessory = { EmptyView() },
         send: @escaping @MainActor () -> Void
     ) {

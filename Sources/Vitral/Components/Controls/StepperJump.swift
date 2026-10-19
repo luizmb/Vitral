@@ -28,8 +28,8 @@ public struct StepperJump: View {
         fine: Int = 1,
         coarse: Int = 10,
         range: ClosedRange<Int> = 1 ... .max,
-        decreaseLabel: @escaping @Sendable (Int) -> Text = { Text("Minus \($0)") },
-        increaseLabel: @escaping @Sendable (Int) -> Text = { Text("Plus \($0)") }
+        decreaseLabel: @escaping @Sendable (Int) -> Text,
+        increaseLabel: @escaping @Sendable (Int) -> Text
     ) {
         self._value = value
         self.fine = fine

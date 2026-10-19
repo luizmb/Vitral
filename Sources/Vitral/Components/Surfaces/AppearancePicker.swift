@@ -15,9 +15,9 @@ public struct AppearancePicker: View {
 
     public init(
         selection: Binding<Appearance>,
-        systemLabel: LocalizedStringKey = "Match system",
-        lightLabel: LocalizedStringKey = "Light",
-        darkLabel: LocalizedStringKey = "Dark"
+        systemLabel: LocalizedStringKey,
+        lightLabel: LocalizedStringKey,
+        darkLabel: LocalizedStringKey
     ) {
         self._selection = selection
         self.systemLabel = systemLabel

@@ -51,7 +51,7 @@ struct AppearancePage: View {
     var body: some View {
         Page("Appearance") {
             Sample("AppearancePicker") {
-                AppearancePicker(selection: .constant(.system))
+                AppearancePicker(selection: .constant(.system), systemLabel: "Match system", lightLabel: "Light", darkLabel: "Dark")
             }
             ForEach([Appearance.light, .dark], id: \.self) { appearance in
                 LabelledGroup(LocalizedStringKey(".appearance(.\(appearance.rawValue))")) {
@@ -92,7 +92,7 @@ extension View {
     func galleryChrome(_ appearance: Binding<Appearance>) -> some View {
         toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                AppearancePicker(selection: appearance)
+                AppearancePicker(selection: appearance, systemLabel: "Match system", lightLabel: "Light", darkLabel: "Dark")
             }
             .sharedBackgroundVisibility(.hidden)
         }

@@ -119,8 +119,8 @@ public struct EntryList: View {
         entries: [String],
         draft: Binding<String>,
         placeholder: LocalizedStringKey,
-        addTitle: LocalizedStringKey = "Add",
-        removeLabel: @escaping (String) -> Text = { Text("Remove \($0)") },
+        addTitle: LocalizedStringKey,
+        removeLabel: @escaping (String) -> Text,
         onRemove: @escaping (Int) -> Void,
         onAdd: @escaping () -> Void
     ) {

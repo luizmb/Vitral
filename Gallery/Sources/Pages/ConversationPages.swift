@@ -21,7 +21,7 @@ struct ConversationPage: View {
                 }
             }
             Sample("Composer, with a microphone") {
-                Composer("Say something…", text: $model.chatDraft) {
+                Composer("Say something…", text: $model.chatDraft, sendLabel: "Send") {
                     Pill(isActive: model.chatListening, action: { model.chatListening.toggle() }) {
                         Image(systemName: model.chatListening ? "mic.fill" : "mic")
                             .frame(width: Size.controlSmall, height: Size.controlSmall)
@@ -31,7 +31,7 @@ struct ConversationPage: View {
                 }
             }
             Sample("Composer, waiting for a reply") {
-                Composer("Say something…", text: .constant("Thanks!"), isBusy: true) {}
+                Composer("Say something…", text: .constant("Thanks!"), isBusy: true, sendLabel: "Send") {}
             }
         }
     }

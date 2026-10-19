@@ -293,8 +293,8 @@ enum GeneratedSamples {
         #"ComponentPages.swift#StepperJump"#: #"""
         Panel {
             VStack(spacing: Space.medium) {
-                StepperJump(value: .constant(200), fine: 1, coarse: 20)
-                StepperJump(value: .constant(1), fine: 1, coarse: 20)
+                StepperJump(value: .constant(200), fine: 1, coarse: 20, decreaseLabel: { Text("Minus \($0)") }, increaseLabel: { Text("Plus \($0)") })
+                StepperJump(value: .constant(1), fine: 1, coarse: 20, decreaseLabel: { Text("Minus \($0)") }, increaseLabel: { Text("Plus \($0)") })
             }
         }
         """#,
@@ -339,8 +339,8 @@ enum GeneratedSamples {
         #"ComponentPages.swift#FieldSearch"#: #"""
         Panel {
             VStack(spacing: Space.medium) {
-                FieldSearch("Name, artist or tag", text: .constant(""))
-                FieldSearch("Name, artist or tag", text: .constant("Highway"))
+                FieldSearch("Name, artist or tag", text: .constant(""), clearLabel: "Clear")
+                FieldSearch("Name, artist or tag", text: .constant("Highway"), clearLabel: "Clear")
             }
         }
         """#,
@@ -381,7 +381,7 @@ enum GeneratedSamples {
         """#,
         #"ComponentPages.swift#ErrorScreen with retry"#: #"""
         Panel {
-            ErrorScreen("Couldn't sync", message: Text("GitHub didn't answer for \(30) seconds."), illustration: .offline) {}
+            ErrorScreen("Couldn't sync", message: Text("GitHub didn't answer for \(30) seconds."), illustration: .offline, retry: ("Try again", {}))
         }
         """#,
         #"ComponentPages.swift#ErrorScreen without retry"#: #"""
@@ -467,7 +467,7 @@ enum GeneratedSamples {
         }
         """#,
         #"ConversationPages.swift#Composer, with a microphone"#: #"""
-        Composer("Say something…", text: $model.chatDraft) {
+        Composer("Say something…", text: $model.chatDraft, sendLabel: "Send") {
             Pill(isActive: model.chatListening, action: { model.chatListening.toggle() }) {
                 Image(systemName: model.chatListening ? "mic.fill" : "mic")
                     .frame(width: Size.controlSmall, height: Size.controlSmall)
@@ -477,7 +477,7 @@ enum GeneratedSamples {
         }
         """#,
         #"ConversationPages.swift#Composer, waiting for a reply"#: #"""
-        Composer("Say something…", text: .constant("Thanks!"), isBusy: true) {}
+        Composer("Say something…", text: .constant("Thanks!"), isBusy: true, sendLabel: "Send") {}
         """#,
         #"FaderPages.swift#Glass, labels in every place"#: #"""
         Panel {
@@ -674,6 +674,8 @@ enum GeneratedSamples {
                 entries: model.formEntries,
                 draft: $model.formDraft,
                 placeholder: "Another name",
+                addTitle: "Add",
+                removeLabel: { Text("Remove \($0)") },
                 onRemove: { model.formEntries.remove(at: $0) },
                 onAdd: {
                     model.formEntries.append(model.formDraft.trimmingCharacters(in: .whitespaces))
@@ -711,7 +713,7 @@ enum GeneratedSamples {
         }
         """#,
         #"IconGroupPages.swift#IconGroup with a header, page dots and a footer"#: #"""
-        IconGroup(DemoIcon.all, page: $model.iconPage) { icon in
+        IconGroup(DemoIcon.all, page: $model.iconPage, pageLabel: { Text("Page \($0) of \($1)") }) { icon in
             IconTile(
                 Text(verbatim: icon.title),
                 subtitle: Text(verbatim: icon.subtitle),
@@ -742,7 +744,7 @@ enum GeneratedSamples {
             page: .constant(0),
             columns: 4,
             rows: 2,
-            showsPageControl: false
+            pageLabel: nil
         ) { slot in
             switch slot {
             case .add:
@@ -900,7 +902,7 @@ enum GeneratedSamples {
         .frame(maxWidth: .infinity)
         """#,
         #"ShowcasePages.swift#AppearancePicker"#: #"""
-        AppearancePicker(selection: .constant(.system))
+        AppearancePicker(selection: .constant(.system), systemLabel: "Match system", lightLabel: "Light", darkLabel: "Dark")
         """#,
         #"TintPages.swift#Tag(style: .tint(_:))"#: #"""
         FlowLayout(spacing: Space.small) {
