@@ -87,6 +87,15 @@ import Testing
         #expect(TrackGeometry.fraction(at: -50, length: 220, thumb: 20, reversed: false) == 0)
     }
 
+    @Test("a finger's wobble is still a tap; past the slop it is a drag")
+    func touchSlop() {
+        #expect(!TrackGeometry.isDragging(dx: 0, dy: 0))
+        #expect(!TrackGeometry.isDragging(dx: 0.4, dy: -0.3))
+        #expect(!TrackGeometry.isDragging(dx: 4, dy: 4))
+        #expect(TrackGeometry.isDragging(dx: 0, dy: -7))
+        #expect(TrackGeometry.isDragging(dx: 5, dy: 5))
+    }
+
     @Test func detentsPullWhenClose() {
         #expect(TrackGeometry.snapped(0.51, to: [0.5]) == 0.5)
         #expect(TrackGeometry.snapped(0.6, to: [0.5]) == 0.6)

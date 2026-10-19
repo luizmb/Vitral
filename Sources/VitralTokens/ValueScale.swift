@@ -298,6 +298,17 @@ public enum DialGeometry {
 /// left of a horizontal one, the top of a vertical one), where the thumb's centre can travel
 /// between half a thumb from each end.
 public enum TrackGeometry {
+    /// How far a finger may wander and still be tapping, in points: UIKit's own allowance. A real
+    /// finger never lifts exactly where it landed, so "it moved" can't mean "it moved at all".
+    public static let touchSlop = 6.0
+
+    /// Whether a finger that has moved by (`dx`, `dy`) since it landed is dragging rather than
+    /// tapping. A tap — the second of a double tap above all — must not write a value, or it
+    /// writes over the reset the double tap just made.
+    public static func isDragging(dx: Double, dy: Double, slop: Double = touchSlop) -> Bool {
+        dx * dx + dy * dy > slop * slop
+    }
+
     /// How far the thumb's centre travels.
     public static func travel(length: Double, thumb: Double) -> Double {
         max(length - thumb, 1)
