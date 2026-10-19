@@ -278,6 +278,8 @@ enum ChartScale: Hashable, Sendable {
 }
 
 struct PickersPage: View {
+    @Environment(GalleryModel.self) private var model
+
     var body: some View {
         Page("Pickers") {
             Sample("SegmentedControlGlass") {
@@ -305,8 +307,8 @@ struct PickersPage: View {
             Sample("StepperJump") {
                 Panel {
                     VStack(spacing: Space.medium) {
-                        StepperJump(value: .constant(200), fine: 1, coarse: 20)
-                        StepperJump(value: .constant(1), fine: 1, coarse: 20)
+                        StepperJump(value: .constant(200), fine: 1, coarse: 20, format: model.formats.whole, decreaseLabel: { Text("Minus \($0)") }, increaseLabel: { Text("Plus \($0)") })
+                        StepperJump(value: .constant(1), fine: 1, coarse: 20, format: model.formats.whole, decreaseLabel: { Text("Minus \($0)") }, increaseLabel: { Text("Plus \($0)") })
                     }
                 }
             }
@@ -358,8 +360,8 @@ struct FieldsPage: View {
             Sample("FieldSearch") {
                 Panel {
                     VStack(spacing: Space.medium) {
-                        FieldSearch("Name, artist or tag", text: .constant(""))
-                        FieldSearch("Name, artist or tag", text: .constant("Highway"))
+                        FieldSearch("Name, artist or tag", text: .constant(""), clearLabel: "Clear")
+                        FieldSearch("Name, artist or tag", text: .constant("Highway"), clearLabel: "Clear")
                     }
                 }
             }
@@ -414,7 +416,7 @@ struct EmptyStatesPage: View {
             }
             Sample("ErrorScreen with retry") {
                 Panel {
-                    ErrorScreen("Couldn't sync", message: Text("GitHub didn't answer for \(30) seconds."), illustration: .offline) {}
+                    ErrorScreen("Couldn't sync", message: Text("GitHub didn't answer for \(30) seconds."), illustration: .offline, retry: ("Try again", {}))
                 }
             }
             Sample("ErrorScreen without retry") {

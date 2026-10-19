@@ -90,6 +90,7 @@ public struct WorkspacePanel<Body: View> {
 ///
 /// Panels shouldn't hold a `NavigationStack`: inside a column it takes over the app's.
 public struct Workspace<Leading: View, Content: View, Trailing: View, Bottom: View>: View {
+    @Environment(\.vitralScheme) private var scheme
     let mode: WorkspaceMode?
     let exclusive: Bool
     let closeLabel: LocalizedStringKey
@@ -297,7 +298,7 @@ public struct Workspace<Leading: View, Content: View, Trailing: View, Bottom: Vi
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .clipShape(RoundedRectangle(cornerRadius: Radius.sheet, style: .continuous))
             .glassSurface(.regular, cornerRadius: Radius.sheet)
-            .shadow(color: Color(.scrim), radius: Space.large, y: Space.extraSmall)
+            .shadow(color: Color(.scrim, scheme: scheme), radius: Space.large, y: Space.extraSmall)
     }
 
     /// A panel in the sheet, with a close button over it: an iPhone on its side shows the sheet
@@ -380,7 +381,7 @@ public extension Workspace where Leading == EmptyView, Trailing == EmptyView, Bo
     ///     off), in any mode: docked panels forced onto an iPhone then never squeeze the content.
     ///     Sheets are always one at a time: iOS shows one sheet at a time, even on an iPad.
     ///   - closeLabel: what VoiceOver says for the close button on a panel's sheet.
-    init(mode: WorkspaceMode? = nil, exclusive: Bool = false, closeLabel: LocalizedStringKey = "Close", @ViewBuilder content: () -> Content) {
+    init(mode: WorkspaceMode? = nil, exclusive: Bool = false, closeLabel: LocalizedStringKey, @ViewBuilder content: () -> Content) {
         self.mode = mode
         self.exclusive = exclusive
         self.closeLabel = closeLabel
@@ -495,18 +496,10 @@ public struct PanelToggle: View {
     @Environment(\.accent) private var accent
 
     /// - Parameter label: what VoiceOver says.
-    public init(_ side: PanelSide, isPresented: Binding<Bool>, label: LocalizedStringKey? = nil) {
+    public init(_ side: PanelSide, isPresented: Binding<Bool>, label: LocalizedStringKey) {
         self.side = side
         self._isPresented = isPresented
-        self.label = label ?? PanelToggle.defaultLabel(side)
-    }
-
-    static func defaultLabel(_ side: PanelSide) -> LocalizedStringKey {
-        switch side {
-        case .leading: "Sidebar"
-        case .trailing: "Inspector"
-        case .bottom: "Bottom panel"
-        }
+        self.label = label
     }
 
     var glyph: Glyph {
@@ -541,25 +534,22 @@ extension View {
 }
 
 public extension View {
-    /// A `PanelToggle` for each panel given: the leading one at the toolbar's leading end, the
-    /// bottom and trailing ones at its trailing end.
+    /// A `PanelToggle` for each panel given, with what VoiceOver says for it: the leading one at
+    /// the toolbar's leading end, the bottom and trailing ones at its trailing end.
     func workspaceToolbar(
-        leading: Binding<Bool>? = nil,
-        trailing: Binding<Bool>? = nil,
-        bottom: Binding<Bool>? = nil,
-        leadingLabel: LocalizedStringKey? = nil,
-        trailingLabel: LocalizedStringKey? = nil,
-        bottomLabel: LocalizedStringKey? = nil
+        leading: (isPresented: Binding<Bool>, label: LocalizedStringKey)? = nil,
+        trailing: (isPresented: Binding<Bool>, label: LocalizedStringKey)? = nil,
+        bottom: (isPresented: Binding<Bool>, label: LocalizedStringKey)? = nil
     ) -> some View {
         toolbar {
             if let leading {
-                ToolbarItem(placement: Self.leadingPlacement) { PanelToggle(.leading, isPresented: leading, label: leadingLabel) }
+                ToolbarItem(placement: Self.leadingPlacement) { PanelToggle(.leading, isPresented: leading.isPresented, label: leading.label) }
             }
             if let bottom {
-                ToolbarItem(placement: .primaryAction) { PanelToggle(.bottom, isPresented: bottom, label: bottomLabel) }
+                ToolbarItem(placement: .primaryAction) { PanelToggle(.bottom, isPresented: bottom.isPresented, label: bottom.label) }
             }
             if let trailing {
-                ToolbarItem(placement: .primaryAction) { PanelToggle(.trailing, isPresented: trailing, label: trailingLabel) }
+                ToolbarItem(placement: .primaryAction) { PanelToggle(.trailing, isPresented: trailing.isPresented, label: trailing.label) }
             }
         }
     }

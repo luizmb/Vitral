@@ -1,8 +1,9 @@
 import Foundation
 
-/// The values a control can take: a range, an optional step, how many decimal places they show,
+/// The values a control can take: a range, an optional step, how many decimal places they keep,
 /// and how they spread along the control (the taper). Plain maths, so a reducer can use the same
-/// functions the control does.
+/// functions the control does. It writes nothing: how a value reads is the app's (a control's
+/// `format`), in the app's locale.
 public struct ValueScale: Hashable, Sendable {
     /// How values spread along the control.
     public enum Taper: Hashable, Sendable {
@@ -39,45 +40,33 @@ public struct ValueScale: Hashable, Sendable {
         case decibels
     }
 
-    /// How a value is written.
-    public enum Readout: Hashable, Sendable {
-        /// The value, with the scale's decimal places.
-        case number
-        /// A gain in signed decibels (+6.0, −12.0), and `silence` for none.
-        case decibels(silence: String = "−∞")
-    }
-
     public var lower: Double
     public var upper: Double
     public var step: Double?
     public var precision: Int
     public var taper: Taper
-    public var readout: Readout
 
     /// - Parameters:
     ///   - range: the lowest and highest values.
     ///   - step: values land on multiples of it from the lowest; `nil` for any value.
-    ///   - precision: decimal places kept, and shown by a `.number` readout.
-    ///   - readout: how the value is written.
+    ///   - precision: decimal places kept.
     public init(
         _ range: ClosedRange<Double> = 0 ... 1,
         step: Double? = nil,
         precision: Int = 2,
-        taper: Taper = .linear,
-        readout: Readout = .number
+        taper: Taper = .linear
     ) {
         self.lower = range.lowerBound
         self.upper = range.upperBound
         self.step = step
         self.precision = precision
         self.taper = taper
-        self.readout = readout
     }
 
     /// A mixing desk's gain fader: gains from silence to `headroom` decibels above unity, unity
     /// `unity` of the way up, the `working` decibels below it over the next stretch down (where
     /// most rides live, so the finest control is there), falling to `floor` decibels and then
-    /// silence at the bottom. Written in decibels.
+    /// silence at the bottom (`decibels(gain:)` turns its values into decibels to show).
     public static func consoleGain(
         unity: Double = 2.0 / 3.0,
         headroom: Double = 20 * log10(2.0),
@@ -91,14 +80,22 @@ public struct ValueScale: Hashable, Sendable {
             taper: .breakpoints(
                 [Breakpoint(0, floor), Breakpoint(unity / 2, working), Breakpoint(unity, 0), Breakpoint(1, headroom)],
                 measure: .decibels
-            ),
-            readout: .decibels()
+            )
         )
     }
 
-    /// The gain `decibels` stands for: 1 at 0 dB, 2 at about +6.
+    /// The gain `decibels` stands for: 1 at 0 dB, 2 at about +6, silence (0) at −∞.
+    /// `decibels(gain:)` undoes it exactly, over gains from 0 up: together the two are an
+    /// isomorphism between gains and decibels, for an app to wrap in whatever it composes with
+    /// (an FP `Iso`, say) rather than repeat the maths.
     public static func gain(decibels: Double) -> Double {
         pow(10, decibels / 20)
+    }
+
+    /// The decibels `gain` stands for: 0 at 1, about +6 at 2, −∞ at silence. The inverse of
+    /// `gain(decibels:)`.
+    public static func decibels(gain: Double) -> Double {
+        gain > 0 ? 20 * log10(gain) : -.infinity
     }
 
     var span: Double { upper - lower }
@@ -129,11 +126,6 @@ public struct ValueScale: Hashable, Sendable {
         value(at: fraction(of: start) + distance / max(length, 1))
     }
 
-    /// `value` as the readout writes it.
-    public func formatted(_ value: Double) -> String {
-        formatted(value, places: readout == .number ? precision : 1)
-    }
-
     /// Values for marks along the control: each step when there are at most `limit` of them,
     /// otherwise `limit` evenly spaced fractions' values.
     public func marks(limit: Int = 11) -> [Double] {
@@ -153,26 +145,6 @@ public struct ValueScale: Hashable, Sendable {
     /// The decimal places `interval` needs to be written: 0 for 1, 1 for 0.5, 2 for 0.25.
     public static func decimals(of interval: Double) -> Int {
         (0 ... 6).first { places in abs((interval * pow(10, Double(places))).rounded() - interval * pow(10, Double(places))) < 1e-9 } ?? 6
-    }
-
-    /// `value` as the readout writes it, with `places` decimal places whatever the precision.
-    public func formatted(_ value: Double, places: Int) -> String {
-        switch readout {
-        case .number:
-            String(format: "%.\(max(places, 0))f", value)
-        case let .decibels(silence):
-            value > 0 ? Self.signed(20 * log10(value), places: places) : silence
-        }
-    }
-
-    /// `decibels` with its sign, a real minus below zero.
-    static func signed(_ decibels: Double, places: Int) -> String {
-        signed(String(format: "%.\(max(places, 0))f", abs(decibels)), positive: decibels > 0)
-    }
-
-    /// A magnitude already written, with its sign; none for zero.
-    static func signed(_ written: String, positive: Bool) -> String {
-        Double(written) == 0 ? written : (positive ? "+" : "\u{2212}") + written
     }
 
     /// How many steps the range holds (infinite without a step).

@@ -4,6 +4,7 @@ import VitralTokens
 /// A button that stays down while it's on, as a desk's mute and solo do: a short label, lit in
 /// `lit` when on, glass when off. Stateless: on is the binding's.
 public struct ToggleButtonLatched: View {
+    @Environment(\.vitralScheme) private var scheme
     let title: Text
     let lit: ColorToken
     let litInk: ColorToken
@@ -39,12 +40,12 @@ public struct ToggleButtonLatched: View {
             .frame(minWidth: Size.controlSmall, minHeight: Size.controlSmall)
         if isOn {
             face
-                .foregroundStyle(Color(litInk))
-                .background(Color(lit), in: RoundedRectangle(cornerRadius: Radius.extraSmall, style: .continuous))
-                .shadow(color: Color(lit.opacity(0.6)), radius: 4)
+                .foregroundStyle(Color(litInk, scheme: scheme))
+                .background(Color(lit, scheme: scheme), in: RoundedRectangle(cornerRadius: Radius.extraSmall, style: .continuous))
+                .shadow(color: Color(lit.opacity(0.6), scheme: scheme), radius: 4)
         } else {
             face
-                .foregroundStyle(Color(.ink))
+                .foregroundStyle(Color(.ink, scheme: scheme))
                 .glassSurface(.clear, cornerRadius: Radius.extraSmall)
         }
     }

@@ -17,10 +17,12 @@ public struct StepperJump: View {
     let fine: Int
     let coarse: Int
     let range: ClosedRange<Int>
+    let format: @Sendable (Int) -> Text
     let decreaseLabel: @Sendable (Int) -> Text
     let increaseLabel: @Sendable (Int) -> Text
 
     /// - Parameters:
+    ///   - format: how the number reads ("5,000", "5.000"): the app's, in its locale.
     ///   - decreaseLabel: what VoiceOver says for a step down by the given amount ("Minus 20 days").
     ///   - increaseLabel: the same for a step up.
     public init(
@@ -28,13 +30,15 @@ public struct StepperJump: View {
         fine: Int = 1,
         coarse: Int = 10,
         range: ClosedRange<Int> = 1 ... .max,
-        decreaseLabel: @escaping @Sendable (Int) -> Text = { Text("Minus \($0)") },
-        increaseLabel: @escaping @Sendable (Int) -> Text = { Text("Plus \($0)") }
+        format: @escaping @Sendable (Int) -> Text,
+        decreaseLabel: @escaping @Sendable (Int) -> Text,
+        increaseLabel: @escaping @Sendable (Int) -> Text
     ) {
         self._value = value
         self.fine = fine
         self.coarse = coarse
         self.range = range
+        self.format = format
         self.decreaseLabel = decreaseLabel
         self.increaseLabel = increaseLabel
     }
@@ -45,7 +49,7 @@ public struct StepperJump: View {
             Hairline(.vertical).frame(height: Space.large + Space.hairline)
             step(-fine, glyph: .chevronBack, id: AccessibilityID.decreaseFine)
             Hairline(.vertical).frame(height: Space.large + Space.hairline)
-            Text(value, format: .number)
+            format(value)
                 .font(.value)
                 .foregroundStyle(.ink)
                 .lineLimit(1)

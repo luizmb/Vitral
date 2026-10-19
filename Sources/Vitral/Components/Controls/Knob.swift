@@ -22,6 +22,8 @@ public struct KnobConfiguration: Sendable {
     public let startAngle: Double
     public let endAngle: Double
     public let isDragging: Bool
+    /// How a value reads: the knob's `format`.
+    public let format: @Sendable (Double) -> Text
 
     /// The pointer's angle, degrees clockwise from twelve o'clock.
     public var angle: Double { DialGeometry.angle(for: fraction, start: startAngle, end: endAngle) }
@@ -31,8 +33,8 @@ public struct KnobConfiguration: Sendable {
         DialGeometry.angle(for: scale.fraction(of: value), start: startAngle, end: endAngle)
     }
 
-    /// `value` as the scale writes it.
-    public var formatted: String { scale.formatted(value) }
+    /// `value` as the knob's `format` writes it.
+    public var formatted: Text { format(value) }
 }
 
 /// How a knob looks. Write one to draw a knob entirely your own way; `GlassKnobStyle` is the
@@ -75,6 +77,7 @@ public extension View {
 public struct Knob: View {
     @Binding var value: Double
     let scale: ValueScale
+    let format: @Sendable (Double) -> Text
     let interaction: KnobInteraction
     let startAngle: Double
     let endAngle: Double
@@ -86,12 +89,15 @@ public struct Knob: View {
     @Environment(\.knobStyle) private var environmentStyle
 
     /// - Parameters:
+    ///   - format: how the value reads, in the readout and to VoiceOver: the app's, in its locale
+    ///     (Vitral formats nothing itself).
     ///   - startAngle, endAngle: where the pointer is at the lowest and highest values, degrees
     ///     clockwise from twelve o'clock (7:30 to 4:30 by default).
     ///   - label: what VoiceOver calls it.
     public init(
         value: Binding<Double>,
         scale: ValueScale = ValueScale(),
+        format: @escaping @Sendable (Double) -> Text,
         interaction: KnobInteraction = .circular,
         startAngle: Double = -135,
         endAngle: Double = 135,
@@ -101,7 +107,7 @@ public struct Knob: View {
         label: Text
     ) {
         self.init(
-            value: value, scale: scale, interaction: interaction, startAngle: startAngle, endAngle: endAngle,
+            value: value, scale: scale, format: format, interaction: interaction, startAngle: startAngle, endAngle: endAngle,
             anyStyle: AnyKnobStyle(style), resetValue: resetValue, onEditingEnded: onEditingEnded, label: label
         )
     }
@@ -110,6 +116,7 @@ public struct Knob: View {
     public init(
         value: Binding<Double>,
         scale: ValueScale = ValueScale(),
+        format: @escaping @Sendable (Double) -> Text,
         interaction: KnobInteraction = .circular,
         startAngle: Double = -135,
         endAngle: Double = 135,
@@ -118,7 +125,7 @@ public struct Knob: View {
         label: Text
     ) {
         self.init(
-            value: value, scale: scale, interaction: interaction, startAngle: startAngle, endAngle: endAngle,
+            value: value, scale: scale, format: format, interaction: interaction, startAngle: startAngle, endAngle: endAngle,
             anyStyle: nil, resetValue: resetValue, onEditingEnded: onEditingEnded, label: label
         )
     }
@@ -126,6 +133,7 @@ public struct Knob: View {
     init(
         value: Binding<Double>,
         scale: ValueScale,
+        format: @escaping @Sendable (Double) -> Text,
         interaction: KnobInteraction,
         startAngle: Double,
         endAngle: Double,
@@ -136,6 +144,7 @@ public struct Knob: View {
     ) {
         self._value = value
         self.scale = scale
+        self.format = format
         self.interaction = interaction
         self.startAngle = startAngle
         self.endAngle = endAngle
@@ -161,7 +170,8 @@ public struct Knob: View {
                     scale: scale,
                     startAngle: startAngle,
                     endAngle: endAngle,
-                    isDragging: isDragging
+                    isDragging: isDragging,
+                    format: format
                 )
             )
             .frame(width: proxy.size.width, height: proxy.size.height)
@@ -174,7 +184,7 @@ public struct Knob: View {
         .aspectRatio(1, contentMode: .fit)
         .accessibilityElement()
         .accessibilityLabel(label)
-        .accessibilityValue(Text(verbatim: scale.formatted(value)))
+        .accessibilityValue(format(value))
         .accessibilityAdjustableAction { direction in
             switch direction {
             case .increment: value = scale.stepped(value, by: 1)
@@ -269,6 +279,7 @@ public struct GlassKnobStyle: KnobStyle, Sendable {
     let numbers: Numbers
     let numberCount: Int
     let numberStep: Double?
+    let numberFormat: (@Sendable (Double) -> Text)?
     let pointer: Pointer
     let showsArc: Bool
     let showsValue: Bool
@@ -283,9 +294,10 @@ public struct GlassKnobStyle: KnobStyle, Sendable {
     ///   - marks: dashes round the knob, this many (`nil` for none).
     ///   - numberCount: the most numbers written (the scale's steps when they fit), when there's
     ///     no `numberStep`.
-    ///   - numberStep: a number every this much (1 for 0, 1, 2 … 10), written with the decimals
-    ///     it needs. It only labels the knob: the value keeps the scale's step and precision, so a
+    ///   - numberStep: a number every this much (1 for 0, 1, 2 … 10). It only labels the knob: the value keeps the scale's step and precision, so a
     ///     knob numbered 1 to 10 can rest at 7.35.
+    ///   - numberFormat: how those numbers read (without the value's decimals, say); the knob's
+    ///     `format` when `nil`.
     ///   - markColour, numberColour, valueColour: the dashes', numbers' and readout's colour, for
     ///     the panel they sit on.
     ///   - pointerColour: the pointer's colour; the accent when `nil`.
@@ -296,6 +308,7 @@ public struct GlassKnobStyle: KnobStyle, Sendable {
         numbers: Numbers = .none,
         numberCount: Int = 11,
         numberStep: Double? = nil,
+        numberFormat: (@Sendable (Double) -> Text)? = nil,
         pointer: Pointer = .line,
         showsArc: Bool = true,
         showsValue: Bool = false,
@@ -310,6 +323,7 @@ public struct GlassKnobStyle: KnobStyle, Sendable {
         self.numbers = numbers
         self.numberCount = numberCount
         self.numberStep = numberStep
+        self.numberFormat = numberFormat
         self.pointer = pointer
         self.showsArc = showsArc
         self.showsValue = showsValue
@@ -327,6 +341,7 @@ public struct GlassKnobStyle: KnobStyle, Sendable {
 /// The glass knob, drawn: rings outward-in (numbers outside, marks, the arc), then the glass cap
 /// with its face, numbers inside and pointer.
 struct GlassKnob: View {
+    @Environment(\.vitralScheme) private var scheme
     let style: GlassKnobStyle
     let configuration: KnobConfiguration
 
@@ -350,7 +365,7 @@ struct GlassKnob: View {
                     numbers(radius: ring * 0.78 / 2 * (style.faceSize >= 0.9 ? 0.76 : (1 + style.faceSize) / 2), size: ring * 0.09)
                 }
                 if style.showsValue {
-                    Text(verbatim: configuration.formatted)
+                    configuration.formatted
                         .font(.system(size: ring * 0.11, weight: .semibold, design: .monospaced))
                         .foregroundStyle(style.valueColour)
                         // Under the knob; with numbers outside, in the gap between the last and the first.
@@ -370,7 +385,7 @@ struct GlassKnob: View {
             pointerMark(diameter: diameter)
         }
         .frame(width: diameter, height: diameter)
-        .shadow(color: Color(.scrim), radius: diameter * 0.06, y: diameter * 0.03)
+        .shadow(color: Color(.scrim, scheme: scheme), radius: diameter * 0.06, y: diameter * 0.03)
         .scaleEffect(configuration.isDragging ? 1.04 : 1)
         .animation(.spring(response: 0.25, dampingFraction: 0.7), value: configuration.isDragging)
     }
@@ -385,9 +400,9 @@ struct GlassKnob: View {
                 .resizable(resizingMode: .tile)
                 .frame(width: diameter, height: diameter)
                 .clipShape(Circle())
-                .overlay { Circle().strokeBorder(Color(.hairline), lineWidth: 1) }
+                .overlay { Circle().strokeBorder(Color(.hairline, scheme: scheme), lineWidth: 1) }
         case let .colour(colour):
-            Circle().fill(Color(colour)).frame(width: diameter, height: diameter)
+            Circle().fill(Color(colour, scheme: scheme)).frame(width: diameter, height: diameter)
         case .chrome:
             ChromeDome().frame(width: diameter, height: diameter)
         }
@@ -398,27 +413,27 @@ struct GlassKnob: View {
         switch style.pointer {
         case .line:
             Capsule()
-                .fill(Color(style.pointerColour ?? accent.base))
+                .fill(Color(style.pointerColour ?? accent.base, scheme: scheme))
                 .frame(width: diameter * 0.05, height: diameter * 0.26)
                 .offset(y: -diameter * 0.3)
                 .rotationEffect(.degrees(configuration.angle))
         case .dot:
             Circle()
-                .fill(Color(style.pointerColour ?? accent.base))
+                .fill(Color(style.pointerColour ?? accent.base, scheme: scheme))
                 .frame(width: diameter * 0.1, height: diameter * 0.1)
                 .offset(y: -diameter * 0.36)
                 .rotationEffect(.degrees(configuration.angle))
         case .handle:
             ZStack {
                 Capsule()
-                    .fill(Color(.ink).opacity(0.85))
+                    .fill(Color(.ink, scheme: scheme).opacity(0.85))
                     .frame(width: diameter * 0.16, height: diameter * 0.96)
                 Capsule()
-                    .fill(Color(style.pointerColour ?? .onAccent))
+                    .fill(Color(style.pointerColour ?? .onAccent, scheme: scheme))
                     .frame(width: diameter * 0.04, height: diameter * 0.3)
                     .offset(y: -diameter * 0.3)
             }
-            .shadow(color: Color(.scrim), radius: diameter * 0.04, y: diameter * 0.02)
+            .shadow(color: Color(.scrim, scheme: scheme), radius: diameter * 0.04, y: diameter * 0.02)
             .rotationEffect(.degrees(configuration.angle))
         case .chromeStud, .chromeDimple:
             ChromeBead(isConcave: style.pointer == .chromeDimple)
@@ -440,10 +455,10 @@ struct GlassKnob: View {
         ZStack {
             Circle()
                 .trim(from: 0, to: sweep)
-                .stroke(Color(.hairline), style: StrokeStyle(lineWidth: width, lineCap: .round))
+                .stroke(Color(.hairline, scheme: scheme), style: StrokeStyle(lineWidth: width, lineCap: .round))
             Circle()
                 .trim(from: 0, to: sweep * configuration.fraction)
-                .stroke(Color(accent.base), style: StrokeStyle(lineWidth: width, lineCap: .round))
+                .stroke(Color(accent.base, scheme: scheme), style: StrokeStyle(lineWidth: width, lineCap: .round))
         }
         .frame(width: diameter, height: diameter)
         // A circle's trim starts at three o'clock; the knob's angles at twelve.
@@ -453,7 +468,7 @@ struct GlassKnob: View {
     func marks(count: Int, radius: Double, length: Double) -> some View {
         ForEach(0 ..< max(count, 2), id: \.self) { index in
             Capsule()
-                .fill(Color(style.markColour))
+                .fill(Color(style.markColour, scheme: scheme))
                 .frame(width: max(length * 0.25, 1), height: length)
                 .offset(y: -radius + length / 2)
                 .rotationEffect(.degrees(DialGeometry.angle(for: Double(index) / Double(max(count, 2) - 1), start: configuration.startAngle, end: configuration.endAngle)))
@@ -465,14 +480,9 @@ struct GlassKnob: View {
         style.numberStep.map { configuration.scale.marks(every: $0) } ?? configuration.scale.marks(limit: style.numberCount)
     }
 
-    /// A number as written: with its step's decimals, or the scale's precision.
-    func label(_ mark: Double) -> String {
-        style.numberStep.map { configuration.scale.formatted(mark, places: ValueScale.decimals(of: $0)) } ?? configuration.scale.formatted(mark)
-    }
-
     func numbers(radius: Double, size: Double) -> some View {
         ForEach(numbered, id: \.self) { mark in
-            Text(verbatim: label(mark))
+            (style.numberFormat ?? configuration.format)(mark)
                 .font(.system(size: size, weight: .semibold, design: .rounded))
                 .foregroundStyle(style.numberColour)
                 .offset(
@@ -486,17 +496,18 @@ struct GlassKnob: View {
 /// Polished chrome, domed: the metal's reflections turning round it, and a bright highlight up and
 /// to the left where the light catches the dome.
 struct ChromeDome: View {
+    @Environment(\.vitralScheme) private var scheme
     var body: some View {
         ZStack {
             Circle().fill(
                 AngularGradient(
-                    colors: [.chromeHighlight, .chromeMid, .chromeShadow, .chromeMid, .chromeHighlight, .chromeMid, .chromeShadow, .chromeMid, .chromeHighlight].map { Color($0) },
+                    colors: [.chromeHighlight, .chromeMid, .chromeShadow, .chromeMid, .chromeHighlight, .chromeMid, .chromeShadow, .chromeMid, .chromeHighlight].map { Color($0, scheme: scheme) },
                     center: .center
                 )
             )
             Circle().fill(
                 RadialGradient(
-                    colors: [Color(.chromeHighlight), Color(ColorToken.chromeHighlight.opacity(0))],
+                    colors: [Color(.chromeHighlight, scheme: scheme), Color(ColorToken.chromeHighlight.opacity(0), scheme: scheme)],
                     center: UnitPoint(x: 0.35, y: 0.3),
                     startRadius: 0,
                     endRadius: 60
@@ -505,13 +516,13 @@ struct ChromeDome: View {
             .blendMode(.screen)
             Circle().fill(
                 RadialGradient(
-                    colors: [.clear, Color(ColorToken.chromeShadow.opacity(0.55))],
+                    colors: [.clear, Color(ColorToken.chromeShadow.opacity(0.55), scheme: scheme)],
                     center: .center,
                     startRadius: 20,
                     endRadius: 70
                 )
             )
-            Circle().strokeBorder(Color(.chromeShadow), lineWidth: 1)
+            Circle().strokeBorder(Color(.chromeShadow, scheme: scheme), lineWidth: 1)
         }
         .compositingGroup()
     }
@@ -520,26 +531,27 @@ struct ChromeDome: View {
 /// A half sphere of chrome: convex, lit on top with a shadow below; or concave, the other way
 /// round, shadowed on top as light falls into it.
 struct ChromeBead: View {
+    @Environment(\.vitralScheme) private var scheme
     let isConcave: Bool
 
     var body: some View {
         ZStack {
             Circle().fill(
                 LinearGradient(
-                    colors: [Color(.chromeHighlight), Color(.chromeMid), Color(.chromeShadow)],
+                    colors: [Color(.chromeHighlight, scheme: scheme), Color(.chromeMid, scheme: scheme), Color(.chromeShadow, scheme: scheme)],
                     startPoint: isConcave ? .bottom : .top,
                     endPoint: isConcave ? .top : .bottom
                 )
             )
             Circle()
-                .fill(Color(ColorToken.chromeHighlight.opacity(0.9)))
+                .fill(Color(ColorToken.chromeHighlight.opacity(0.9), scheme: scheme))
                 .frame(width: 2, height: 2)
                 .scaleEffect(2)
                 .offset(x: -1.5, y: isConcave ? 2 : -2)
                 .blur(radius: 0.5)
         }
-        .overlay { Circle().strokeBorder(Color(.chromeShadow), lineWidth: 0.6) }
-        .shadow(color: Color(.scrim), radius: isConcave ? 0 : 1.5, y: isConcave ? 0 : 1)
+        .overlay { Circle().strokeBorder(Color(.chromeShadow, scheme: scheme), lineWidth: 0.6) }
+        .shadow(color: Color(.scrim, scheme: scheme), radius: isConcave ? 0 : 1.5, y: isConcave ? 0 : 1)
     }
 }
 
@@ -547,6 +559,7 @@ struct ChromeBead: View {
 /// follows the finger. Stateless: `lastTouch` (the app's state) keeps the finger's previous angle
 /// during a turn. Turn rotation into steps, a playhead's movement or a scrub as the app needs.
 public struct JogDial: View {
+    @Environment(\.vitralScheme) private var scheme
     @Binding var rotation: Double
     @Binding var lastTouch: Double?
     let marks: Int
@@ -573,15 +586,15 @@ public struct JogDial: View {
                     .glassLayer(GlassToken.regular.interactive(), in: Circle())
                 ForEach(0 ..< marks, id: \.self) { index in
                     Capsule()
-                        .fill(Color(.inkFaint))
+                        .fill(Color(.inkFaint, scheme: scheme))
                         .frame(width: side * 0.012, height: side * 0.07)
                         .offset(y: -side * 0.43)
                         .rotationEffect(.degrees(Double(index) * 360 / Double(max(marks, 1)) + rotation))
                 }
                 // The finger dimple.
                 Circle()
-                    .fill(Color(.neutralSurface))
-                    .overlay { Circle().strokeBorder(Color(.hairline), lineWidth: 1) }
+                    .fill(Color(.neutralSurface, scheme: scheme))
+                    .overlay { Circle().strokeBorder(Color(.hairline, scheme: scheme), lineWidth: 1) }
                     .frame(width: side * 0.16, height: side * 0.16)
                     .offset(y: -side * 0.28)
                     .rotationEffect(.degrees(rotation))
@@ -591,7 +604,7 @@ public struct JogDial: View {
                     .frame(width: side * 0.3, height: side * 0.3)
             }
             .frame(width: proxy.size.width, height: proxy.size.height)
-            .shadow(color: Color(.scrim), radius: side * 0.05, y: side * 0.025)
+            .shadow(color: Color(.scrim, scheme: scheme), radius: side * 0.05, y: side * 0.025)
             .scaleEffect(lastTouch == nil ? 1 : 1.02)
             .animation(.spring(response: 0.25, dampingFraction: 0.7), value: lastTouch == nil)
             .contentShape(Circle())

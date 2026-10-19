@@ -19,6 +19,20 @@ struct FormsPage: View {
                     .padding(.horizontal, Space.large)
                 }
             }
+            Sample("FieldValue: a value to read") {
+                PanelList {
+                    FieldValue("Port", value: Text(verbatim: "10111"))
+                        .padding(.horizontal, Space.large)
+                    FieldValue("File") { Text(verbatim: "Kick.wav").monospaced() }
+                        .padding(.horizontal, Space.large)
+                }
+            }
+            Sample("FieldNumber: a number, in its format, with a unit") {
+                PanelList {
+                    FieldNumber("Tempo", value: $model.formTempo, format: .number.precision(.fractionLength(0 ... 2)).locale(model.locale), suffix: Text("BPM"))
+                        .padding(.horizontal, Space.large)
+                }
+            }
             Sample("FieldStepper: its label says the value") {
                 PanelList {
                     FieldStepper(Text(verbatim: "Division \(model.formDivision)"), value: $model.formDivision, in: 1 ... 4)
@@ -27,7 +41,7 @@ struct FormsPage: View {
             }
             Sample("FieldDate") {
                 PanelList {
-                    FieldDate("Published", date: $model.formDate)
+                    FieldDate("Published", date: $model.formDate, format: model.formats.date, isPicking: $model.formDatePicking)
                         .padding(.horizontal, Space.large)
                 }
             }
@@ -37,6 +51,8 @@ struct FormsPage: View {
                         entries: model.formEntries,
                         draft: $model.formDraft,
                         placeholder: "Another name",
+                        addTitle: "Add",
+                        removeLabel: { Text("Remove \($0)") },
                         onRemove: { model.formEntries.remove(at: $0) },
                         onAdd: {
                             model.formEntries.append(model.formDraft.trimmingCharacters(in: .whitespaces))

@@ -7,30 +7,30 @@ import VitralTokens
 struct Aurora: View {
     let palette: [ColorToken]
 
-    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.vitralScheme) private var scheme
 
     /// How strongly the curtains are painted: more by day.
-    var strength: Double { colorScheme == .dark ? 1 : 1.25 }
+    var strength: Double { scheme == .dark ? 1 : 1.25 }
 
     var body: some View {
         ZStack {
-            LinearGradient(colors: [Color(.skyTop), Color(.skyHorizon)], startPoint: .top, endPoint: .bottom)
+            LinearGradient(colors: [Color(.skyTop, scheme: scheme), Color(.skyHorizon, scheme: scheme)], startPoint: .top, endPoint: .bottom)
             Canvas { context, size in
                 for index in 0 ..< 140 {
                     let point = CGPoint(x: scatter(index, 31) * size.width, y: scatter(index, 32) * size.height * 0.8)
                     let radius = 0.3 + scatter(index, 33) * 0.8
                     context.fill(
                         Path(ellipseIn: CGRect(x: point.x - radius, y: point.y - radius, width: radius * 2, height: radius * 2)),
-                        with: .color(Color(.star).opacity(0.3 + 0.7 * scatter(index, 34)))
+                        with: .color(Color(.star, scheme: scheme).opacity(0.3 + 0.7 * scatter(index, 34)))
                     )
                 }
                 var glow = context
                 glow.addFilter(.blur(radius: 26))
-                if colorScheme != .dark {
+                if scheme != .dark {
                     var horizon = context
                     horizon.addFilter(.blur(radius: 50))
                     for (index, colour) in palette.enumerated() {
-                        horizon.fill(Aurora.horizonPool(index: index, count: palette.count, size: size), with: .color(Color(colour.opacity(0.45))))
+                        horizon.fill(Aurora.horizonPool(index: index, count: palette.count, size: size), with: .color(Color(colour.opacity(0.45), scheme: scheme)))
                     }
                 }
                 var rays = context
@@ -40,7 +40,7 @@ struct Aurora: View {
                     glow.fill(
                         curtain.band,
                         with: .linearGradient(
-                            Gradient(colors: [.clear, Color(colour.opacity(0.55 * strength)), Color(colour.opacity(min(1, 0.85 * strength)))]),
+                            Gradient(colors: [.clear, Color(colour.opacity(0.55 * strength), scheme: scheme), Color(colour.opacity(min(1, 0.85 * strength)), scheme: scheme)]),
                             startPoint: CGPoint(x: 0, y: curtain.bounds.minY),
                             endPoint: CGPoint(x: 0, y: curtain.bounds.maxY)
                         )
@@ -51,7 +51,7 @@ struct Aurora: View {
                         rays.stroke(
                             GraphPaper.segment(CGPoint(x: x, y: top), CGPoint(x: x, y: foot)),
                             with: .linearGradient(
-                                Gradient(colors: [.clear, Color(colour.opacity((0.15 + 0.35 * scatter(ray, 50 + index)) * strength))]),
+                                Gradient(colors: [.clear, Color(colour.opacity((0.15 + 0.35 * scatter(ray, 50 + index)) * strength), scheme: scheme)]),
                                 startPoint: CGPoint(x: x, y: top),
                                 endPoint: CGPoint(x: x, y: foot)
                             ),
@@ -111,6 +111,7 @@ struct Aurora: View {
 /// Soft pools of colour, one per colour of the palette, set around the screen and fading into the
 /// backdrop: a glow, not a shape.
 struct Glow: View {
+    @Environment(\.vitralScheme) private var scheme
     let palette: [ColorToken]
 
     var body: some View {
@@ -121,7 +122,7 @@ struct Glow: View {
                 context.fill(
                     Path(ellipseIn: CGRect(x: centre.x - radius, y: centre.y - radius, width: radius * 2, height: radius * 2)),
                     with: .radialGradient(
-                        Gradient(colors: [Color(colour.opacity(0.7)), Color(colour.opacity(0.25)), .clear]),
+                        Gradient(colors: [Color(colour.opacity(0.7), scheme: scheme), Color(colour.opacity(0.25), scheme: scheme), .clear]),
                         center: centre,
                         startRadius: 0,
                         endRadius: radius
@@ -129,7 +130,7 @@ struct Glow: View {
                 )
             }
         }
-        .background(Color(.backdrop))
+        .background(Color(.backdrop, scheme: scheme))
     }
 
     /// The pools go round an ellipse inside the screen, each nudged off its place by the hash.
@@ -152,23 +153,23 @@ struct Waves: View {
 
     let colour: ColorToken
 
-    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.vitralScheme) private var scheme
 
     /// How strong the layers are: softer at night, so they don't glare.
-    var strength: Double { colorScheme == .dark ? 0.55 : 1 }
+    var strength: Double { scheme == .dark ? 0.55 : 1 }
 
     var body: some View {
         Canvas { context, size in
             var layered = context
-            layered.addFilter(.shadow(color: Color(ColorToken.chromeShadow.opacity(0.35)), radius: 14, y: -3))
+            layered.addFilter(.shadow(color: Color(ColorToken.chromeShadow.opacity(0.35), scheme: scheme), radius: 14, y: -3))
             for layer in 0 ..< Waves.layers {
                 let crest = Waves.crest(layer: layer, size: size)
                 layered.fill(
                     crest,
                     with: .linearGradient(
                         Gradient(colors: [
-                            Color(colour.opacity((0.18 + 0.14 * Double(layer)) * strength)),
-                            Color(colour.opacity((0.30 + 0.14 * Double(layer)) * strength))
+                            Color(colour.opacity((0.18 + 0.14 * Double(layer)) * strength), scheme: scheme),
+                            Color(colour.opacity((0.30 + 0.14 * Double(layer)) * strength), scheme: scheme)
                         ]),
                         startPoint: CGPoint(x: 0, y: crest.boundingRect.minY),
                         endPoint: CGPoint(x: size.width, y: size.height)
@@ -176,7 +177,7 @@ struct Waves: View {
                 )
             }
         }
-        .background(Color(.backdrop))
+        .background(Color(.backdrop, scheme: scheme))
         .drawingGroup()
     }
 
@@ -203,9 +204,9 @@ struct Laser: View {
 
     let palette: [ColorToken]
 
-    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.vitralScheme) private var scheme
 
-    var isNight: Bool { colorScheme == .dark }
+    var isNight: Bool { scheme == .dark }
 
     var body: some View {
         Canvas { context, size in
@@ -219,15 +220,15 @@ struct Laser: View {
                 let colour = palette[index % palette.count]
                 lines.stroke(
                     strand,
-                    with: .color(Color(colour.opacity((isNight ? 0.12 : 0.16) + (isNight ? 0.26 : 0.24) * scatter(index, 91)))),
+                    with: .color(Color(colour.opacity((isNight ? 0.12 : 0.16) + (isNight ? 0.26 : 0.24) * scatter(index, 91)), scheme: scheme)),
                     lineWidth: 0.4 + scatter(index, 92) * 1.1
                 )
                 if index.isMultiple(of: 5) {
-                    glow.stroke(strand, with: .color(Color(colour.opacity(isNight ? 0.16 : 0.12))), lineWidth: 3)
+                    glow.stroke(strand, with: .color(Color(colour.opacity(isNight ? 0.16 : 0.12), scheme: scheme)), lineWidth: 3)
                 }
             }
         }
-        .background(isNight ? Color(.fixedBlack) : Color(.backdrop))
+        .background(isNight ? Color(.fixedBlack, scheme: scheme) : Color(.backdrop, scheme: scheme))
         .drawingGroup()
     }
 
@@ -257,17 +258,17 @@ struct Contours: View {
 
     let palette: [ColorToken]
 
-    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.vitralScheme) private var scheme
 
     /// A palette colour toned for the appearance: lighter by day, deeper at night.
     func toned(_ token: ColorToken) -> Color {
-        colorScheme == .dark ? Color(token).mix(with: .black, by: 0.58) : Color(token).mix(with: .white, by: 0.3)
+        scheme == .dark ? Color(token, scheme: scheme).mix(with: .black, by: 0.58) : Color(token, scheme: scheme).mix(with: .white, by: 0.3)
     }
 
     var body: some View {
         Canvas { context, size in
             var layered = context
-            layered.addFilter(.shadow(color: Color(ColorToken.fixedBlack.opacity(0.28)), radius: 10, y: -2))
+            layered.addFilter(.shadow(color: Color(ColorToken.fixedBlack.opacity(0.28), scheme: scheme), radius: 10, y: -2))
             for layer in 0 ..< (palette.isEmpty ? 0 : Contours.layers) {
                 let colour = toned(palette[layer % palette.count])
                 layered.fill(
@@ -281,13 +282,13 @@ struct Contours: View {
                 for line in 1 ... Contours.lines {
                     context.stroke(
                         Contours.hill(layer, offset: Double(line) * size.height * 0.011, closed: false, in: size),
-                        with: .color(Color(ColorToken.fixedWhite.opacity(line.isMultiple(of: 2) ? 0.22 : 0.12))),
+                        with: .color(Color(ColorToken.fixedWhite.opacity(line.isMultiple(of: 2) ? 0.22 : 0.12), scheme: scheme)),
                         lineWidth: 0.6
                     )
                 }
             }
         }
-        .background(palette.first.map(toned) ?? Color(.backdrop))
+        .background(palette.first.map(toned) ?? Color(.backdrop, scheme: scheme))
         .drawingGroup()
     }
 
@@ -324,15 +325,15 @@ struct Fractal: View {
 
     let palette: [ColorToken]
 
-    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.vitralScheme) private var scheme
 
     var body: some View {
         GeometryReader { proxy in
             Fractal.image(
                 width: Fractal.width,
                 height: min(Int(Double(Fractal.width) * proxy.size.height / max(proxy.size.width, 1)), Fractal.width * 3),
-                palette: palette.map { colorScheme == .dark ? $0.dark : $0.light },
-                isDark: colorScheme == .dark
+                palette: palette.map { scheme == .dark ? $0.dark : $0.light },
+                isDark: scheme == .dark
             )
             .map { image in
                 Image(decorative: image, scale: 1)

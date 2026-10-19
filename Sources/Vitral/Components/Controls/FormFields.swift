@@ -5,6 +5,7 @@ import VitralTokens
 /// many options or long ones, where a `SegmentedControlGlass` won't fit and a `RadioList` would
 /// take the screen.
 public struct FieldPicker<Value: Hashable & Sendable>: View {
+    @Environment(\.vitralScheme) private var scheme
     let title: Text
     @Binding var selection: Value
     let options: [ChoiceOption<Value>]
@@ -34,7 +35,97 @@ public struct FieldPicker<Value: Hashable & Sendable>: View {
             }
             .labelsHidden()
             .pickerStyle(.menu)
-            .tint(Color(accent.base))
+            .tint(Color(accent.base, scheme: scheme))
+        }
+        .frame(minHeight: Size.hitTarget)
+    }
+}
+
+/// A value to read, on one line: the title, and the value (or any trailing content) after it. For
+/// what a form shows but doesn't edit here: a port, a count, a file's name.
+public struct FieldValue<Value: View>: View {
+    let title: Text
+    let value: Value
+
+    public init(_ title: LocalizedStringKey, @ViewBuilder value: () -> Value) {
+        self.init(Text(title), value: value)
+    }
+
+    public init(_ title: Text, @ViewBuilder value: () -> Value) {
+        self.title = title
+        self.value = value()
+    }
+
+    public var body: some View {
+        HStack(spacing: Space.medium) {
+            title.font(.body).foregroundStyle(.ink)
+            Spacer(minLength: Space.small)
+            value
+                .font(.body)
+                .foregroundStyle(.inkMuted)
+                .multilineTextAlignment(.trailing)
+        }
+        .frame(minHeight: Size.hitTarget)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+public extension FieldValue where Value == Text {
+    /// A title and a text value.
+    init(_ title: LocalizedStringKey, value: Text) {
+        self.init(Text(title)) { value }
+    }
+
+    init(_ title: Text, value: Text) {
+        self.init(title) { value }
+    }
+}
+
+/// A number to type, on one line: the title, the number, and an optional unit after it. `format`
+/// both writes and reads it, so it is the app's, in the app's locale (`.number.locale(locale)`):
+/// 1.5 typed in English is 1,5 in Portuguese.
+public struct FieldNumber<Format: ParseableFormatStyle>: View where Format.FormatInput == Double, Format.FormatOutput == String {
+    let title: Text
+    @Binding var value: Double
+    let format: Format
+    let suffix: Text?
+    let onEndEditing: @MainActor () -> Void
+
+    public init(
+        _ title: LocalizedStringKey,
+        value: Binding<Double>,
+        format: Format,
+        suffix: Text? = nil,
+        onEndEditing: @escaping @MainActor () -> Void = {}
+    ) {
+        self.init(Text(title), value: value, format: format, suffix: suffix, onEndEditing: onEndEditing)
+    }
+
+    public init(
+        _ title: Text,
+        value: Binding<Double>,
+        format: Format,
+        suffix: Text? = nil,
+        onEndEditing: @escaping @MainActor () -> Void = {}
+    ) {
+        self.title = title
+        self._value = value
+        self.format = format
+        self.suffix = suffix
+        self.onEndEditing = onEndEditing
+    }
+
+    public var body: some View {
+        HStack(spacing: Space.small) {
+            title.font(.body).foregroundStyle(.ink)
+            Spacer(minLength: Space.small)
+            TextField(value: $value, format: format) { title }
+                .font(.body.monospacedDigit())
+                .multilineTextAlignment(.trailing)
+                .frame(maxWidth: 110)
+                .keyboard(.decimal)
+                .onSubmit { onEndEditing() }
+            suffix.map { suffix in suffix.font(.body).foregroundStyle(.inkMuted) }
         }
         .frame(minHeight: Size.hitTarget)
     }
@@ -67,40 +158,73 @@ public struct FieldStepper<Value: Strideable>: View {
     }
 }
 
-/// A date (or a time, or both) to pick, on one line: the title, and the value, which opens the
-/// system's picker.
+/// A date (or a time, or both) to pick, on one line: the title, and the date as `format` writes it
+/// (the app's, in its locale). Tapping it opens the calendar below; whether it's open is the app's
+/// (`isPicking`), and the calendar's month and day names follow the environment's `locale` and
+/// `calendar`, which the app sets.
 public struct FieldDate: View {
+    @Environment(\.vitralScheme) private var scheme
     let title: Text
     @Binding var date: Date
     let components: DatePickerComponents
+    let format: @Sendable (Date) -> Text
+    @Binding var isPicking: Bool
 
     @Environment(\.accent) private var accent
 
-    public init(_ title: LocalizedStringKey, date: Binding<Date>, components: DatePickerComponents = .date) {
-        self.init(Text(title), date: date, components: components)
+    public init(
+        _ title: LocalizedStringKey,
+        date: Binding<Date>,
+        components: DatePickerComponents = .date,
+        format: @escaping @Sendable (Date) -> Text,
+        isPicking: Binding<Bool>
+    ) {
+        self.init(Text(title), date: date, components: components, format: format, isPicking: isPicking)
     }
 
-    public init(_ title: Text, date: Binding<Date>, components: DatePickerComponents = .date) {
+    public init(
+        _ title: Text,
+        date: Binding<Date>,
+        components: DatePickerComponents = .date,
+        format: @escaping @Sendable (Date) -> Text,
+        isPicking: Binding<Bool>
+    ) {
         self.title = title
         self._date = date
         self.components = components
+        self.format = format
+        self._isPicking = isPicking
     }
 
     public var body: some View {
-        HStack(spacing: Space.medium) {
-            title.font(.body).foregroundStyle(.ink)
-            Spacer(minLength: Space.small)
-            DatePicker(selection: $date, displayedComponents: components) { title }
-                .labelsHidden()
-                .tint(Color(accent.base))
+        VStack(spacing: Space.small) {
+            Button { isPicking.toggle() } label: {
+                HStack(spacing: Space.medium) {
+                    title.font(.body).foregroundStyle(.ink)
+                    Spacer(minLength: Space.small)
+                    format(date)
+                        .font(.body.monospacedDigit())
+                        .foregroundStyle(isPicking ? Color(accent.base, scheme: scheme) : Color(.inkMuted, scheme: scheme))
+                }
+                .frame(minHeight: Size.hitTarget)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityValue(format(date))
+            if isPicking {
+                DatePicker(selection: $date, displayedComponents: components) { title }
+                    .datePickerStyle(.graphical)
+                    .labelsHidden()
+                    .tint(Color(accent.base, scheme: scheme))
+            }
         }
-        .frame(minHeight: Size.hitTarget)
     }
 }
 
 /// A list of short entries to keep (names, aliases, tags): each removable, and a field at the end
 /// to add another. Stateless: the entries and the draft being typed are the app's.
 public struct EntryList: View {
+    @Environment(\.vitralScheme) private var scheme
     let entries: [String]
     @Binding var draft: String
     let placeholder: LocalizedStringKey
@@ -119,8 +243,8 @@ public struct EntryList: View {
         entries: [String],
         draft: Binding<String>,
         placeholder: LocalizedStringKey,
-        addTitle: LocalizedStringKey = "Add",
-        removeLabel: @escaping (String) -> Text = { Text("Remove \($0)") },
+        addTitle: LocalizedStringKey,
+        removeLabel: @escaping (String) -> Text,
         onRemove: @escaping (Int) -> Void,
         onAdd: @escaping () -> Void
     ) {
@@ -143,7 +267,7 @@ public struct EntryList: View {
                 Button(role: .destructive) { onRemove(index) } label: {
                     Image(systemName: "minus.circle")
                         .font(.title3)
-                        .foregroundStyle(Color(.danger))
+                        .foregroundStyle(Color(.danger, scheme: scheme))
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(removeLabel(entry))
@@ -156,7 +280,7 @@ public struct EntryList: View {
                 .onSubmit { if canAdd { onAdd() } }
             Button(addTitle) { onAdd() }
                 .disabled(!canAdd)
-                .tint(Color(accent.base))
+                .tint(Color(accent.base, scheme: scheme))
         }
         .frame(minHeight: Size.hitTarget)
     }
@@ -207,6 +331,7 @@ public struct ChoiceGrid<Value: Hashable & Sendable, Cell: View>: View {
 
 /// A colour to choose from a grid of discs, the chosen one ticked.
 public struct SwatchPicker<Value: Hashable & Sendable>: View {
+    @Environment(\.vitralScheme) private var scheme
     @Binding var selection: Value
     let options: [Value]
     let diameter: Double
@@ -234,7 +359,7 @@ public struct SwatchPicker<Value: Hashable & Sendable>: View {
         ChoiceGrid(selection: $selection, options: options, minimumWidth: diameter + Space.small, label: label) { option, isChosen in
             Circle()
                 .fill(colour(option))
-                .overlay(Circle().strokeBorder(Color(.hairline), lineWidth: 1))
+                .overlay(Circle().strokeBorder(Color(.hairline, scheme: scheme), lineWidth: 1))
                 .overlay {
                     if isChosen {
                         Image(systemName: "checkmark")
@@ -250,6 +375,7 @@ public struct SwatchPicker<Value: Hashable & Sendable>: View {
 /// A picture to choose from a grid: each option's icon over its name, the chosen one on a wash of
 /// the accent.
 public struct IconPicker<Value: Hashable & Sendable, Icon: View>: View {
+    @Environment(\.vitralScheme) private var scheme
     @Binding var selection: Value
     let options: [Value]
     let minimumWidth: Double
@@ -286,7 +412,7 @@ public struct IconPicker<Value: Hashable & Sendable, Icon: View>: View {
             .frame(maxWidth: .infinity)
             .background(
                 RoundedRectangle(cornerRadius: Space.small)
-                    .fill(isChosen ? Color(accent.base).opacity(0.18) : .clear)
+                    .fill(isChosen ? Color(accent.base, scheme: scheme).opacity(0.18) : .clear)
             )
         }
     }

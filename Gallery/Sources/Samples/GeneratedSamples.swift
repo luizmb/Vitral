@@ -293,8 +293,8 @@ enum GeneratedSamples {
         #"ComponentPages.swift#StepperJump"#: #"""
         Panel {
             VStack(spacing: Space.medium) {
-                StepperJump(value: .constant(200), fine: 1, coarse: 20)
-                StepperJump(value: .constant(1), fine: 1, coarse: 20)
+                StepperJump(value: .constant(200), fine: 1, coarse: 20, format: model.formats.whole, decreaseLabel: { Text("Minus \($0)") }, increaseLabel: { Text("Plus \($0)") })
+                StepperJump(value: .constant(1), fine: 1, coarse: 20, format: model.formats.whole, decreaseLabel: { Text("Minus \($0)") }, increaseLabel: { Text("Plus \($0)") })
             }
         }
         """#,
@@ -339,8 +339,8 @@ enum GeneratedSamples {
         #"ComponentPages.swift#FieldSearch"#: #"""
         Panel {
             VStack(spacing: Space.medium) {
-                FieldSearch("Name, artist or tag", text: .constant(""))
-                FieldSearch("Name, artist or tag", text: .constant("Highway"))
+                FieldSearch("Name, artist or tag", text: .constant(""), clearLabel: "Clear")
+                FieldSearch("Name, artist or tag", text: .constant("Highway"), clearLabel: "Clear")
             }
         }
         """#,
@@ -381,7 +381,7 @@ enum GeneratedSamples {
         """#,
         #"ComponentPages.swift#ErrorScreen with retry"#: #"""
         Panel {
-            ErrorScreen("Couldn't sync", message: Text("GitHub didn't answer for \(30) seconds."), illustration: .offline) {}
+            ErrorScreen("Couldn't sync", message: Text("GitHub didn't answer for \(30) seconds."), illustration: .offline, retry: ("Try again", {}))
         }
         """#,
         #"ComponentPages.swift#ErrorScreen without retry"#: #"""
@@ -467,7 +467,7 @@ enum GeneratedSamples {
         }
         """#,
         #"ConversationPages.swift#Composer, with a microphone"#: #"""
-        Composer("Say something…", text: $model.chatDraft) {
+        Composer("Say something…", text: $model.chatDraft, sendLabel: "Send") {
             Pill(isActive: model.chatListening, action: { model.chatListening.toggle() }) {
                 Image(systemName: model.chatListening ? "mic.fill" : "mic")
                     .frame(width: Size.controlSmall, height: Size.controlSmall)
@@ -477,16 +477,16 @@ enum GeneratedSamples {
         }
         """#,
         #"ConversationPages.swift#Composer, waiting for a reply"#: #"""
-        Composer("Say something…", text: .constant("Thanks!"), isBusy: true) {}
+        Composer("Say something…", text: .constant("Thanks!"), isBusy: true, sendLabel: "Send") {}
         """#,
         #"FaderPages.swift#Glass, labels in every place"#: #"""
         Panel {
             VStack(spacing: Space.large) {
-                Fader(value: model.fader("plain", 0.4), label: Text("Level"))
-                Fader(value: model.fader("top", 0.6), title: Text("Opacity"), labels: .top, label: Text("Opacity"))
-                Fader(value: model.fader("leading", 0.3), title: Text("Mix"), labels: .leading, label: Text("Mix"))
-                Fader(value: model.fader("trailing", 0.8), title: Text("Wet"), labels: .trailing, label: Text("Wet"))
-                Fader(value: model.fader("bottom", 0.5), title: Text("Blend"), labels: .bottom, label: Text("Blend"))
+                Fader(value: model.fader("plain", 0.4), format: model.formats.number(2), label: Text("Level"))
+                Fader(value: model.fader("top", 0.6), format: model.formats.number(2), title: Text("Opacity"), labels: .top, label: Text("Opacity"))
+                Fader(value: model.fader("leading", 0.3), format: model.formats.number(2), title: Text("Mix"), labels: .leading, label: Text("Mix"))
+                Fader(value: model.fader("trailing", 0.8), format: model.formats.number(2), title: Text("Wet"), labels: .trailing, label: Text("Wet"))
+                Fader(value: model.fader("bottom", 0.5), format: model.formats.number(2), title: Text("Blend"), labels: .bottom, label: Text("Blend"))
             }
         }
         """#,
@@ -495,6 +495,7 @@ enum GeneratedSamples {
             Fader(
                 value: model.fader("brightness", 70),
                 scale: ValueScale(0 ... 100, precision: 0),
+                format: model.formats.number(0),
                 title: Text("Brightness"),
                 labels: .inside,
                 style: GlassFaderStyle(trackThickness: 44, thumb: .none),
@@ -502,6 +503,7 @@ enum GeneratedSamples {
             )
             Fader(
                 value: model.fader("volume", 0.5),
+                format: model.formats.number(2),
                 axis: .vertical,
                 style: GlassFaderStyle(trackThickness: 56, thumb: .none),
                 label: Text("Volume")
@@ -515,6 +517,7 @@ enum GeneratedSamples {
                 Fader(
                     value: model.fader("temperature", 5500),
                     scale: ValueScale(2000 ... 50000, precision: 0, taper: .logarithmic),
+                    format: model.formats.number(0),
                     resetValue: 5500,
                     title: Text("Temp"),
                     labels: .top,
@@ -524,6 +527,7 @@ enum GeneratedSamples {
                 Fader(
                     value: model.fader("tint", 0),
                     scale: ValueScale(-150 ... 150, precision: 0),
+                    format: model.formats.number(0),
                     centre: 0,
                     detents: [0],
                     resetValue: 0,
@@ -535,6 +539,7 @@ enum GeneratedSamples {
                 Fader(
                     value: model.fader("exposure", 0.35),
                     scale: ValueScale(-5 ... 5, precision: 2),
+                    format: model.formats.number(2),
                     centre: 0,
                     detents: [0],
                     resetValue: 0,
@@ -545,6 +550,7 @@ enum GeneratedSamples {
                 Fader(
                     value: model.fader("contrast", -12),
                     scale: ValueScale(-100 ... 100, precision: 0),
+                    format: model.formats.number(0),
                     centre: 0,
                     detents: [0],
                     resetValue: 0,
@@ -562,11 +568,12 @@ enum GeneratedSamples {
                     Fader(
                         value: model.fader("eq\(band)", 0),
                         scale: ValueScale(-12 ... 12, precision: 1),
+                        format: model.formats.number(1),
                         axis: .vertical,
                         centre: 0,
                         detents: [0],
                         resetValue: 0,
-                        style: GlassFaderStyle(marks: 25, numberStep: 6),
+                        style: GlassFaderStyle(marks: 25, numberStep: 6, numberFormat: model.formats.number(0)),
                         label: Text(LocalizedStringKey(band))
                     )
                     .frame(height: 200)
@@ -608,9 +615,10 @@ enum GeneratedSamples {
         #"FinishPages.swift#Fader thumbs and fills"#: #"""
         Panel {
             VStack(spacing: Space.large) {
-                Fader(value: model.fader("finishGlass", 0.4), title: Text(verbatim: "glass (default)"), labels: .top, label: Text("Glass"))
+                Fader(value: model.fader("finishGlass", 0.4), format: model.formats.number(2), title: Text(verbatim: "glass (default)"), labels: .top, label: Text("Glass"))
                 Fader(
                     value: model.fader("finishGel", 0.6),
+                    format: model.formats.number(2),
                     title: Text(verbatim: "thumb: .glass(.clear).sheen(.aqua(0.4))"),
                     labels: .top,
                     style: GlassFaderStyle(thumbFinish: .glass(.clear).sheen(.aqua(0.4))),
@@ -618,6 +626,7 @@ enum GeneratedSamples {
                 )
                 Fader(
                     value: model.fader("finishAqua", 0.7),
+                    format: model.formats.number(2),
                     title: Text(verbatim: "thumb: .aqua, fill: .aqua"),
                     labels: .top,
                     style: GlassFaderStyle(trackThickness: 14, thumbFinish: .aqua(.fixedSilver), fillFinish: .aqua(.accent)),
@@ -626,6 +635,7 @@ enum GeneratedSamples {
                 Fader(
                     value: model.fader("finishCentre", 64),
                     scale: ValueScale(0 ... 100, precision: 0),
+                    format: model.formats.number(0),
                     title: Text(verbatim: "Control Centre's, fill: .gradient.sheen(.aqua())"),
                     labels: .inside,
                     style: GlassFaderStyle(trackThickness: 44, thumb: .none, fillFinish: .gradient([.washViolet, .washPink]).sheen(.aqua())),
@@ -641,7 +651,7 @@ enum GeneratedSamples {
                     ButtonPrimary("Save") {}
                     ButtonSecondary("Cancel") {}
                 }
-                Fader(value: model.fader("aquaGroup", 0.5), title: Text(verbatim: "Volume"), labels: .top, label: Text("Volume"))
+                Fader(value: model.fader("aquaGroup", 0.5), format: model.formats.number(2), title: Text(verbatim: "Volume"), labels: .top, label: Text("Volume"))
             }
         }
         .controlFinish(.aqua(.accent))
@@ -656,6 +666,20 @@ enum GeneratedSamples {
             .padding(.horizontal, Space.large)
         }
         """#,
+        #"FormPages.swift#FieldValue: a value to read"#: #"""
+        PanelList {
+            FieldValue("Port", value: Text(verbatim: "10111"))
+                .padding(.horizontal, Space.large)
+            FieldValue("File") { Text(verbatim: "Kick.wav").monospaced() }
+                .padding(.horizontal, Space.large)
+        }
+        """#,
+        #"FormPages.swift#FieldNumber: a number, in its format, with a unit"#: #"""
+        PanelList {
+            FieldNumber("Tempo", value: $model.formTempo, format: .number.precision(.fractionLength(0 ... 2)).locale(model.locale), suffix: Text("BPM"))
+                .padding(.horizontal, Space.large)
+        }
+        """#,
         #"FormPages.swift#FieldStepper: its label says the value"#: #"""
         PanelList {
             FieldStepper(Text(verbatim: "Division \(model.formDivision)"), value: $model.formDivision, in: 1 ... 4)
@@ -664,7 +688,7 @@ enum GeneratedSamples {
         """#,
         #"FormPages.swift#FieldDate"#: #"""
         PanelList {
-            FieldDate("Published", date: $model.formDate)
+            FieldDate("Published", date: $model.formDate, format: model.formats.date, isPicking: $model.formDatePicking)
                 .padding(.horizontal, Space.large)
         }
         """#,
@@ -674,6 +698,8 @@ enum GeneratedSamples {
                 entries: model.formEntries,
                 draft: $model.formDraft,
                 placeholder: "Another name",
+                addTitle: "Add",
+                removeLabel: { Text("Remove \($0)") },
                 onRemove: { model.formEntries.remove(at: $0) },
                 onAdd: {
                     model.formEntries.append(model.formDraft.trimmingCharacters(in: .whitespaces))
@@ -711,7 +737,7 @@ enum GeneratedSamples {
         }
         """#,
         #"IconGroupPages.swift#IconGroup with a header, page dots and a footer"#: #"""
-        IconGroup(DemoIcon.all, page: $model.iconPage) { icon in
+        IconGroup(DemoIcon.all, page: $model.iconPage, pageLabel: { Text("Page \($0) of \($1)") }) { icon in
             IconTile(
                 Text(verbatim: icon.title),
                 subtitle: Text(verbatim: icon.subtitle),
@@ -742,7 +768,7 @@ enum GeneratedSamples {
             page: .constant(0),
             columns: 4,
             rows: 2,
-            showsPageControl: false
+            pageLabel: nil
         ) { slot in
             switch slot {
             case .add:
@@ -755,11 +781,12 @@ enum GeneratedSamples {
         }
         """#,
         #"KnobPages.swift#Glass, turned round"#: #"""
-        Knob(value: $model.knobGain, label: Text("Gain"))
+        Knob(value: $model.knobGain, format: model.formats.number(2), label: Text("Gain"))
         """#,
         #"KnobPages.swift#Dragged up and down"#: #"""
         Knob(
             value: $model.knobVolume,
+            format: model.formats.number(2),
             interaction: .vertical(dragStart: $model.knobVolumeStart),
             style: GlassKnobStyle(marks: 11, showsValue: true),
             label: Text("Volume")
@@ -769,6 +796,7 @@ enum GeneratedSamples {
         Knob(
             value: $model.knobPan,
             scale: ValueScale(-100 ... 100, precision: 0),
+            format: model.formats.number(0),
             interaction: .vertical(dragStart: $model.knobPanStart),
             style: GlassKnobStyle(marks: 21, showsValue: true),
             resetValue: 0,
@@ -778,6 +806,7 @@ enum GeneratedSamples {
         #"KnobPages.swift#A texture in the middle"#: #"""
         Knob(
             value: $model.knobTexture,
+            format: model.formats.number(2),
             style: GlassKnobStyle(face: .texture(.wood), marks: 21, pointer: .dot),
             label: Text("Tone")
         )
@@ -786,6 +815,7 @@ enum GeneratedSamples {
         Knob(
             value: $model.knobHandle,
             scale: ValueScale(0 ... 10, step: 1, precision: 0),
+            format: model.formats.number(0),
             style: GlassKnobStyle(marks: 11, pointer: .handle, showsArc: false),
             label: Text("Drive")
         )
@@ -794,6 +824,7 @@ enum GeneratedSamples {
         Knob(
             value: $model.knobFrequency,
             scale: ValueScale(20 ... 20000, precision: 0, taper: .logarithmic),
+            format: model.formats.number(0),
             style: GlassKnobStyle(marks: 31, showsValue: true),
             label: Text("Frequency")
         )
@@ -802,7 +833,8 @@ enum GeneratedSamples {
         Knob(
             value: $model.knobSoldano,
             scale: ValueScale(1 ... 11, precision: 1),
-            style: GlassKnobStyle(face: .colour(.fixedBlack), faceSize: 0.5, numbers: .inside, numberStep: 1, pointer: .dot, showsArc: false, showsValue: true),
+            format: model.formats.number(1),
+            style: GlassKnobStyle(face: .colour(.fixedBlack), faceSize: 0.5, numbers: .inside, numberStep: 1, numberFormat: model.formats.number(0), pointer: .dot, showsArc: false, showsValue: true),
             label: Text("Preamp")
         )
         """#,
@@ -810,10 +842,11 @@ enum GeneratedSamples {
         Knob(
             value: $model.knobMarshall,
             scale: ValueScale(0 ... 10, precision: 2),
+            format: model.formats.number(2),
             startAngle: -150,
             endAngle: 150,
             style: GlassKnobStyle(
-                face: .colour(.fixedGold), marks: 11, numbers: .outside, numberStep: 1, showsArc: false, showsValue: true,
+                face: .colour(.fixedGold), marks: 11, numbers: .outside, numberStep: 1, numberFormat: model.formats.number(0), showsArc: false, showsValue: true,
                 markColour: .fixedGold, numberColour: .fixedGold, valueColour: .fixedGold, pointerColour: .fixedBlack
             ),
             label: Text("Presence")
@@ -823,10 +856,11 @@ enum GeneratedSamples {
         Knob(
             value: $model.knobFender,
             scale: ValueScale(1 ... 10, precision: 2),
+            format: model.formats.number(2),
             startAngle: -150,
             endAngle: 150,
             style: GlassKnobStyle(
-                face: .colour(.fixedBlack), faceSize: 1, numbers: .inside, numberStep: 1, pointer: .dot, showsArc: false, showsValue: true,
+                face: .colour(.fixedBlack), faceSize: 1, numbers: .inside, numberStep: 1, numberFormat: model.formats.number(0), pointer: .dot, showsArc: false, showsValue: true,
                 numberColour: .fixedWhite, pointerColour: .fixedWhite
             ),
             label: Text("Treble")
@@ -836,10 +870,11 @@ enum GeneratedSamples {
         Knob(
             value: $model.knobMesa,
             scale: ValueScale(0 ... 10, precision: 2),
+            format: model.formats.number(2),
             startAngle: -150,
             endAngle: 150,
             style: GlassKnobStyle(
-                face: .colour(.fixedBlack), faceSize: 0.9, marks: 21, numbers: .outside, numberStep: 1, pointer: .line, showsArc: false, showsValue: true,
+                face: .colour(.fixedBlack), faceSize: 0.9, marks: 21, numbers: .outside, numberStep: 1, numberFormat: model.formats.number(0), pointer: .line, showsArc: false, showsValue: true,
                 markColour: .fixedWhite, numberColour: .fixedWhite, valueColour: .fixedWhite, pointerColour: .fixedWhite
             ),
             label: Text("Gain")
@@ -849,10 +884,11 @@ enum GeneratedSamples {
         Knob(
             value: $model.knobChrome,
             scale: ValueScale(0 ... 10, precision: 2),
+            format: model.formats.number(2),
             startAngle: -150,
             endAngle: 150,
             style: GlassKnobStyle(
-                face: .chrome, faceSize: 1, marks: 11, numbers: .outside, numberStep: 1, pointer: .chromeDimple, showsArc: false, showsValue: true,
+                face: .chrome, faceSize: 1, marks: 11, numbers: .outside, numberStep: 1, numberFormat: model.formats.number(0), pointer: .chromeDimple, showsArc: false, showsValue: true,
                 markColour: .fixedWhite, numberColour: .fixedWhite, valueColour: .fixedWhite, pointerColour: .fixedBlack
             ),
             label: Text("Bass")
@@ -862,10 +898,11 @@ enum GeneratedSamples {
         Knob(
             value: $model.knobChromeStud,
             scale: ValueScale(0 ... 10, precision: 2),
+            format: model.formats.number(2),
             startAngle: -150,
             endAngle: 150,
             style: GlassKnobStyle(
-                face: .chrome, faceSize: 1, marks: 11, numbers: .outside, numberStep: 1, pointer: .chromeStud, showsArc: false,
+                face: .chrome, faceSize: 1, marks: 11, numbers: .outside, numberStep: 1, numberFormat: model.formats.number(0), pointer: .chromeStud, showsArc: false,
                 markColour: .fixedCream, numberColour: .fixedCream, valueColour: .fixedCream
             ),
             label: Text("Treble")
@@ -875,9 +912,9 @@ enum GeneratedSamples {
         HStack(spacing: Space.large) {
             ForEach(["Bass", "Middle", "Treble"], id: \.self) { name in
                 VStack(spacing: Space.small) {
-                    Knob(value: model.fader("panel\(name)", 5), scale: ValueScale(0 ... 10, precision: 1), startAngle: -150, endAngle: 150, label: Text(LocalizedStringKey(name)))
+                    Knob(value: model.fader("panel\(name)", 5), scale: ValueScale(0 ... 10, precision: 1), format: model.formats.number(1), startAngle: -150, endAngle: 150, label: Text(LocalizedStringKey(name)))
                         .frame(width: 96)
-                    Text(LocalizedStringKey(name)).font(TypeToken.detail.weight(.semibold)).foregroundStyle(Color(.fixedCream))
+                    Text(LocalizedStringKey(name)).font(TypeToken.detail.weight(.semibold)).foregroundStyle(TokenColor(.fixedCream))
                 }
             }
         }
@@ -900,7 +937,7 @@ enum GeneratedSamples {
         .frame(maxWidth: .infinity)
         """#,
         #"ShowcasePages.swift#AppearancePicker"#: #"""
-        AppearancePicker(selection: .constant(.system))
+        AppearancePicker(selection: .constant(.system), systemLabel: "Match system", lightLabel: "Light", darkLabel: "Dark")
         """#,
         #"TintPages.swift#Tag(style: .tint(_:))"#: #"""
         FlowLayout(spacing: Space.small) {

@@ -16,6 +16,7 @@ public struct SwatchItem: Sendable {
 /// Colour circles overlapping like a fanned hand, the first on top. Past `maxShown`, a count of
 /// the rest ("+3"); with none at all, a dashed circle.
 public struct SwatchStack: View {
+    @Environment(\.vitralScheme) private var scheme
     let items: [SwatchItem]
     let maxShown: Int
     let diameter: Double
@@ -38,7 +39,7 @@ public struct SwatchStack: View {
             ForEach(Array(items.prefix(maxShown).enumerated()), id: \.offset) { index, item in
                 Swatch(item.color, label: item.label.map { Text(verbatim: $0) }, diameter: diameter)
                     // A ring in the backdrop colour cuts each circle out of the one beneath.
-                    .background(Circle().fill(Color(.backdrop)).padding(-1.5))
+                    .background(Circle().fill(Color(.backdrop, scheme: scheme)).padding(-1.5))
                     .zIndex(Double(maxShown - index))
             }
             if items.count > maxShown {

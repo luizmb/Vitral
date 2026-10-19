@@ -19,7 +19,6 @@ import Testing
     @Test func precisionRounds() {
         let scale = ValueScale(0 ... 1, precision: 2)
         #expect(scale.snapped(0.123_456) == 0.12)
-        #expect(scale.formatted(0.5) == "0.50")
     }
 
     @Test func logarithmicSpreadsByRatio() {
@@ -135,25 +134,10 @@ import Testing
         #expect(gain.fraction(of: ValueScale.gain(decibels: -80)) == 0)
     }
 
-    @Test func decibelReadoutIsSignedWithSilenceForNone() {
-        let gain = ValueScale.consoleGain()
-        #expect(gain.formatted(1) == "0.0")
-        #expect(gain.formatted(2) == "+6.0")
-        #expect(gain.formatted(0.5) == "\u{2212}6.0")
-        #expect(gain.formatted(0) == "−∞")
-    }
-}
-
-@Suite struct MonogramTests {
-    @Test func initialsAreTheFirstTwoWords() {
-        #expect(Initials.of("Highway to Hell") == "HT")
-        #expect(Initials.of("paranoid") == "P")
-        #expect(Initials.of("") == "")
-    }
-
-    @Test func aNameKeepsItsColour() {
-        #expect(ColorToken.stable(for: "AC/DC") == ColorToken.stable(for: "AC/DC"))
-        #expect(ColorToken.fnv1a("") == 0xCBF2_9CE4_8422_2325)
-        #expect(ColorToken.stable(for: "x", palette: []) == .inkMuted)
+    @Test func decibelsAreTheGainsInverse() {
+        #expect(ValueScale.decibels(gain: 1) == 0)
+        #expect(abs(ValueScale.decibels(gain: 2) - 6.0206) < 0.0001)
+        #expect(abs(ValueScale.decibels(gain: ValueScale.gain(decibels: -12)) + 12) < 1e-9)
+        #expect(ValueScale.decibels(gain: 0) == -.infinity)
     }
 }

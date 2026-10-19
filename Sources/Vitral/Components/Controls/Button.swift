@@ -59,6 +59,7 @@ public struct ButtonLabel: View {
 /// environment's `.controlFinish(_:)`) for a clearer glass, a gel, a texture. One per screen, ideally. While `isBusy` it
 /// shows a spinner and takes no taps.
 public struct ButtonPrimary: View {
+    @Environment(\.vitralScheme) private var scheme
     let label: ButtonLabel
     let finish: FinishToken?
     let action: @MainActor () -> Void
@@ -111,7 +112,7 @@ public struct ButtonPrimary: View {
             Button(action: action) { label }
                 .disabled(label.isBusy)
                 .buttonStyle(.glassProminent)
-                .tint(Color(accent.base))
+                .tint(Color(accent.base, scheme: scheme))
         }
     }
 }
@@ -119,6 +120,7 @@ public struct ButtonPrimary: View {
 /// Any other action: the system's glass, or a finish (`finish:`, or the environment's
 /// `.controlFinish(_:)`).
 public struct ButtonSecondary: View {
+    @Environment(\.vitralScheme) private var scheme
     let label: ButtonLabel
     let finish: FinishToken?
     let role: ButtonRole?
@@ -178,7 +180,7 @@ public struct ButtonSecondary: View {
             Button(role: role, action: action) { label }
                 .disabled(label.isBusy)
                 .buttonStyle(.glass)
-                .foregroundStyle(role == .destructive ? Color(.danger) : Color(.ink))
+                .foregroundStyle(role == .destructive ? Color(.danger, scheme: scheme) : Color(.ink, scheme: scheme))
         }
     }
 }
@@ -186,6 +188,7 @@ public struct ButtonSecondary: View {
 /// A button made of a finish: a capsule of it, the label in the light ink on a colour or the
 /// dark ink otherwise, pressing in a little.
 struct FinishButtonStyle: ButtonStyle {
+    @Environment(\.vitralScheme) private var scheme
     let finish: FinishToken
 
     /// The light ink on a colour, black on chrome or silver, the ink (dark by day, light at night)
@@ -201,7 +204,7 @@ struct FinishButtonStyle: ButtonStyle {
             .foregroundStyle(ink)
             // Light text on a glossy colour sinks into the gloss; a soft shadow under it keeps it
             // readable, as Aqua's labels did.
-            .shadow(color: Color(ColorToken.fixedBlack.opacity(ink == .onAccent && !finish.sheen.isNone ? 0.35 : 0)), radius: 0.5, y: 1)
+            .shadow(color: Color(ColorToken.fixedBlack.opacity(ink == .onAccent && !finish.sheen.isNone ? 0.35 : 0), scheme: scheme), radius: 0.5, y: 1)
             // The label leaves the glass style its vertical padding; this finish adds the same.
             .padding(.vertical, Space.medium / 2)
             .padding(.horizontal, Space.medium)
@@ -215,9 +218,10 @@ struct FinishButtonStyle: ButtonStyle {
 
 /// A destructive action's label in the danger colour; anything else as the finish draws it.
 struct DestructiveTint: ViewModifier {
+    @Environment(\.vitralScheme) private var scheme
     let isOn: Bool
 
     func body(content: Content) -> some View {
-        if isOn { content.foregroundStyle(Color(.danger)) } else { content }
+        if isOn { content.foregroundStyle(Color(.danger, scheme: scheme)) } else { content }
     }
 }

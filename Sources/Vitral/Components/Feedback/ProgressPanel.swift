@@ -9,6 +9,7 @@ import VitralTokens
 /// For a job made of tasks, `overall` is the whole job and `fraction` the task under way: the
 /// title sits over the overall bar, the detail (the task) over a thinner one of its own.
 public struct ProgressPanel: View {
+    @Environment(\.vitralScheme) private var scheme
     let title: Text
     let detail: Text?
     let fraction: Double?
@@ -58,7 +59,7 @@ public struct ProgressPanel: View {
     private func bar(_ value: Double, colour: ColorToken) -> some View {
         ProgressView(value: value)
             .progressViewStyle(.linear)
-            .tint(Color(colour))
+            .tint(Color(colour, scheme: scheme))
             .frame(width: Size.floatingPanel - Space.large * 2)
     }
 }

@@ -12,7 +12,7 @@ public struct IconGroup<Item: Identifiable, Tile: View, Header: View, Footer: Vi
     let columns: Int
     let rows: Int
     let tileHeight: Double
-    let showsPageControl: Bool
+    let pageLabel: ((Int, Int) -> Text)?
     let glass: GlassToken?
     let items: (Int) -> [Item]
     let tile: (Item) -> Tile
@@ -24,7 +24,8 @@ public struct IconGroup<Item: Identifiable, Tile: View, Header: View, Footer: Vi
     ///   - pageCount: how many pages there are.
     ///   - columns, rows: each page's grid.
     ///   - tileHeight: every tile's height, so a row lines up (`IconTile`'s by default).
-    ///   - showsPageControl: dots under the grid, when there's more than one page.
+    ///   - pageLabel: dots under the grid when there's more than one page, and what VoiceOver says
+    ///     for a page's dot given its number and the count ("Page 2 of 5"); `nil` for no dots.
     ///   - items: what's on a page.
     public init(
         page: Binding<Int>,
@@ -32,7 +33,7 @@ public struct IconGroup<Item: Identifiable, Tile: View, Header: View, Footer: Vi
         columns: Int = 3,
         rows: Int = 3,
         tileHeight: Double = Size.iconTile,
-        showsPageControl: Bool = true,
+        pageLabel: ((Int, Int) -> Text)?,
         glass: GlassToken? = nil,
         items: @escaping (Int) -> [Item],
         @ViewBuilder tile: @escaping (Item) -> Tile,
@@ -44,7 +45,7 @@ public struct IconGroup<Item: Identifiable, Tile: View, Header: View, Footer: Vi
         self.columns = columns
         self.rows = rows
         self.tileHeight = tileHeight
-        self.showsPageControl = showsPageControl
+        self.pageLabel = pageLabel
         self.glass = glass
         self.items = items
         self.tile = tile
@@ -59,7 +60,7 @@ public struct IconGroup<Item: Identifiable, Tile: View, Header: View, Footer: Vi
         columns: Int = 3,
         rows: Int = 3,
         tileHeight: Double = Size.iconTile,
-        showsPageControl: Bool = true,
+        pageLabel: ((Int, Int) -> Text)?,
         glass: GlassToken? = nil,
         @ViewBuilder tile: @escaping (Item) -> Tile,
         @ViewBuilder header: () -> Header = { EmptyView() },
@@ -72,7 +73,7 @@ public struct IconGroup<Item: Identifiable, Tile: View, Header: View, Footer: Vi
             columns: columns,
             rows: rows,
             tileHeight: tileHeight,
-            showsPageControl: showsPageControl,
+            pageLabel: pageLabel,
             glass: glass,
             items: { index in Array(all.dropFirst(index * perPage).prefix(perPage)) },
             tile: tile,
@@ -101,8 +102,8 @@ public struct IconGroup<Item: Identifiable, Tile: View, Header: View, Footer: Vi
                 Hairline()
             }
             pager
-            if showsPageControl, pageCount > 1 {
-                PageDots(Array(0 ..< pageCount), selection: shown)
+            if let pageLabel, pageCount > 1 {
+                PageDots(Array(0 ..< pageCount), selection: shown, pageLabel: pageLabel)
                     .padding(.bottom, Space.small)
             }
             if hasFooter {
@@ -230,6 +231,7 @@ struct IconTileButtonStyle: ButtonStyle {
 
 /// The tile where the next icon would go: a dashed circle with a plus, and its title.
 public struct IconTileAdd: View {
+    @Environment(\.vitralScheme) private var scheme
     let title: Text
     let icon: Image
     let action: @MainActor () -> Void
@@ -244,7 +246,7 @@ public struct IconTileAdd: View {
         Button(action: action) {
             VStack(spacing: Space.extraSmall) {
                 Circle()
-                    .strokeBorder(Color(.outline), style: StrokeStyle(lineWidth: 1.5, dash: [5, 4]))
+                    .strokeBorder(Color(.outline, scheme: scheme), style: StrokeStyle(lineWidth: 1.5, dash: [5, 4]))
                     .frame(width: Size.icon, height: Size.icon)
                     .overlay(icon.font(.title3).foregroundStyle(.inkMuted))
                 title

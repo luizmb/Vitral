@@ -33,6 +33,7 @@ public enum TagStyle: Hashable, Sendable {
 
 /// A short label on a capsule, with an optional icon: a category, a property, a count.
 public struct Tag: View {
+    @Environment(\.vitralScheme) private var scheme
     let text: Text
     let icon: Image?
     let style: TagStyle
@@ -57,19 +58,24 @@ public struct Tag: View {
         .lineLimit(1)
         .padding(.horizontal, Space.medium)
         .padding(.vertical, Space.extraSmall)
-        .background(Color(style.background), in: Capsule())
+        .background(Color(style.background, scheme: scheme), in: Capsule())
     }
 }
 
 /// A tag that turns on and off: filled with the accent when on, plain when off.
 public struct TagToggle: View {
-    let title: LocalizedStringKey
+    let title: Text
     let icon: Image?
     @Binding var isOn: Bool
 
     @Environment(\.accent) private var accent
 
     public init(_ title: LocalizedStringKey, icon: Image? = nil, isOn: Binding<Bool>) {
+        self.init(Text(title), icon: icon, isOn: isOn)
+    }
+
+    /// A tag titled with `Text`: for a title that is the app's data (a chord symbol), shown as it is.
+    public init(_ title: Text, icon: Image? = nil, isOn: Binding<Bool>) {
         self.title = title
         self.icon = icon
         self._isOn = isOn
@@ -82,7 +88,7 @@ public struct TagToggle: View {
                 .contentShape(Capsule())
         }
         .buttonStyle(.plain)
-        .accessibilityRepresentation { Toggle(title, isOn: $isOn) }
+        .accessibilityRepresentation { Toggle(isOn: $isOn) { title } }
     }
 }
 

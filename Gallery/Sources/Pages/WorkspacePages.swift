@@ -90,7 +90,7 @@ struct WorkspaceSample: View {
 
     var body: some View {
         @Bindable var model = model
-        Workspace(mode: route.choice.mode, exclusive: route.choice.exclusive) {
+        Workspace(mode: route.choice.mode, exclusive: route.choice.exclusive, closeLabel: "Close") {
             WorkspaceCanvas()
         }
         .leading(isPresented: $model.showsSidebar, width: $model.sidebarWidth) {
@@ -102,7 +102,7 @@ struct WorkspaceSample: View {
         .bottom(isPresented: $model.showsConsole, height: $model.consoleHeight) {
             WorkspaceConsole()
         }
-        .workspaceToolbar(leading: $model.showsSidebar, trailing: $model.showsInspector, bottom: $model.showsConsole)
+        .workspaceToolbar(leading: ($model.showsSidebar, "Sidebar"), trailing: ($model.showsInspector, "Inspector"), bottom: ($model.showsConsole, "Bottom panel"))
         .navigationTitle(route.choice.title)
         .navigationBarTitleDisplayMode(.inline)
     }

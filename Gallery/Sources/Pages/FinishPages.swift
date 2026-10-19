@@ -70,9 +70,10 @@ struct FinishesPage: View {
             Sample("Fader thumbs and fills") {
                 Panel {
                     VStack(spacing: Space.large) {
-                        Fader(value: model.fader("finishGlass", 0.4), title: Text(verbatim: "glass (default)"), labels: .top, label: Text("Glass"))
+                        Fader(value: model.fader("finishGlass", 0.4), format: model.formats.number(2), title: Text(verbatim: "glass (default)"), labels: .top, label: Text("Glass"))
                         Fader(
                             value: model.fader("finishGel", 0.6),
+                            format: model.formats.number(2),
                             title: Text(verbatim: "thumb: .glass(.clear).sheen(.aqua(0.4))"),
                             labels: .top,
                             style: GlassFaderStyle(thumbFinish: .glass(.clear).sheen(.aqua(0.4))),
@@ -80,6 +81,7 @@ struct FinishesPage: View {
                         )
                         Fader(
                             value: model.fader("finishAqua", 0.7),
+                            format: model.formats.number(2),
                             title: Text(verbatim: "thumb: .aqua, fill: .aqua"),
                             labels: .top,
                             style: GlassFaderStyle(trackThickness: 14, thumbFinish: .aqua(.fixedSilver), fillFinish: .aqua(.accent)),
@@ -88,6 +90,7 @@ struct FinishesPage: View {
                         Fader(
                             value: model.fader("finishCentre", 64),
                             scale: ValueScale(0 ... 100, precision: 0),
+                            format: model.formats.number(0),
                             title: Text(verbatim: "Control Centre's, fill: .gradient.sheen(.aqua())"),
                             labels: .inside,
                             style: GlassFaderStyle(trackThickness: 44, thumb: .none, fillFinish: .gradient([.washViolet, .washPink]).sheen(.aqua())),
@@ -103,7 +106,7 @@ struct FinishesPage: View {
                             ButtonPrimary("Save") {}
                             ButtonSecondary("Cancel") {}
                         }
-                        Fader(value: model.fader("aquaGroup", 0.5), title: Text(verbatim: "Volume"), labels: .top, label: Text("Volume"))
+                        Fader(value: model.fader("aquaGroup", 0.5), format: model.formats.number(2), title: Text(verbatim: "Volume"), labels: .top, label: Text("Volume"))
                     }
                 }
                 .controlFinish(.aqua(.accent))

@@ -86,6 +86,7 @@ struct FillAndSheen<S: InsettableShape>: View {
 /// A shape filled: a colour, a gradient, a texture, chrome or gel; `edged` gives it a light edge,
 /// as it has when it isn't on glass.
 struct FillShape<S: InsettableShape>: View {
+    @Environment(\.vitralScheme) private var scheme
     let fill: FinishToken.Fill
     let shape: S
     let edged: Bool
@@ -93,15 +94,15 @@ struct FillShape<S: InsettableShape>: View {
     var body: some View {
         switch fill {
         case let .colour(colour):
-            shape.fill(Color(colour)).overlay { if edged { Rim(shape: shape) } }
+            shape.fill(Color(colour, scheme: scheme)).overlay { if edged { Rim(shape: shape) } }
         case let .gradient(colours):
-            shape.fill(LinearGradient(colors: colours.map { Color($0) }, startPoint: .top, endPoint: .bottom)).overlay { if edged { Rim(shape: shape) } }
+            shape.fill(LinearGradient(colors: colours.map { Color($0, scheme: scheme) }, startPoint: .top, endPoint: .bottom)).overlay { if edged { Rim(shape: shape) } }
         case let .texture(texture):
             Image(texture).resizable(resizingMode: .tile).clipShape(shape).overlay { if edged { Rim(shape: shape) } }
         case .chrome:
             shape
-                .fill(LinearGradient(colors: [.chromeHighlight, .chromeMid, .chromeShadow, .chromeMid].map { Color($0) }, startPoint: .top, endPoint: .bottom))
-                .overlay { shape.strokeBorder(Color(.chromeShadow), lineWidth: 0.75) }
+                .fill(LinearGradient(colors: [.chromeHighlight, .chromeMid, .chromeShadow, .chromeMid].map { Color($0, scheme: scheme) }, startPoint: .top, endPoint: .bottom))
+                .overlay { shape.strokeBorder(Color(.chromeShadow, scheme: scheme), lineWidth: 0.75) }
         case let .gel(colour):
             GelBody(colour: colour, shape: shape)
         }
@@ -110,6 +111,7 @@ struct FillShape<S: InsettableShape>: View {
 
 /// Aqua's light over a shape: the glow, the gloss and the rim, each as strong as the sheen says.
 struct SheenLayers<S: InsettableShape>: View {
+    @Environment(\.vitralScheme) private var scheme
     let tone: ColorToken
     let sheen: FinishToken.Sheen
     let shape: S
@@ -121,7 +123,7 @@ struct SheenLayers<S: InsettableShape>: View {
                     // Light passing through, gathering at the bottom.
                     shape.fill(
                         RadialGradient(
-                            colors: [Color(tone).mix(with: .white, by: 0.6).opacity(0.85 * sheen.glow), .clear],
+                            colors: [Color(tone, scheme: scheme).mix(with: .white, by: 0.6).opacity(0.85 * sheen.glow), .clear],
                             center: UnitPoint(x: 0.5, y: 1),
                             startRadius: 0,
                             endRadius: max(proxy.size.width, proxy.size.height) * 0.6
@@ -130,12 +132,12 @@ struct SheenLayers<S: InsettableShape>: View {
                 }
                 if sheen.gloss > 0 {
                     Capsule()
-                        .fill(LinearGradient(colors: [Color(ColorToken.fixedWhite.opacity(0.9 * sheen.gloss)), Color(ColorToken.fixedWhite.opacity(0.08 * sheen.gloss))], startPoint: .top, endPoint: .bottom))
+                        .fill(LinearGradient(colors: [Color(ColorToken.fixedWhite.opacity(0.9 * sheen.gloss), scheme: scheme), Color(ColorToken.fixedWhite.opacity(0.08 * sheen.gloss), scheme: scheme)], startPoint: .top, endPoint: .bottom))
                         .frame(width: proxy.size.width * 0.84, height: proxy.size.height * 0.48)
                         .position(x: proxy.size.width / 2, y: proxy.size.height * 0.28)
                 }
                 if sheen.rim > 0 {
-                    shape.strokeBorder(Color(tone).mix(with: .black, by: 0.4).opacity(sheen.rim), lineWidth: 0.8)
+                    shape.strokeBorder(Color(tone, scheme: scheme).mix(with: .black, by: 0.4).opacity(sheen.rim), lineWidth: 0.8)
                 }
             }
             .clipShape(shape)
@@ -146,12 +148,13 @@ struct SheenLayers<S: InsettableShape>: View {
 
 /// Glass's bright edge, catching the light from above.
 struct GlassRim<S: InsettableShape>: View {
+    @Environment(\.vitralScheme) private var scheme
     let shape: S
 
     var body: some View {
         shape
             .strokeBorder(
-                LinearGradient(colors: [Color(ColorToken.fixedWhite.opacity(0.95)), Color(ColorToken.fixedWhite.opacity(0.15))], startPoint: .top, endPoint: .bottom),
+                LinearGradient(colors: [Color(ColorToken.fixedWhite.opacity(0.95), scheme: scheme), Color(ColorToken.fixedWhite.opacity(0.15), scheme: scheme)], startPoint: .top, endPoint: .bottom),
                 lineWidth: 1.2
             )
             .allowsHitTesting(false)
@@ -160,11 +163,12 @@ struct GlassRim<S: InsettableShape>: View {
 
 /// A light edge on a coloured shape.
 struct Rim<S: InsettableShape>: View {
+    @Environment(\.vitralScheme) private var scheme
     let shape: S
 
     var body: some View {
         shape.strokeBorder(
-            LinearGradient(colors: [Color(ColorToken.fixedWhite.opacity(0.5)), Color(ColorToken.fixedBlack.opacity(0.2))], startPoint: .top, endPoint: .bottom),
+            LinearGradient(colors: [Color(ColorToken.fixedWhite.opacity(0.5), scheme: scheme), Color(ColorToken.fixedBlack.opacity(0.2), scheme: scheme)], startPoint: .top, endPoint: .bottom),
             lineWidth: 0.75
         )
     }
@@ -173,6 +177,7 @@ struct Rim<S: InsettableShape>: View {
 /// Aqua's gel body: the colour darkening towards the top and lighter at the bottom, with the
 /// shadow a drop of gel casts.
 struct GelBody<S: InsettableShape>: View {
+    @Environment(\.vitralScheme) private var scheme
     let colour: ColorToken
     let shape: S
 
@@ -180,11 +185,11 @@ struct GelBody<S: InsettableShape>: View {
         shape
             .fill(
                 LinearGradient(
-                    colors: [Color(colour).mix(with: .black, by: 0.18), Color(colour), Color(colour).mix(with: .white, by: 0.45)],
+                    colors: [Color(colour, scheme: scheme).mix(with: .black, by: 0.18), Color(colour, scheme: scheme), Color(colour, scheme: scheme).mix(with: .white, by: 0.45)],
                     startPoint: .top,
                     endPoint: .bottom
                 )
             )
-            .shadow(color: Color(colour).mix(with: .black, by: 0.3).opacity(0.45), radius: 3, y: 2)
+            .shadow(color: Color(colour, scheme: scheme).mix(with: .black, by: 0.3).opacity(0.45), radius: 3, y: 2)
     }
 }

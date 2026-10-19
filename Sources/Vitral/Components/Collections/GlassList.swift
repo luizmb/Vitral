@@ -11,6 +11,7 @@ import VitralTokens
 /// screen, so it stays cheap. A `NavigationLink` row shows no system chevron: give it
 /// `.disclosure()`, the same chevron as every other row.
 public struct GlassList<Selection: Hashable, Content: View>: View {
+    @Environment(\.vitralScheme) private var scheme
     let selection: Binding<Selection?>?
     let backdrop: BackdropStyle?
     let rows: GlassRows?
@@ -41,7 +42,7 @@ public struct GlassList<Selection: Hashable, Content: View>: View {
             .scrollContentBackground(.hidden)
             .background { backdrop.map { Backdrop($0) } }
             .environment(\.defaultMinListRowHeight, Size.hitTarget)
-            .tint(Color(accent.base))
+            .tint(Color(accent.base, scheme: scheme))
     }
 
     var styled: some View {
@@ -139,13 +140,14 @@ public extension GlassSection where Trailing == EmptyView {
 /// (Vitral's rows), the system's chevron is hidden: rows that lead somewhere say so with
 /// `.disclosure()`. Padded (plain controls), it stays.
 struct GlassRowStyle: ViewModifier {
+    @Environment(\.vitralScheme) private var scheme
     let rows: GlassRows
 
     func body(content: Content) -> some View {
         content
             .listRowInsets(rows == .edgeToEdge ? EdgeInsets() : nil)
             .listRowBackground(GlassRowBackground())
-            .listRowSeparatorTint(Color(.hairline))
+            .listRowSeparatorTint(Color(.hairline, scheme: scheme))
             .navigationLinkIndicatorVisibility(rows == .edgeToEdge ? .hidden : .automatic)
     }
 }
@@ -189,7 +191,7 @@ public extension View {
         swipeActions(edge: edge) {
             ForEach(Array(actions.enumerated()), id: \.offset) { _, action in
                 RowActionButton(action: action)
-                    .tint(action.tint.map { Color($0) })
+                    .tint(action.tint.map(TokenColor.init))
             }
         }
         .contextMenu {

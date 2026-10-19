@@ -52,6 +52,7 @@ public enum FieldStatus: Sendable {
 /// What every field sits in: glass at control height, an optional icon before the input and an
 /// optional suffix after it, and its status (colours, icon, messages).
 public struct FieldContainer<Input: View>: View {
+    @Environment(\.vitralScheme) private var scheme
     let icon: Image?
     let suffix: Text?
     let status: FieldStatus
@@ -88,7 +89,7 @@ public struct FieldContainer<Input: View>: View {
             .overlay {
                 status.style.map { style in
                     RoundedRectangle(cornerRadius: Radius.medium, style: .continuous)
-                        .strokeBorder(Color(style.foreground), lineWidth: 1.5)
+                        .strokeBorder(Color(style.foreground, scheme: scheme), lineWidth: 1.5)
                 }
             }
             FieldMessages(status: status)
@@ -127,9 +128,12 @@ public struct FieldText: View {
     let suffix: Text?
     let keyboard: FieldKeyboard
     let isMonospaced: Bool
+    let axis: Axis
     let status: FieldStatus
     let onEndEditing: @MainActor () -> Void
 
+    /// - Parameter axis: `.vertical` grows the field line by line for longer text (a lyric, a
+    ///   note); Return then ends the line rather than the editing.
     public init(
         _ placeholder: LocalizedStringKey,
         text: Binding<String>,
@@ -137,9 +141,11 @@ public struct FieldText: View {
         suffix: Text? = nil,
         keyboard: FieldKeyboard = .text,
         isMonospaced: Bool = false,
+        axis: Axis = .horizontal,
         status: FieldStatus = .normal,
         onEndEditing: @escaping @MainActor () -> Void = {}
     ) {
+        self.axis = axis
         self.status = status
         self.placeholder = placeholder
         self._text = text
@@ -152,9 +158,15 @@ public struct FieldText: View {
 
     public var body: some View {
         FieldContainer(icon: icon, suffix: suffix, status: status) {
-            TextField(placeholder, text: $text, onEditingChanged: { editing in if !editing { onEndEditing() } })
-                .fontDesign(isMonospaced ? .monospaced : .default)
-                .keyboard(keyboard)
+            Group {
+                if axis == .vertical {
+                    TextField(placeholder, text: $text, axis: .vertical)
+                } else {
+                    TextField(placeholder, text: $text, onEditingChanged: { editing in if !editing { onEndEditing() } })
+                }
+            }
+            .fontDesign(isMonospaced ? .monospaced : .default)
+            .keyboard(keyboard)
         }
     }
 }
@@ -189,7 +201,7 @@ public struct FieldSearch: View {
     let clearLabel: LocalizedStringKey
 
     /// - Parameter clearLabel: what VoiceOver says for the clear button.
-    public init(_ placeholder: LocalizedStringKey, text: Binding<String>, clearLabel: LocalizedStringKey = "Clear") {
+    public init(_ placeholder: LocalizedStringKey, text: Binding<String>, clearLabel: LocalizedStringKey) {
         self.placeholder = placeholder
         self._text = text
         self.clearLabel = clearLabel

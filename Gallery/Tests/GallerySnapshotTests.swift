@@ -70,7 +70,7 @@ struct GallerySnapshotTests {
     private func snapshot(_ view: some View, named name: String, fileID: StaticString = #fileID, filePath: StaticString = #filePath, testName: String = #function, line: UInt = #line, column: UInt = #column) {
         for style in [UIUserInterfaceStyle.light, .dark] {
             assertSnapshot(
-                of: UIHostingController(rootView: NavigationStack { view }.environment(GalleryModel())),
+                of: UIHostingController(rootView: NavigationStack { view }.environment(GalleryModel()).environment(\.locale, GalleryModel().locale).scheme(style == .dark ? .dark : .light)),
                 as: Self.strategy(style: style),
                 named: "\(name)-\(style == .dark ? "dark" : "light")",
                 fileID: fileID,

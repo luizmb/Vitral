@@ -51,6 +51,7 @@ public enum BackdropStyle: Sendable {
 /// is drawn, not loaded, and its irregularity comes from a fixed hash: the same size always draws
 /// the same picture.
 public struct Backdrop: View {
+    @Environment(\.vitralScheme) private var scheme
     let style: BackdropStyle
 
     public init(_ style: BackdropStyle = .grid()) {
@@ -61,13 +62,13 @@ public struct Backdrop: View {
         ZStack {
             switch style {
             case let .grid(origin, scale, spacing):
-                Color(.backdrop)
+                Color(.backdrop, scheme: scheme)
                 GraphPaper(origin: origin, step: spacing * scale)
             case let .dots(spacing):
-                Color(.backdrop)
+                Color(.backdrop, scheme: scheme)
                 DotGrid(spacing: spacing)
             case let .guilloche(color):
-                Color(.backdrop)
+                Color(.backdrop, scheme: scheme)
                 Guilloche(color: color)
             case let .laser(palette):
                 Laser(palette: palette)
@@ -76,18 +77,18 @@ public struct Backdrop: View {
             case let .fractal(palette):
                 Fractal(palette: palette)
             case .wood:
-                Color(.woodBase)
+                Color(.woodBase, scheme: scheme)
                 WoodGrain()
             case .brushedMetal:
-                Color(.metalBase)
+                Color(.metalBase, scheme: scheme)
                 BrushedMetal()
             case .paper:
-                Color(.backdrop)
+                Color(.backdrop, scheme: scheme)
                 PaperFleck()
             case let .busFloor(angle):
                 BusFloor(angle: angle)
             case let .mesh(palette):
-                Color(.backdrop)
+                Color(.backdrop, scheme: scheme)
                 MeshBackdrop(palette: palette)
             case let .aurora(palette):
                 Aurora(palette: palette)
@@ -98,10 +99,10 @@ public struct Backdrop: View {
             case let .texture(texture):
                 Image(texture).resizable(resizingMode: .tile)
                 if !texture.followsAppearance {
-                    Color(.pictureDim)
+                    Color(.pictureDim, scheme: scheme)
                 }
             case let .image(image, tiled):
-                Color(.backdrop)
+                Color(.backdrop, scheme: scheme)
                 if tiled {
                     image.resizable(resizingMode: .tile)
                 } else {
@@ -109,9 +110,9 @@ public struct Backdrop: View {
                         .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
                         .clipped()
                 }
-                Color(.pictureDim)
+                Color(.pictureDim, scheme: scheme)
             case .plain:
-                Color(.backdrop)
+                Color(.backdrop, scheme: scheme)
             }
         }
         .ignoresSafeArea()
@@ -137,6 +138,7 @@ private func finalShift(_ z: UInt64) -> UInt64 { z ^ (z >> 31) }
 /// Graph paper drawn in one pass. Below 10 points apart only the stronger lines are drawn, so a
 /// zoomed-out grid doesn't turn into a grey wash.
 public struct GraphPaper: View {
+    @Environment(\.vitralScheme) private var scheme
     let origin: CGPoint
     let step: Double
 
@@ -147,8 +149,8 @@ public struct GraphPaper: View {
 
     public var body: some View {
         Canvas { context, size in
-            let minor = GraphicsContext.Shading.color(Color(.gridLine))
-            let major = GraphicsContext.Shading.color(Color(.gridLineMajor))
+            let minor = GraphicsContext.Shading.color(Color(.gridLine, scheme: scheme))
+            let major = GraphicsContext.Shading.color(Color(.gridLineMajor, scheme: scheme))
             for line in GraphPaper.lines(in: size, origin: origin, step: max(step, 1)) {
                 context.stroke(line.path, with: line.isMajor ? major : minor, lineWidth: line.isMajor ? 1 : 0.5)
             }
@@ -186,6 +188,7 @@ public struct GraphPaper: View {
 /// The palette's colours washed in from the corners, clear in the middle, faint enough for text on
 /// glass to stay legible.
 struct MeshBackdrop: View {
+    @Environment(\.vitralScheme) private var scheme
     let palette: [ColorToken]
 
     var body: some View {
@@ -194,7 +197,7 @@ struct MeshBackdrop: View {
             height: 3,
             points: [[0, 0], [0.5, 0], [1, 0], [0, 0.5], [0.5, 0.5], [1, 0.5], [0, 1], [0.5, 1], [1, 1]],
             colors: [0, -1, 1, -1, -1, -1, 2, -1, 3].map { index in
-                index < 0 || palette.isEmpty ? .clear : Color(palette[index % palette.count].opacity(0.3))
+                index < 0 || palette.isEmpty ? .clear : Color(palette[index % palette.count].opacity(0.3), scheme: scheme)
             },
             smoothsColors: true
         )
@@ -203,13 +206,14 @@ struct MeshBackdrop: View {
 
 /// A dot at each crossing, every fifth a little stronger.
 struct DotGrid: View {
+    @Environment(\.vitralScheme) private var scheme
     let spacing: Double
 
     var body: some View {
         Canvas { context, size in
             for x in stride(from: spacing / 2, through: size.width, by: spacing) {
                 for y in stride(from: spacing / 2, through: size.height, by: spacing) {
-                    context.fill(Path(ellipseIn: CGRect(x: x - 1, y: y - 1, width: 2, height: 2)), with: .color(Color(.gridLineMajor)))
+                    context.fill(Path(ellipseIn: CGRect(x: x - 1, y: y - 1, width: 2, height: 2)), with: .color(Color(.gridLineMajor, scheme: scheme)))
                 }
             }
         }
@@ -218,6 +222,7 @@ struct DotGrid: View {
 
 /// Guilloché: two bands of interlaced sine curves, each curve a step out of phase with the last.
 struct Guilloche: View {
+    @Environment(\.vitralScheme) private var scheme
     let color: ColorToken
 
     var body: some View {
@@ -226,7 +231,7 @@ struct Guilloche: View {
                 for curve in 0 ..< 28 {
                     context.stroke(
                         Guilloche.curve(index: curve, centre: size.height * band, size: size),
-                        with: .color(Color(color.opacity(0.10 + 0.14 * scatter(curve, Int(band * 100))))),
+                        with: .color(Color(color.opacity(0.10 + 0.14 * scatter(curve, Int(band * 100))), scheme: scheme)),
                         lineWidth: 0.7
                     )
                 }
@@ -250,18 +255,19 @@ struct Guilloche: View {
 
 /// Planks with grain: wavy lines across, close and faint, drifting a little in each plank.
 struct WoodGrain: View {
+    @Environment(\.vitralScheme) private var scheme
     var body: some View {
         Canvas { context, size in
             let plank = 140.0
             for (row, y) in stride(from: 0.0, through: size.height, by: 3.5).enumerated() {
                 context.stroke(
                     WoodGrain.grain(row: row, y: y, width: size.width),
-                    with: .color(Color(ColorToken.woodGrain.opacity(ColorToken.woodGrain.light.alpha * (0.3 + 0.9 * scatter(row, 7))))),
+                    with: .color(Color(ColorToken.woodGrain.opacity(ColorToken.woodGrain.light.alpha * (0.3 + 0.9 * scatter(row, 7))), scheme: scheme)),
                     lineWidth: 0.5 + scatter(row, 3)
                 )
             }
             for seam in stride(from: plank, through: size.height, by: plank) {
-                context.stroke(GraphPaper.segment(CGPoint(x: 0, y: seam), CGPoint(x: size.width, y: seam)), with: .color(Color(.woodGrain)), lineWidth: 1.2)
+                context.stroke(GraphPaper.segment(CGPoint(x: 0, y: seam), CGPoint(x: size.width, y: seam)), with: .color(Color(.woodGrain, scheme: scheme)), lineWidth: 1.2)
             }
         }
     }
@@ -277,15 +283,16 @@ struct WoodGrain: View {
 
 /// Brushed metal: a soft sheen from the top, and fine streaks across of every length.
 struct BrushedMetal: View {
+    @Environment(\.vitralScheme) private var scheme
     var body: some View {
         ZStack {
-            LinearGradient(colors: [Color(.metalStreak), .clear, Color(.metalShade)], startPoint: .top, endPoint: .bottom)
+            LinearGradient(colors: [Color(.metalStreak, scheme: scheme), .clear, Color(.metalShade, scheme: scheme)], startPoint: .top, endPoint: .bottom)
             Canvas { context, size in
                 for (row, y) in stride(from: 0.0, through: size.height, by: 1.5).enumerated() {
                     let start = scatter(row, 11) * size.width * 0.6
                     context.stroke(
                         GraphPaper.segment(CGPoint(x: start, y: y), CGPoint(x: start + size.width * (0.3 + 0.7 * scatter(row, 13)), y: y)),
-                        with: .color(Color(scatter(row, 17) > 0.5 ? .metalStreak : .metalShade)),
+                        with: .color(Color(scatter(row, 17) > 0.5 ? .metalStreak : .metalShade, scheme: scheme)),
                         lineWidth: 0.5
                     )
                 }
@@ -296,6 +303,7 @@ struct BrushedMetal: View {
 
 /// Paper: tiny flecks, one in each small cell, placed and sized by the hash.
 struct PaperFleck: View {
+    @Environment(\.vitralScheme) private var scheme
     var body: some View {
         Canvas { context, size in
             let cell = 6.0
@@ -304,7 +312,7 @@ struct PaperFleck: View {
                 let x = Double(index % columns) * cell + scatter(index, 1) * cell
                 let y = Double(index / columns) * cell + scatter(index, 2) * cell
                 let radius = 0.35 + scatter(index, 3) * 0.75
-                context.fill(Path(ellipseIn: CGRect(x: x, y: y, width: radius * 2, height: radius * 2)), with: .color(Color(.paperFleck)))
+                context.fill(Path(ellipseIn: CGRect(x: x, y: y, width: radius * 2, height: radius * 2)), with: .color(Color(.paperFleck, scheme: scheme)))
             }
         }
     }
@@ -314,13 +322,14 @@ struct PaperFleck: View {
 /// across in one square and upright in the next. Each bar is a raised capsule lit from above (a
 /// bright edge, a dark underside) on a darker chrome floor.
 struct BusFloor: View {
+    @Environment(\.vitralScheme) private var scheme
     static let square = 30.0
 
     let angle: Angle
 
     var body: some View {
         ZStack {
-            LinearGradient(colors: [Color(.chromeMid), Color(.chromeShadow)], startPoint: .top, endPoint: .bottom)
+            LinearGradient(colors: [Color(.chromeMid, scheme: scheme), Color(.chromeShadow, scheme: scheme)], startPoint: .top, endPoint: .bottom)
             Canvas { context, size in
                 let cover = BusFloor.cover(size, turnedBy: angle)
                 var context = context
@@ -328,13 +337,13 @@ struct BusFloor: View {
                 context.rotate(by: angle)
                 context.translateBy(x: -cover.width / 2, y: -cover.height / 2)
                 let chrome = Gradient(stops: [
-                    .init(color: Color(.chromeHighlight), location: 0),
-                    .init(color: Color(.chromeMid), location: 0.45),
-                    .init(color: Color(.chromeShadow), location: 1)
+                    .init(color: Color(.chromeHighlight, scheme: scheme), location: 0),
+                    .init(color: Color(.chromeMid, scheme: scheme), location: 0.45),
+                    .init(color: Color(.chromeShadow, scheme: scheme), location: 1)
                 ])
                 for frame in BusFloor.bars(in: cover) {
                     let capsule = Path(roundedRect: frame, cornerRadius: min(frame.width, frame.height) / 2)
-                    context.fill(capsule.offsetBy(dx: 0.8, dy: 1.2), with: .color(Color(.chromeShadow)))
+                    context.fill(capsule.offsetBy(dx: 0.8, dy: 1.2), with: .color(Color(.chromeShadow, scheme: scheme)))
                     // Lit across the bar's short side, whichever way it lies.
                     context.fill(
                         capsule,
@@ -350,10 +359,10 @@ struct BusFloor: View {
             LinearGradient(
                 stops: [
                     .init(color: .clear, location: 0),
-                    .init(color: Color(ColorToken.chromeHighlight.opacity(0.35)), location: 0.22),
+                    .init(color: Color(ColorToken.chromeHighlight.opacity(0.35), scheme: scheme), location: 0.22),
                     .init(color: .clear, location: 0.38),
-                    .init(color: Color(ColorToken.chromeShadow.opacity(0.35)), location: 0.6),
-                    .init(color: Color(ColorToken.chromeHighlight.opacity(0.25)), location: 0.78),
+                    .init(color: Color(ColorToken.chromeShadow.opacity(0.35), scheme: scheme), location: 0.6),
+                    .init(color: Color(ColorToken.chromeHighlight.opacity(0.25), scheme: scheme), location: 0.78),
                     .init(color: .clear, location: 1)
                 ],
                 startPoint: .topLeading,

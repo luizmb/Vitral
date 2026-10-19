@@ -58,6 +58,7 @@ public struct SegmentedControlGlass<Value: Hashable & Sendable>: View {
 
 /// One segment of a `SegmentedControlGlass`.
 public struct Segment<Value: Hashable & Sendable>: View {
+    @Environment(\.vitralScheme) private var scheme
     let option: ChoiceOption<Value>
     let isSelected: Bool
     let action: @MainActor () -> Void
@@ -80,7 +81,7 @@ public struct Segment<Value: Hashable & Sendable>: View {
             .frame(minWidth: Size.hitTarget, maxWidth: .infinity, minHeight: Size.controlSmall + Space.extraSmall)
             .background {
                 if isSelected {
-                    Capsule().fill(Color(.selectedSurface)).shadow(color: Color(.hairline), radius: 3, y: 1)
+                    Capsule().fill(Color(.selectedSurface, scheme: scheme)).shadow(color: Color(.hairline, scheme: scheme), radius: 3, y: 1)
                 }
             }
             .contentShape(Capsule())
@@ -113,6 +114,7 @@ public struct RadioList<Value: Hashable & Sendable>: View {
 
 /// One row of a `RadioList`: the mark, the title, and the detail on the trailing side.
 public struct RadioRow<Value: Hashable & Sendable>: View {
+    @Environment(\.vitralScheme) private var scheme
     let option: ChoiceOption<Value>
     let isSelected: Bool
     let action: @MainActor () -> Void
@@ -139,7 +141,7 @@ public struct RadioRow<Value: Hashable & Sendable>: View {
             }
             .padding(.horizontal, Space.large)
             .frame(minHeight: Size.hitTarget + Space.small)
-            .background(isSelected ? Color(.selectedSurface).opacity(0.5) : .clear)
+            .background(isSelected ? Color(.selectedSurface, scheme: scheme).opacity(0.5) : .clear)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

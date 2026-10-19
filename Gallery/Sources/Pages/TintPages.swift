@@ -80,13 +80,15 @@ struct AccentColumn: View {
 
 /// Two made-up series, one in each accent: what the counter-accent is for.
 struct TwoSeries: View {
+    @Environment(\.vitralScheme) private var scheme
+
     static let first = [0.2, 0.35, 0.3, 0.55, 0.5, 0.7, 0.65, 0.85]
     static let second = [0.6, 0.5, 0.55, 0.4, 0.45, 0.3, 0.35, 0.2]
 
     var body: some View {
         Canvas { context, size in
             for (values, colour) in [(Self.first, ColorToken.accent), (Self.second, ColorToken.counterAccent)] {
-                context.stroke(Self.line(values, in: size), with: .color(Color(colour)), style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
+                context.stroke(Self.line(values, in: size), with: .color(Color(colour, scheme: scheme)), style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
             }
         }
     }

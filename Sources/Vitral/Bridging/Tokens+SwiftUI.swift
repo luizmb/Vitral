@@ -8,17 +8,46 @@ import AppKit
 
 // The one place tokens become SwiftUI values. Components only ever go through these.
 
+public extension EnvironmentValues {
+    /// The colour scheme Vitral draws in. The app's, set with `.scheme(_:)` from its own state (the
+    /// device's appearance arrives through the app's world, like any other fact about the device);
+    /// Vitral never asks the device. Light until set.
+    @Entry var vitralScheme: ColorScheme = .light
+}
+
+public extension View {
+    /// Draws this view, and everything in it, in `scheme`: Vitral's token colours, and SwiftUI's own
+    /// (system controls, materials, glass, asset colour variants), which read the same value. The
+    /// scheme is the app's, from its state; set it once at the root.
+    func scheme(_ scheme: ColorScheme) -> some View {
+        environment(\.vitralScheme, scheme).environment(\.colorScheme, scheme)
+    }
+}
+
 public extension Color {
-    /// The token's colour for the current appearance, switching with light and dark mode by
-    /// itself: one view, both appearances.
-    init(_ token: ColorToken) {
-        #if canImport(UIKit)
-        self.init(uiColor: UIColor { traits in UIColor(traits.userInterfaceStyle == .dark ? token.dark : token.light) })
-        #elseif canImport(AppKit)
-        self.init(nsColor: NSColor(name: nil) { appearance in
-            NSColor(appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? token.dark : token.light)
-        })
-        #endif
+    /// The token's colour in `scheme`.
+    init(_ token: ColorToken, scheme: ColorScheme) {
+        self.init(token.resolved(isDark: scheme == .dark))
+    }
+
+    /// An RGBA value as a SwiftUI colour, in sRGB.
+    init(_ rgba: RGBA) {
+        self.init(.sRGB, red: rgba.red, green: rgba.green, blue: rgba.blue, opacity: rgba.alpha)
+    }
+}
+
+/// A token's colour as a shape style, resolved in the scheme the app set (`.scheme(_:)`). What
+/// components fill, stroke and tint with wherever a style will do; where a `Color` itself is
+/// needed (a gradient's stops, a shadow), they resolve the token with `Color(_:scheme:)`.
+public struct TokenColor: ShapeStyle {
+    let token: ColorToken
+
+    public init(_ token: ColorToken) {
+        self.token = token
+    }
+
+    public func resolve(in environment: EnvironmentValues) -> Color {
+        Color(token, scheme: environment.vitralScheme)
     }
 }
 
@@ -194,9 +223,9 @@ extension Font.Weight {
 
 public extension Glass {
     /// The system's glass for `token`; `sheer` is none (Vitral draws it, see `glassLayer(_:in:)`).
-    static func token(_ token: GlassToken) -> Glass {
+    static func token(_ token: GlassToken, scheme: ColorScheme) -> Glass {
         variant(token.variant)
-            .tint(token.tint.map(Color.init))
+            .tint(token.tint.map { Color($0, scheme: scheme) })
             .interactive(token.isInteractive)
     }
 

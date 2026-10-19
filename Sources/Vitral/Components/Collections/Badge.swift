@@ -5,6 +5,7 @@ import VitralTokens
 /// or a symbol. The colour is the identity — which track, which band, which bus — so it is a
 /// filled disc with the thing on it rather than a tint on a glyph.
 public struct Badge: View {
+    @Environment(\.vitralScheme) private var scheme
     /// What sits on the disc.
     public enum Content {
         /// A name's initials (`Initials.of`), and the disc its stable colour unless one is given.
@@ -18,7 +19,7 @@ public struct Badge: View {
     }
 
     let content: Content
-    let fill: Color
+    let fill: Fill
     let diameter: Double
     let gradient: Bool
 
@@ -30,23 +31,39 @@ public struct Badge: View {
         let token = colour ?? {
             if case let .monogram(name) = content { ColorToken.stable(for: name) } else { ColorToken.accent }
         }()
-        self.init(content, fill: Color(token), diameter: diameter, gradient: gradient)
+        self.content = content
+        self.fill = .token(token)
+        self.diameter = diameter
+        self.gradient = gradient
+    }
+
+    /// The disc's colour: a token resolved in the app's scheme, or a colour the app owns.
+    enum Fill {
+        case token(ColorToken)
+        case colour(Color)
+    }
+
+    var fillColour: Color {
+        switch fill {
+        case let .token(token): Color(token, scheme: scheme)
+        case let .colour(colour): colour
+        }
     }
 
     /// A badge on a colour the app owns rather than one of Vitral's tokens.
     public init(_ content: Content, fill: Color, diameter: Double = Size.icon, gradient: Bool = false) {
         self.content = content
-        self.fill = fill
+        self.fill = .colour(fill)
         self.diameter = diameter
         self.gradient = gradient
     }
 
     public var body: some View {
         Circle()
-            .fill(gradient ? AnyShapeStyle(fill.gradient) : AnyShapeStyle(fill))
+            .fill(gradient ? AnyShapeStyle(fillColour.gradient) : AnyShapeStyle(fillColour))
             .overlay { face }
             .clipShape(Circle())
-            .overlay(Circle().strokeBorder(Color(.hairline), lineWidth: 1))
+            .overlay(Circle().strokeBorder(Color(.hairline, scheme: scheme), lineWidth: 1))
             .frame(width: diameter, height: diameter)
             .accessibilityHidden(true)
     }

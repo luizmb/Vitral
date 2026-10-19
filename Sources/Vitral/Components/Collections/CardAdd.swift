@@ -4,6 +4,7 @@ import VitralTokens
 /// The card that makes a new one: a dashed outline on clear glass, an icon and a title, in the
 /// grid among the cards it adds to.
 public struct CardAdd: View {
+    @Environment(\.vitralScheme) private var scheme
     let title: LocalizedStringKey
     let icon: Image
     let action: @MainActor () -> Void
@@ -20,7 +21,7 @@ public struct CardAdd: View {
                 icon
                     .font(.title2)
                     .frame(width: Size.controlLarge + Space.medium, height: Size.controlLarge + Space.medium)
-                    .overlay(Circle().strokeBorder(Color(.outline), style: StrokeStyle(lineWidth: 1.5, dash: [4, 3])))
+                    .overlay(Circle().strokeBorder(Color(.outline, scheme: scheme), style: StrokeStyle(lineWidth: 1.5, dash: [4, 3])))
                 Text(title).font(.bodyStrong)
             }
             .foregroundStyle(.inkMuted)
@@ -28,7 +29,7 @@ public struct CardAdd: View {
             .glassSurface(.clear, cornerRadius: Radius.card)
             .overlay(
                 RoundedRectangle(cornerRadius: Radius.card, style: .continuous)
-                    .strokeBorder(Color(.outline), style: StrokeStyle(lineWidth: 1.5, dash: [6, 4]))
+                    .strokeBorder(Color(.outline, scheme: scheme), style: StrokeStyle(lineWidth: 1.5, dash: [6, 4]))
             )
             .contentShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
         }

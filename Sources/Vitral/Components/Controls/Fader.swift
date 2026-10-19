@@ -38,9 +38,11 @@ public struct FaderConfiguration: Sendable {
     public let scale: ValueScale
     public let axis: Axis
     public let isDragging: Bool
+    /// How a value reads: the fader's `format`.
+    public let format: @Sendable (Double) -> Text
 
-    /// `value` as the scale writes it.
-    public var formatted: String { scale.formatted(value) }
+    /// `value` as the fader's `format` writes it.
+    public var formatted: Text { format(value) }
 }
 
 /// How a fader looks. Write one to draw a fader entirely your own way; `GlassFaderStyle` is the
@@ -91,6 +93,7 @@ public extension View {
 public struct Fader: View {
     @Binding var value: Double
     let scale: ValueScale
+    let format: @Sendable (Double) -> Text
     let axis: Axis
     let interaction: FaderInteraction
     let centre: Double?
@@ -108,11 +111,14 @@ public struct Fader: View {
     var style: AnyFaderStyle { given ?? environmentStyle }
 
     /// - Parameters:
+    ///   - format: how the value reads, in the readout and to VoiceOver: the app's, in its locale
+    ///     (Vitral formats nothing itself).
     ///   - title: shown where `labels` says, with the value.
     ///   - label: what VoiceOver calls it.
     public init(
         value: Binding<Double>,
         scale: ValueScale = ValueScale(),
+        format: @escaping @Sendable (Double) -> Text,
         axis: Axis = .horizontal,
         interaction: FaderInteraction = .absolute,
         centre: Double? = nil,
@@ -125,7 +131,7 @@ public struct Fader: View {
         label: Text
     ) {
         self.init(
-            value: value, scale: scale, axis: axis, interaction: interaction, centre: centre, detents: detents,
+            value: value, scale: scale, format: format, axis: axis, interaction: interaction, centre: centre, detents: detents,
             resetValue: resetValue, title: title, labels: labels, given: AnyFaderStyle(style), onEditingEnded: onEditingEnded, label: label
         )
     }
@@ -134,6 +140,7 @@ public struct Fader: View {
     public init(
         value: Binding<Double>,
         scale: ValueScale = ValueScale(),
+        format: @escaping @Sendable (Double) -> Text,
         axis: Axis = .horizontal,
         interaction: FaderInteraction = .absolute,
         centre: Double? = nil,
@@ -145,7 +152,7 @@ public struct Fader: View {
         label: Text
     ) {
         self.init(
-            value: value, scale: scale, axis: axis, interaction: interaction, centre: centre, detents: detents,
+            value: value, scale: scale, format: format, axis: axis, interaction: interaction, centre: centre, detents: detents,
             resetValue: resetValue, title: title, labels: labels, given: nil, onEditingEnded: onEditingEnded, label: label
         )
     }
@@ -153,6 +160,7 @@ public struct Fader: View {
     init(
         value: Binding<Double>,
         scale: ValueScale,
+        format: @escaping @Sendable (Double) -> Text,
         axis: Axis,
         interaction: FaderInteraction,
         centre: Double?,
@@ -166,6 +174,7 @@ public struct Fader: View {
     ) {
         self._value = value
         self.scale = scale
+        self.format = format
         self.axis = axis
         self.interaction = interaction
         self.centre = centre
@@ -185,7 +194,8 @@ public struct Fader: View {
             originFraction: centre.map { scale.fraction(of: $0) } ?? 0,
             scale: scale,
             axis: axis,
-            isDragging: isDragging
+            isDragging: isDragging,
+            format: format
         )
     }
 
@@ -215,7 +225,7 @@ public struct Fader: View {
     func caption(alignment: HorizontalAlignment) -> some View {
         VStack(alignment: alignment, spacing: Space.hairline) {
             title.font(.detail).foregroundStyle(.inkMuted)
-            Text(verbatim: scale.formatted(value)).font(.value).foregroundStyle(.ink)
+            format(value).font(.value).foregroundStyle(.ink)
         }
         .fixedSize()
     }
@@ -225,7 +235,7 @@ public struct Fader: View {
         HStack {
             title.font(.detail).foregroundStyle(.inkMuted)
             Spacer(minLength: Space.small)
-            Text(verbatim: scale.formatted(value)).font(TypeToken.detail.weight(.semibold)).monospacedDigit().foregroundStyle(.ink)
+            format(value).font(TypeToken.detail.weight(.semibold)).monospacedDigit().foregroundStyle(.ink)
         }
     }
 
@@ -250,7 +260,7 @@ public struct Fader: View {
         .frame(maxWidth: axis == .horizontal ? .infinity : nil, maxHeight: axis == .vertical ? .infinity : nil)
         .accessibilityElement()
         .accessibilityLabel(label)
-        .accessibilityValue(Text(verbatim: scale.formatted(value)))
+        .accessibilityValue(format(value))
         .accessibilityAdjustableAction { direction in
             switch direction {
             case .increment: value = scale.stepped(value, by: 1)
@@ -372,6 +382,7 @@ public struct GlassFaderStyle: FaderStyle, Sendable {
     let showsFill: Bool
     let marks: Int?
     let numberStep: Double?
+    let numberFormat: (@Sendable (Double) -> Text)?
     let markColour: ColorToken
     let numberColour: ColorToken
     let thumbFinish: FinishToken?
@@ -385,6 +396,8 @@ public struct GlassFaderStyle: FaderStyle, Sendable {
     ///   - gradient: colours along the track instead of a fill (a temperature's blue to amber).
     ///   - marks: dashes beside the track, this many (`nil` for none).
     ///   - numberStep: a number beside the track every this much.
+    ///   - numberFormat: how those numbers read (fewer places than the value, say); the fader's
+    ///     `format` when `nil`.
     public init(
         trackThickness: Double = 6,
         thumb: Thumb = .round,
@@ -392,6 +405,7 @@ public struct GlassFaderStyle: FaderStyle, Sendable {
         showsFill: Bool = true,
         marks: Int? = nil,
         numberStep: Double? = nil,
+        numberFormat: (@Sendable (Double) -> Text)? = nil,
         markColour: ColorToken = .inkFaint,
         numberColour: ColorToken = .inkMuted,
         thumbFinish: FinishToken? = nil,
@@ -403,6 +417,7 @@ public struct GlassFaderStyle: FaderStyle, Sendable {
         self.showsFill = showsFill
         self.marks = marks
         self.numberStep = numberStep
+        self.numberFormat = numberFormat
         self.markColour = markColour
         self.numberColour = numberColour
         self.thumbFinish = thumbFinish
@@ -427,6 +442,7 @@ public struct GlassFaderStyle: FaderStyle, Sendable {
 }
 
 struct GlassFader: View {
+    @Environment(\.vitralScheme) private var scheme
     let style: GlassFaderStyle
     let configuration: FaderConfiguration
 
@@ -462,7 +478,7 @@ struct GlassFader: View {
         Capsule()
             .fill(gradientFill(frame))
             .frame(width: frame.size(along: frame.length, across: style.trackThickness).width, height: frame.size(along: frame.length, across: style.trackThickness).height)
-            .overlay { Capsule().strokeBorder(Color(.hairline), lineWidth: 0.5) }
+            .overlay { Capsule().strokeBorder(Color(.hairline, scheme: scheme), lineWidth: 0.5) }
             .glassSurface(.clear, cornerRadius: style.trackThickness / 2)
             .position(configuration.axis == .horizontal
                 ? CGPoint(x: frame.length / 2, y: frame.size.height / 2 + trackOffset)
@@ -473,12 +489,12 @@ struct GlassFader: View {
         style.gradient.map { colours in
             AnyShapeStyle(
                 LinearGradient(
-                    colors: colours.map { Color($0) },
+                    colors: colours.map { Color($0, scheme: scheme) },
                     startPoint: configuration.axis == .horizontal ? .leading : .bottom,
                     endPoint: configuration.axis == .horizontal ? .trailing : .top
                 )
             )
-        } ?? AnyShapeStyle(Color(.hairline))
+        } ?? AnyShapeStyle(Color(.hairline, scheme: scheme))
     }
 
     /// Where the fill starts and ends: from the origin (the lowest, or the centre) to the value.
@@ -516,7 +532,7 @@ struct GlassFader: View {
     func marks(_ frame: TrackFrame, count: Int) -> some View {
         ForEach(0 ..< max(count, 2), id: \.self) { index in
             Rectangle()
-                .fill(Color(style.markColour))
+                .fill(Color(style.markColour, scheme: scheme))
                 .frame(
                     width: frame.size(along: 1, across: index % 5 == 0 ? 8 : 5).width,
                     height: frame.size(along: 1, across: index % 5 == 0 ? 8 : 5).height
@@ -527,10 +543,10 @@ struct GlassFader: View {
 
     func numbers(_ frame: TrackFrame, step: Double) -> some View {
         ForEach(configuration.scale.marks(every: step), id: \.self) { mark in
-            Text(verbatim: configuration.scale.formatted(mark, places: ValueScale.decimals(of: step)))
+            (style.numberFormat ?? configuration.format)(mark)
                 .font(.caption2.weight(.medium))
                 .monospacedDigit()
-                .foregroundStyle(Color(style.numberColour))
+                .foregroundStyle(Color(style.numberColour, scheme: scheme))
                 .fixedSize()
                 .position(frame.point(configuration.scale.fraction(of: mark), across: trackOffset + 26))
         }
@@ -542,13 +558,13 @@ struct GlassFader: View {
         case .round:
             FinishedShape(finish: thumbFinish, shape: Circle())
                 .frame(width: 28, height: 28)
-                .shadow(color: Color(.scrim), radius: 4, y: 2)
+                .shadow(color: Color(.scrim, scheme: scheme), radius: 4, y: 2)
                 .scaleEffect(configuration.isDragging ? 1.12 : 1)
                 .position(frame.point(configuration.fraction, across: trackOffset))
         case .capsule:
             FinishedShape(finish: thumbFinish, shape: Capsule())
                 .frame(width: frame.size(along: 22, across: 34).width, height: frame.size(along: 22, across: 34).height)
-                .shadow(color: Color(.scrim), radius: 4, y: 2)
+                .shadow(color: Color(.scrim, scheme: scheme), radius: 4, y: 2)
                 .position(frame.point(configuration.fraction, across: trackOffset))
         case .none:
             EmptyView()
@@ -561,7 +577,7 @@ struct GlassFader: View {
 public struct ConsoleFaderStyle: FaderStyle, Sendable {
     let ticks: [Double]
     let unity: Double
-    let lowestLabel: String?
+    let tickFormat: (@Sendable (Double) -> Text)?
     let slotColour: ColorToken
     let scaleColour: ColorToken
     let lineColour: ColorToken
@@ -570,18 +586,19 @@ public struct ConsoleFaderStyle: FaderStyle, Sendable {
     ///   - ticks: the values printed on the scale, in the scale's own values (+10, 0, −10 … on a
     ///     decibel scale; gains, `ValueScale.gain(decibels:)`, on a `consoleGain` one).
     ///   - unity: the tick printed boldest and longest (0 dB; a gain of 1).
-    ///   - lowestLabel: what the scale says at its lowest, when there's a tick there (−∞).
+    ///   - tickFormat: how the ticks read (signed whole decibels, −∞ at silence); the fader's
+    ///     `format` when `nil`.
     public init(
         ticks: [Double],
         unity: Double = 0,
-        lowestLabel: String? = "−∞",
+        tickFormat: (@Sendable (Double) -> Text)? = nil,
         slotColour: ColorToken = .fixedBlack,
         scaleColour: ColorToken = .inkMuted,
         lineColour: ColorToken = .fixedWhite
     ) {
         self.ticks = ticks
         self.unity = unity
-        self.lowestLabel = lowestLabel
+        self.tickFormat = tickFormat
         self.slotColour = slotColour
         self.scaleColour = scaleColour
         self.lineColour = lineColour
@@ -596,6 +613,7 @@ public struct ConsoleFaderStyle: FaderStyle, Sendable {
 }
 
 struct ConsoleFader: View {
+    @Environment(\.vitralScheme) private var scheme
     let style: ConsoleFaderStyle
     let configuration: FaderConfiguration
 
@@ -604,9 +622,9 @@ struct ConsoleFader: View {
             let frame = TrackFrame(size: proxy.size, axis: configuration.axis, thumbLength: style.thumbLength)
             ZStack(alignment: .topLeading) {
                 RoundedRectangle(cornerRadius: 2)
-                    .fill(Color(style.slotColour))
+                    .fill(Color(style.slotColour, scheme: scheme))
                     .frame(width: frame.size(along: frame.length - 8, across: 4).width, height: frame.size(along: frame.length - 8, across: 4).height)
-                    .overlay { RoundedRectangle(cornerRadius: 2).strokeBorder(Color(.chromeShadow), lineWidth: 0.5) }
+                    .overlay { RoundedRectangle(cornerRadius: 2).strokeBorder(Color(.chromeShadow, scheme: scheme), lineWidth: 0.5) }
                     .position(frame.point(0.5, across: -10))
                 ForEach(style.ticks, id: \.self) { tick in
                     tickMark(frame, tick: tick)
@@ -621,13 +639,13 @@ struct ConsoleFader: View {
     func tickMark(_ frame: TrackFrame, tick: Double) -> some View {
         ZStack {
             Rectangle()
-                .fill(Color(style.scaleColour))
+                .fill(Color(style.scaleColour, scheme: scheme))
                 .frame(width: frame.size(along: 1, across: tick == style.unity ? 10 : 6).width, height: frame.size(along: 1, across: tick == style.unity ? 10 : 6).height)
                 .position(frame.point(configuration.scale.fraction(of: tick), across: 20))
-            Text(verbatim: tick <= configuration.scale.lower ? (style.lowestLabel ?? configuration.scale.formatted(tick, places: 0)) : label(tick))
+            (style.tickFormat ?? configuration.format)(tick)
                 .font(.caption2.weight(tick == style.unity ? .bold : .medium))
                 .monospacedDigit()
-                .foregroundStyle(Color(style.scaleColour))
+                .foregroundStyle(Color(style.scaleColour, scheme: scheme))
                 .fixedSize()
                 // Starting just past the tick, not centred on a point: a wider label (−12) would
                 // otherwise run under the tick and lose its sign.
@@ -636,38 +654,30 @@ struct ConsoleFader: View {
         }
     }
 
-    /// A tick as the scale writes it, signed above zero on a plain number scale (a decibel
-    /// readout signs its own).
-    func label(_ tick: Double) -> String {
-        configuration.scale.readout == .number && tick > 0
-            ? "+" + configuration.scale.formatted(tick, places: 0)
-            : configuration.scale.formatted(tick, places: 0)
-    }
-
     /// The metal cap: brushed chrome, ridges across for the finger, and a white line where it reads.
     var cap: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 4)
                 .fill(
                     LinearGradient(
-                        colors: [Color(.chromeHighlight), Color(.chromeMid), Color(.chromeShadow)],
+                        colors: [Color(.chromeHighlight, scheme: scheme), Color(.chromeMid, scheme: scheme), Color(.chromeShadow, scheme: scheme)],
                         startPoint: .top,
                         endPoint: .bottom
                     )
                 )
             VStack(spacing: 3) {
                 ForEach(0 ..< 5, id: \.self) { _ in
-                    Rectangle().fill(Color(ColorToken.chromeShadow.opacity(0.6))).frame(height: 1)
+                    Rectangle().fill(Color(ColorToken.chromeShadow.opacity(0.6), scheme: scheme)).frame(height: 1)
                 }
             }
             .padding(.vertical, 5)
             .rotationEffect(.degrees(configuration.axis == .horizontal ? 90 : 0))
             Rectangle()
-                .fill(Color(style.lineColour))
+                .fill(Color(style.lineColour, scheme: scheme))
                 .frame(width: configuration.axis == .horizontal ? 2 : nil, height: configuration.axis == .vertical ? 2 : nil)
         }
         .clipShape(RoundedRectangle(cornerRadius: 4))
-        .shadow(color: Color(.scrim), radius: 3, y: 2)
+        .shadow(color: Color(.scrim, scheme: scheme), radius: 3, y: 2)
         .scaleEffect(configuration.isDragging ? 1.04 : 1)
     }
 }

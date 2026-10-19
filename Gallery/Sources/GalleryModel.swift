@@ -7,6 +7,10 @@ import VitralTokens
 /// pages the interactive samples are on. Views read it, and change it through bindings.
 @MainActor @Observable
 final class GalleryModel {
+    /// The locale every sample writes its numbers and dates in: fixed, so the snapshots are too.
+    let locale = Locale(identifier: "en_GB")
+    var formats: Formats { Formats(locale: locale) }
+    var formDatePicking = false
     var appearance = Appearance.system
     var carouselPage: Int? = 0
     var flipPage: Int? = 0
@@ -40,6 +44,7 @@ final class GalleryModel {
     var faders: [String: Double] = [:]
     var formChannels = "Stereo"
     var formDivision = 2
+    var formTempo = 120.5
     var formDate = Date(timeIntervalSinceReferenceDate: 800_000_000)
     var formEntries = ["Metronome", "Tempo", "Count In"]
     var formDraft = ""

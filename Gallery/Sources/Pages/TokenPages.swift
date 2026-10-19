@@ -66,6 +66,8 @@ extension RGBA {
 
 /// Rows of named measures, each value in points.
 private struct MeasurePage: View {
+    @Environment(GalleryModel.self) private var model
+
     let title: LocalizedStringKey
     let entries: [(name: String, value: Double)]
 
@@ -73,7 +75,7 @@ private struct MeasurePage: View {
         Page(title) {
             PanelList {
                 ForEach(entries, id: \.name) { entry in
-                    Row(LocalizedStringKey(entry.name), detail: Text("\(entry.value.formatted()) pt"))
+                    Row(LocalizedStringKey(entry.name), detail: Text(verbatim: entry.value.formatted(.number.locale(model.locale)) + " pt"))
                 }
             }
         }
@@ -99,6 +101,8 @@ struct SizesPage: View {
 }
 
 struct RadiiPage: View {
+    @Environment(GalleryModel.self) private var model
+
     private static let entries: [(name: String, value: Double)] = [
         ("extraSmall", Radius.extraSmall), ("small", Radius.small), ("medium", Radius.medium),
         ("large", Radius.large), ("card", Radius.card), ("sheet", Radius.sheet)
@@ -108,7 +112,7 @@ struct RadiiPage: View {
         Page("Corner radii") {
             PanelList {
                 ForEach(Self.entries, id: \.name) { entry in
-                    Row(LocalizedStringKey(entry.name), detail: Text("\(entry.value.formatted()) pt")) {
+                    Row(LocalizedStringKey(entry.name), detail: Text(verbatim: entry.value.formatted(.number.locale(model.locale)) + " pt")) {
                         Panel(glass: .active, cornerRadius: entry.value, padding: 0) { EmptyView() }
                             .frame(width: Size.controlLarge, height: Size.controlLarge)
                     }

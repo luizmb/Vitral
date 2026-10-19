@@ -16,6 +16,7 @@ public struct CodeSpan: Hashable, Sendable {
 /// wrapped (it scrolls sideways), and selectable. Vitral doesn't highlight; the app splits the
 /// code and hands over the spans.
 public struct CodeBlock: View {
+    @Environment(\.vitralScheme) private var scheme
     let spans: [CodeSpan]
     let theme: SyntaxTheme
     let font: TypeToken
@@ -33,7 +34,7 @@ public struct CodeBlock: View {
 
     public var body: some View {
         ScrollView(.horizontal) {
-            Text(CodeBlock.attributed(spans, theme: theme))
+            Text(CodeBlock.attributed(spans, theme: theme, scheme: scheme))
                 .font(font)
                 .fixedSize(horizontal: true, vertical: false)
                 .textSelection(.enabled)
@@ -41,12 +42,12 @@ public struct CodeBlock: View {
         }
         .scrollIndicators(.hidden)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(theme.background), in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
+        .background(Color(theme.background, scheme: scheme), in: RoundedRectangle(cornerRadius: Radius.medium, style: .continuous))
     }
 
-    static func attributed(_ spans: [CodeSpan], theme: SyntaxTheme) -> AttributedString {
+    static func attributed(_ spans: [CodeSpan], theme: SyntaxTheme, scheme: ColorScheme) -> AttributedString {
         spans.reduce(into: AttributedString()) { text, span in
-            text.append(AttributedString(span.text, attributes: AttributeContainer().foregroundColor(Color(theme.colour(span.role)))))
+            text.append(AttributedString(span.text, attributes: AttributeContainer().foregroundColor(Color(theme.colour(span.role), scheme: scheme))))
         }
     }
 }

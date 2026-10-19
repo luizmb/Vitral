@@ -17,6 +17,7 @@ public enum RowState: Hashable, Sendable {
 /// trailing detail and trailing part, and an optional chevron. Optional parts are added
 /// builder-style (`.trailing { }`, `.disclosure()`, `.rowState(_:)`).
 public struct Row<Leading: View, Trailing: View>: View {
+    @Environment(\.vitralScheme) private var scheme
     let title: Text
     let subtitle: Text?
     let detail: Text?
@@ -72,7 +73,7 @@ public struct Row<Leading: View, Trailing: View>: View {
         }
         .padding(.horizontal, Space.large)
         .frame(minHeight: Size.hitTarget + Space.small)
-        .background(wash.map { Color($0) })
+        .background(wash.map { Color($0, scheme: scheme) })
         .opacity(state == .dimmed ? 0.45 : 1)
         .animation(.easeOut(duration: 0.2), value: state)
         .contentShape(Rectangle())
