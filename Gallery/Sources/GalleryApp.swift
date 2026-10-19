@@ -24,6 +24,7 @@ struct GalleryApp: App {
             }
             .appearance(model.appearance)
             .environment(model)
+            .environment(\.locale, model.locale)
         }
     }
 }

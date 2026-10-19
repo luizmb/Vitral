@@ -11,11 +11,12 @@ struct KnobsPage: View {
         Page("Knobs") {
             KnobGrid {
                 KnobSample("Glass, turned round") {
-                    Knob(value: $model.knobGain, label: Text("Gain"))
+                    Knob(value: $model.knobGain, format: model.formats.number(2), label: Text("Gain"))
                 }
                 KnobSample("Dragged up and down") {
                     Knob(
                         value: $model.knobVolume,
+                        format: model.formats.number(2),
                         interaction: .vertical(dragStart: $model.knobVolumeStart),
                         style: GlassKnobStyle(marks: 11, showsValue: true),
                         label: Text("Volume")
@@ -25,6 +26,7 @@ struct KnobsPage: View {
                     Knob(
                         value: $model.knobPan,
                         scale: ValueScale(-100 ... 100, precision: 0),
+                        format: model.formats.number(0),
                         interaction: .vertical(dragStart: $model.knobPanStart),
                         style: GlassKnobStyle(marks: 21, showsValue: true),
                         resetValue: 0,
@@ -34,6 +36,7 @@ struct KnobsPage: View {
                 KnobSample("A texture in the middle") {
                     Knob(
                         value: $model.knobTexture,
+                        format: model.formats.number(2),
                         style: GlassKnobStyle(face: .texture(.wood), marks: 21, pointer: .dot),
                         label: Text("Tone")
                     )
@@ -42,6 +45,7 @@ struct KnobsPage: View {
                     Knob(
                         value: $model.knobHandle,
                         scale: ValueScale(0 ... 10, step: 1, precision: 0),
+                        format: model.formats.number(0),
                         style: GlassKnobStyle(marks: 11, pointer: .handle, showsArc: false),
                         label: Text("Drive")
                     )
@@ -50,6 +54,7 @@ struct KnobsPage: View {
                     Knob(
                         value: $model.knobFrequency,
                         scale: ValueScale(20 ... 20000, precision: 0, taper: .logarithmic),
+                        format: model.formats.number(0),
                         style: GlassKnobStyle(marks: 31, showsValue: true),
                         label: Text("Frequency")
                     )
@@ -58,7 +63,8 @@ struct KnobsPage: View {
                     Knob(
                         value: $model.knobSoldano,
                         scale: ValueScale(1 ... 11, precision: 1),
-                        style: GlassKnobStyle(face: .colour(.fixedBlack), faceSize: 0.5, numbers: .inside, numberStep: 1, pointer: .dot, showsArc: false, showsValue: true),
+                        format: model.formats.number(1),
+                        style: GlassKnobStyle(face: .colour(.fixedBlack), faceSize: 0.5, numbers: .inside, numberStep: 1, numberFormat: model.formats.number(0), pointer: .dot, showsArc: false, showsValue: true),
                         label: Text("Preamp")
                     )
                 }
@@ -67,10 +73,11 @@ struct KnobsPage: View {
                 Knob(
                     value: $model.knobMarshall,
                     scale: ValueScale(0 ... 10, precision: 2),
+                    format: model.formats.number(2),
                     startAngle: -150,
                     endAngle: 150,
                     style: GlassKnobStyle(
-                        face: .colour(.fixedGold), marks: 11, numbers: .outside, numberStep: 1, showsArc: false, showsValue: true,
+                        face: .colour(.fixedGold), marks: 11, numbers: .outside, numberStep: 1, numberFormat: model.formats.number(0), showsArc: false, showsValue: true,
                         markColour: .fixedGold, numberColour: .fixedGold, valueColour: .fixedGold, pointerColour: .fixedBlack
                     ),
                     label: Text("Presence")
@@ -80,10 +87,11 @@ struct KnobsPage: View {
                 Knob(
                     value: $model.knobFender,
                     scale: ValueScale(1 ... 10, precision: 2),
+                    format: model.formats.number(2),
                     startAngle: -150,
                     endAngle: 150,
                     style: GlassKnobStyle(
-                        face: .colour(.fixedBlack), faceSize: 1, numbers: .inside, numberStep: 1, pointer: .dot, showsArc: false, showsValue: true,
+                        face: .colour(.fixedBlack), faceSize: 1, numbers: .inside, numberStep: 1, numberFormat: model.formats.number(0), pointer: .dot, showsArc: false, showsValue: true,
                         numberColour: .fixedWhite, pointerColour: .fixedWhite
                     ),
                     label: Text("Treble")
@@ -93,10 +101,11 @@ struct KnobsPage: View {
                 Knob(
                     value: $model.knobMesa,
                     scale: ValueScale(0 ... 10, precision: 2),
+                    format: model.formats.number(2),
                     startAngle: -150,
                     endAngle: 150,
                     style: GlassKnobStyle(
-                        face: .colour(.fixedBlack), faceSize: 0.9, marks: 21, numbers: .outside, numberStep: 1, pointer: .line, showsArc: false, showsValue: true,
+                        face: .colour(.fixedBlack), faceSize: 0.9, marks: 21, numbers: .outside, numberStep: 1, numberFormat: model.formats.number(0), pointer: .line, showsArc: false, showsValue: true,
                         markColour: .fixedWhite, numberColour: .fixedWhite, valueColour: .fixedWhite, pointerColour: .fixedWhite
                     ),
                     label: Text("Gain")
@@ -106,10 +115,11 @@ struct KnobsPage: View {
                 Knob(
                     value: $model.knobChrome,
                     scale: ValueScale(0 ... 10, precision: 2),
+                    format: model.formats.number(2),
                     startAngle: -150,
                     endAngle: 150,
                     style: GlassKnobStyle(
-                        face: .chrome, faceSize: 1, marks: 11, numbers: .outside, numberStep: 1, pointer: .chromeDimple, showsArc: false, showsValue: true,
+                        face: .chrome, faceSize: 1, marks: 11, numbers: .outside, numberStep: 1, numberFormat: model.formats.number(0), pointer: .chromeDimple, showsArc: false, showsValue: true,
                         markColour: .fixedWhite, numberColour: .fixedWhite, valueColour: .fixedWhite, pointerColour: .fixedBlack
                     ),
                     label: Text("Bass")
@@ -119,10 +129,11 @@ struct KnobsPage: View {
                 Knob(
                     value: $model.knobChromeStud,
                     scale: ValueScale(0 ... 10, precision: 2),
+                    format: model.formats.number(2),
                     startAngle: -150,
                     endAngle: 150,
                     style: GlassKnobStyle(
-                        face: .chrome, faceSize: 1, marks: 11, numbers: .outside, numberStep: 1, pointer: .chromeStud, showsArc: false,
+                        face: .chrome, faceSize: 1, marks: 11, numbers: .outside, numberStep: 1, numberFormat: model.formats.number(0), pointer: .chromeStud, showsArc: false,
                         markColour: .fixedCream, numberColour: .fixedCream, valueColour: .fixedCream
                     ),
                     label: Text("Treble")
@@ -132,7 +143,7 @@ struct KnobsPage: View {
                 HStack(spacing: Space.large) {
                     ForEach(["Bass", "Middle", "Treble"], id: \.self) { name in
                         VStack(spacing: Space.small) {
-                            Knob(value: model.fader("panel\(name)", 5), scale: ValueScale(0 ... 10, precision: 1), startAngle: -150, endAngle: 150, label: Text(LocalizedStringKey(name)))
+                            Knob(value: model.fader("panel\(name)", 5), scale: ValueScale(0 ... 10, precision: 1), format: model.formats.number(1), startAngle: -150, endAngle: 150, label: Text(LocalizedStringKey(name)))
                                 .frame(width: 96)
                             Text(LocalizedStringKey(name)).font(TypeToken.detail.weight(.semibold)).foregroundStyle(Color(.fixedCream))
                         }

@@ -29,7 +29,7 @@ struct FormsPage: View {
             }
             Sample("FieldNumber: a number, in its format, with a unit") {
                 PanelList {
-                    FieldNumber("Tempo", value: $model.formTempo, format: .number.precision(.fractionLength(0 ... 2)), suffix: Text("BPM"))
+                    FieldNumber("Tempo", value: $model.formTempo, format: .number.precision(.fractionLength(0 ... 2)).locale(model.locale), suffix: Text("BPM"))
                         .padding(.horizontal, Space.large)
                 }
             }
@@ -41,7 +41,7 @@ struct FormsPage: View {
             }
             Sample("FieldDate") {
                 PanelList {
-                    FieldDate("Published", date: $model.formDate)
+                    FieldDate("Published", date: $model.formDate, format: model.formats.date, isPicking: $model.formDatePicking)
                         .padding(.horizontal, Space.large)
                 }
             }

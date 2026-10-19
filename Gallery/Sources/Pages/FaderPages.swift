@@ -11,11 +11,11 @@ struct FadersPage: View {
             Sample("Glass, labels in every place") {
                 Panel {
                     VStack(spacing: Space.large) {
-                        Fader(value: model.fader("plain", 0.4), label: Text("Level"))
-                        Fader(value: model.fader("top", 0.6), title: Text("Opacity"), labels: .top, label: Text("Opacity"))
-                        Fader(value: model.fader("leading", 0.3), title: Text("Mix"), labels: .leading, label: Text("Mix"))
-                        Fader(value: model.fader("trailing", 0.8), title: Text("Wet"), labels: .trailing, label: Text("Wet"))
-                        Fader(value: model.fader("bottom", 0.5), title: Text("Blend"), labels: .bottom, label: Text("Blend"))
+                        Fader(value: model.fader("plain", 0.4), format: model.formats.number(2), label: Text("Level"))
+                        Fader(value: model.fader("top", 0.6), format: model.formats.number(2), title: Text("Opacity"), labels: .top, label: Text("Opacity"))
+                        Fader(value: model.fader("leading", 0.3), format: model.formats.number(2), title: Text("Mix"), labels: .leading, label: Text("Mix"))
+                        Fader(value: model.fader("trailing", 0.8), format: model.formats.number(2), title: Text("Wet"), labels: .trailing, label: Text("Wet"))
+                        Fader(value: model.fader("bottom", 0.5), format: model.formats.number(2), title: Text("Blend"), labels: .bottom, label: Text("Blend"))
                     }
                 }
             }
@@ -24,6 +24,7 @@ struct FadersPage: View {
                     Fader(
                         value: model.fader("brightness", 70),
                         scale: ValueScale(0 ... 100, precision: 0),
+                        format: model.formats.number(0),
                         title: Text("Brightness"),
                         labels: .inside,
                         style: GlassFaderStyle(trackThickness: 44, thumb: .none),
@@ -31,6 +32,7 @@ struct FadersPage: View {
                     )
                     Fader(
                         value: model.fader("volume", 0.5),
+                        format: model.formats.number(2),
                         axis: .vertical,
                         style: GlassFaderStyle(trackThickness: 56, thumb: .none),
                         label: Text("Volume")
@@ -44,6 +46,7 @@ struct FadersPage: View {
                         Fader(
                             value: model.fader("temperature", 5500),
                             scale: ValueScale(2000 ... 50000, precision: 0, taper: .logarithmic),
+                            format: model.formats.number(0),
                             resetValue: 5500,
                             title: Text("Temp"),
                             labels: .top,
@@ -53,6 +56,7 @@ struct FadersPage: View {
                         Fader(
                             value: model.fader("tint", 0),
                             scale: ValueScale(-150 ... 150, precision: 0),
+                            format: model.formats.number(0),
                             centre: 0,
                             detents: [0],
                             resetValue: 0,
@@ -64,6 +68,7 @@ struct FadersPage: View {
                         Fader(
                             value: model.fader("exposure", 0.35),
                             scale: ValueScale(-5 ... 5, precision: 2),
+                            format: model.formats.number(2),
                             centre: 0,
                             detents: [0],
                             resetValue: 0,
@@ -74,6 +79,7 @@ struct FadersPage: View {
                         Fader(
                             value: model.fader("contrast", -12),
                             scale: ValueScale(-100 ... 100, precision: 0),
+                            format: model.formats.number(0),
                             centre: 0,
                             detents: [0],
                             resetValue: 0,
@@ -91,11 +97,12 @@ struct FadersPage: View {
                             Fader(
                                 value: model.fader("eq\(band)", 0),
                                 scale: ValueScale(-12 ... 12, precision: 1),
+                                format: model.formats.number(1),
                                 axis: .vertical,
                                 centre: 0,
                                 detents: [0],
                                 resetValue: 0,
-                                style: GlassFaderStyle(marks: 25, numberStep: 6),
+                                style: GlassFaderStyle(marks: 25, numberStep: 6, numberFormat: model.formats.number(0)),
                                 label: Text(LocalizedStringKey(band))
                             )
                             .frame(height: 200)
@@ -129,6 +136,7 @@ struct MixerDesk: View {
                     Fader(
                         value: model.fader("pan\(channel)", 0),
                         scale: ValueScale(-1 ... 1, precision: 2),
+                        format: model.formats.number(2),
                         centre: 0,
                         detents: [0],
                         resetValue: 0,
@@ -139,6 +147,7 @@ struct MixerDesk: View {
                     Fader(
                         value: model.fader("level\(channel)", 1),
                         scale: Self.gain,
+                        format: model.formats.decibels(1),
                         axis: .vertical,
                         interaction: .relative(dragStart: model.faderStart("level\(channel)")),
                         detents: [1],
@@ -146,7 +155,7 @@ struct MixerDesk: View {
                         label: Text("\(channel) level")
                     )
                     .frame(height: 260)
-                    Text(verbatim: Self.gain.formatted(model.fader("level\(channel)", 1).wrappedValue) + " dB")
+                    model.formats.decibels(1)(model.fader("level\(channel)", 1).wrappedValue) + Text(verbatim: " dB")
                         .font(.caption2.weight(.semibold))
                         .monospacedDigit()
                         .foregroundStyle(Color(.fixedWhite))
@@ -159,7 +168,7 @@ struct MixerDesk: View {
             }
         }
         // One line sets the look of every level fader on the desk; the pans set their own.
-        .faderStyle(ConsoleFaderStyle(ticks: Self.ticks, unity: 1, scaleColour: .fixedWhite))
+        .faderStyle(ConsoleFaderStyle(ticks: Self.ticks, unity: 1, tickFormat: model.formats.decibels(0), scaleColour: .fixedWhite))
         .padding(Space.small)
         .background { Backdrop(.texture(.metalPlate)) }
         .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))

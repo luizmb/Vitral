@@ -80,19 +80,20 @@ public extension FieldValue where Value == Text {
     }
 }
 
-/// A number to type, on one line: the title, the number (in `format`, so a tempo reads to two
-/// places rather than six), and an optional unit after it.
-public struct FieldNumber: View {
+/// A number to type, on one line: the title, the number, and an optional unit after it. `format`
+/// both writes and reads it, so it is the app's, in the app's locale (`.number.locale(locale)`):
+/// 1.5 typed in English is 1,5 in Portuguese.
+public struct FieldNumber<Format: ParseableFormatStyle>: View where Format.FormatInput == Double, Format.FormatOutput == String {
     let title: Text
     @Binding var value: Double
-    let format: FloatingPointFormatStyle<Double>
+    let format: Format
     let suffix: Text?
     let onEndEditing: @MainActor () -> Void
 
     public init(
         _ title: LocalizedStringKey,
         value: Binding<Double>,
-        format: FloatingPointFormatStyle<Double> = .number,
+        format: Format,
         suffix: Text? = nil,
         onEndEditing: @escaping @MainActor () -> Void = {}
     ) {
@@ -102,7 +103,7 @@ public struct FieldNumber: View {
     public init(
         _ title: Text,
         value: Binding<Double>,
-        format: FloatingPointFormatStyle<Double> = .number,
+        format: Format,
         suffix: Text? = nil,
         onEndEditing: @escaping @MainActor () -> Void = {}
     ) {
@@ -156,34 +157,65 @@ public struct FieldStepper<Value: Strideable>: View {
     }
 }
 
-/// A date (or a time, or both) to pick, on one line: the title, and the value, which opens the
-/// system's picker.
+/// A date (or a time, or both) to pick, on one line: the title, and the date as `format` writes it
+/// (the app's, in its locale). Tapping it opens the calendar below; whether it's open is the app's
+/// (`isPicking`), and the calendar's month and day names follow the environment's `locale` and
+/// `calendar`, which the app sets.
 public struct FieldDate: View {
     let title: Text
     @Binding var date: Date
     let components: DatePickerComponents
+    let format: @Sendable (Date) -> Text
+    @Binding var isPicking: Bool
 
     @Environment(\.accent) private var accent
 
-    public init(_ title: LocalizedStringKey, date: Binding<Date>, components: DatePickerComponents = .date) {
-        self.init(Text(title), date: date, components: components)
+    public init(
+        _ title: LocalizedStringKey,
+        date: Binding<Date>,
+        components: DatePickerComponents = .date,
+        format: @escaping @Sendable (Date) -> Text,
+        isPicking: Binding<Bool>
+    ) {
+        self.init(Text(title), date: date, components: components, format: format, isPicking: isPicking)
     }
 
-    public init(_ title: Text, date: Binding<Date>, components: DatePickerComponents = .date) {
+    public init(
+        _ title: Text,
+        date: Binding<Date>,
+        components: DatePickerComponents = .date,
+        format: @escaping @Sendable (Date) -> Text,
+        isPicking: Binding<Bool>
+    ) {
         self.title = title
         self._date = date
         self.components = components
+        self.format = format
+        self._isPicking = isPicking
     }
 
     public var body: some View {
-        HStack(spacing: Space.medium) {
-            title.font(.body).foregroundStyle(.ink)
-            Spacer(minLength: Space.small)
-            DatePicker(selection: $date, displayedComponents: components) { title }
-                .labelsHidden()
-                .tint(Color(accent.base))
+        VStack(spacing: Space.small) {
+            Button { isPicking.toggle() } label: {
+                HStack(spacing: Space.medium) {
+                    title.font(.body).foregroundStyle(.ink)
+                    Spacer(minLength: Space.small)
+                    format(date)
+                        .font(.body.monospacedDigit())
+                        .foregroundStyle(isPicking ? Color(accent.base) : Color(.inkMuted))
+                }
+                .frame(minHeight: Size.hitTarget)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityValue(format(date))
+            if isPicking {
+                DatePicker(selection: $date, displayedComponents: components) { title }
+                    .datePickerStyle(.graphical)
+                    .labelsHidden()
+                    .tint(Color(accent.base))
+            }
         }
-        .frame(minHeight: Size.hitTarget)
     }
 }
 

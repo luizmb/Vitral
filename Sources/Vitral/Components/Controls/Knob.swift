@@ -22,6 +22,8 @@ public struct KnobConfiguration: Sendable {
     public let startAngle: Double
     public let endAngle: Double
     public let isDragging: Bool
+    /// How a value reads: the knob's `format`.
+    public let format: @Sendable (Double) -> Text
 
     /// The pointer's angle, degrees clockwise from twelve o'clock.
     public var angle: Double { DialGeometry.angle(for: fraction, start: startAngle, end: endAngle) }
@@ -31,8 +33,8 @@ public struct KnobConfiguration: Sendable {
         DialGeometry.angle(for: scale.fraction(of: value), start: startAngle, end: endAngle)
     }
 
-    /// `value` as the scale writes it.
-    public var formatted: String { scale.formatted(value) }
+    /// `value` as the knob's `format` writes it.
+    public var formatted: Text { format(value) }
 }
 
 /// How a knob looks. Write one to draw a knob entirely your own way; `GlassKnobStyle` is the
@@ -75,6 +77,7 @@ public extension View {
 public struct Knob: View {
     @Binding var value: Double
     let scale: ValueScale
+    let format: @Sendable (Double) -> Text
     let interaction: KnobInteraction
     let startAngle: Double
     let endAngle: Double
@@ -86,12 +89,15 @@ public struct Knob: View {
     @Environment(\.knobStyle) private var environmentStyle
 
     /// - Parameters:
+    ///   - format: how the value reads, in the readout and to VoiceOver: the app's, in its locale
+    ///     (Vitral formats nothing itself).
     ///   - startAngle, endAngle: where the pointer is at the lowest and highest values, degrees
     ///     clockwise from twelve o'clock (7:30 to 4:30 by default).
     ///   - label: what VoiceOver calls it.
     public init(
         value: Binding<Double>,
         scale: ValueScale = ValueScale(),
+        format: @escaping @Sendable (Double) -> Text,
         interaction: KnobInteraction = .circular,
         startAngle: Double = -135,
         endAngle: Double = 135,
@@ -101,7 +107,7 @@ public struct Knob: View {
         label: Text
     ) {
         self.init(
-            value: value, scale: scale, interaction: interaction, startAngle: startAngle, endAngle: endAngle,
+            value: value, scale: scale, format: format, interaction: interaction, startAngle: startAngle, endAngle: endAngle,
             anyStyle: AnyKnobStyle(style), resetValue: resetValue, onEditingEnded: onEditingEnded, label: label
         )
     }
@@ -110,6 +116,7 @@ public struct Knob: View {
     public init(
         value: Binding<Double>,
         scale: ValueScale = ValueScale(),
+        format: @escaping @Sendable (Double) -> Text,
         interaction: KnobInteraction = .circular,
         startAngle: Double = -135,
         endAngle: Double = 135,
@@ -118,7 +125,7 @@ public struct Knob: View {
         label: Text
     ) {
         self.init(
-            value: value, scale: scale, interaction: interaction, startAngle: startAngle, endAngle: endAngle,
+            value: value, scale: scale, format: format, interaction: interaction, startAngle: startAngle, endAngle: endAngle,
             anyStyle: nil, resetValue: resetValue, onEditingEnded: onEditingEnded, label: label
         )
     }
@@ -126,6 +133,7 @@ public struct Knob: View {
     init(
         value: Binding<Double>,
         scale: ValueScale,
+        format: @escaping @Sendable (Double) -> Text,
         interaction: KnobInteraction,
         startAngle: Double,
         endAngle: Double,
@@ -136,6 +144,7 @@ public struct Knob: View {
     ) {
         self._value = value
         self.scale = scale
+        self.format = format
         self.interaction = interaction
         self.startAngle = startAngle
         self.endAngle = endAngle
@@ -161,7 +170,8 @@ public struct Knob: View {
                     scale: scale,
                     startAngle: startAngle,
                     endAngle: endAngle,
-                    isDragging: isDragging
+                    isDragging: isDragging,
+                    format: format
                 )
             )
             .frame(width: proxy.size.width, height: proxy.size.height)
@@ -174,7 +184,7 @@ public struct Knob: View {
         .aspectRatio(1, contentMode: .fit)
         .accessibilityElement()
         .accessibilityLabel(label)
-        .accessibilityValue(Text(verbatim: scale.formatted(value)))
+        .accessibilityValue(format(value))
         .accessibilityAdjustableAction { direction in
             switch direction {
             case .increment: value = scale.stepped(value, by: 1)
@@ -269,6 +279,7 @@ public struct GlassKnobStyle: KnobStyle, Sendable {
     let numbers: Numbers
     let numberCount: Int
     let numberStep: Double?
+    let numberFormat: (@Sendable (Double) -> Text)?
     let pointer: Pointer
     let showsArc: Bool
     let showsValue: Bool
@@ -283,9 +294,10 @@ public struct GlassKnobStyle: KnobStyle, Sendable {
     ///   - marks: dashes round the knob, this many (`nil` for none).
     ///   - numberCount: the most numbers written (the scale's steps when they fit), when there's
     ///     no `numberStep`.
-    ///   - numberStep: a number every this much (1 for 0, 1, 2 … 10), written with the decimals
-    ///     it needs. It only labels the knob: the value keeps the scale's step and precision, so a
+    ///   - numberStep: a number every this much (1 for 0, 1, 2 … 10). It only labels the knob: the value keeps the scale's step and precision, so a
     ///     knob numbered 1 to 10 can rest at 7.35.
+    ///   - numberFormat: how those numbers read (without the value's decimals, say); the knob's
+    ///     `format` when `nil`.
     ///   - markColour, numberColour, valueColour: the dashes', numbers' and readout's colour, for
     ///     the panel they sit on.
     ///   - pointerColour: the pointer's colour; the accent when `nil`.
@@ -296,6 +308,7 @@ public struct GlassKnobStyle: KnobStyle, Sendable {
         numbers: Numbers = .none,
         numberCount: Int = 11,
         numberStep: Double? = nil,
+        numberFormat: (@Sendable (Double) -> Text)? = nil,
         pointer: Pointer = .line,
         showsArc: Bool = true,
         showsValue: Bool = false,
@@ -310,6 +323,7 @@ public struct GlassKnobStyle: KnobStyle, Sendable {
         self.numbers = numbers
         self.numberCount = numberCount
         self.numberStep = numberStep
+        self.numberFormat = numberFormat
         self.pointer = pointer
         self.showsArc = showsArc
         self.showsValue = showsValue
@@ -350,7 +364,7 @@ struct GlassKnob: View {
                     numbers(radius: ring * 0.78 / 2 * (style.faceSize >= 0.9 ? 0.76 : (1 + style.faceSize) / 2), size: ring * 0.09)
                 }
                 if style.showsValue {
-                    Text(verbatim: configuration.formatted)
+                    configuration.formatted
                         .font(.system(size: ring * 0.11, weight: .semibold, design: .monospaced))
                         .foregroundStyle(style.valueColour)
                         // Under the knob; with numbers outside, in the gap between the last and the first.
@@ -465,14 +479,9 @@ struct GlassKnob: View {
         style.numberStep.map { configuration.scale.marks(every: $0) } ?? configuration.scale.marks(limit: style.numberCount)
     }
 
-    /// A number as written: with its step's decimals, or the scale's precision.
-    func label(_ mark: Double) -> String {
-        style.numberStep.map { configuration.scale.formatted(mark, places: ValueScale.decimals(of: $0)) } ?? configuration.scale.formatted(mark)
-    }
-
     func numbers(radius: Double, size: Double) -> some View {
         ForEach(numbered, id: \.self) { mark in
-            Text(verbatim: label(mark))
+            (style.numberFormat ?? configuration.format)(mark)
                 .font(.system(size: size, weight: .semibold, design: .rounded))
                 .foregroundStyle(style.numberColour)
                 .offset(
