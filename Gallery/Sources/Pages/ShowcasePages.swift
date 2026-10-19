@@ -53,13 +53,13 @@ struct AppearancePage: View {
             Sample("AppearancePicker") {
                 AppearancePicker(selection: .constant(.system), systemLabel: "Match system", lightLabel: "Light", darkLabel: "Dark")
             }
-            ForEach([Appearance.light, .dark], id: \.self) { appearance in
-                LabelledGroup(LocalizedStringKey(".appearance(.\(appearance.rawValue))")) {
+            ForEach([ColorScheme.light, .dark], id: \.self) { scheme in
+                LabelledGroup(LocalizedStringKey(scheme == .dark ? ".scheme(.dark)" : ".scheme(.light)")) {
                     VStack(spacing: Space.medium) {
                         AppearanceSample(backdrop: .texture(.wood))
                         AppearanceSample(backdrop: .glow())
                     }
-                    .appearance(appearance)
+                    .scheme(scheme)
                 }
             }
         }

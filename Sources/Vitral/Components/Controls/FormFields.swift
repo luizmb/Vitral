@@ -5,6 +5,7 @@ import VitralTokens
 /// many options or long ones, where a `SegmentedControlGlass` won't fit and a `RadioList` would
 /// take the screen.
 public struct FieldPicker<Value: Hashable & Sendable>: View {
+    @Environment(\.vitralScheme) private var scheme
     let title: Text
     @Binding var selection: Value
     let options: [ChoiceOption<Value>]
@@ -34,7 +35,7 @@ public struct FieldPicker<Value: Hashable & Sendable>: View {
             }
             .labelsHidden()
             .pickerStyle(.menu)
-            .tint(Color(accent.base))
+            .tint(Color(accent.base, scheme: scheme))
         }
         .frame(minHeight: Size.hitTarget)
     }
@@ -162,6 +163,7 @@ public struct FieldStepper<Value: Strideable>: View {
 /// (`isPicking`), and the calendar's month and day names follow the environment's `locale` and
 /// `calendar`, which the app sets.
 public struct FieldDate: View {
+    @Environment(\.vitralScheme) private var scheme
     let title: Text
     @Binding var date: Date
     let components: DatePickerComponents
@@ -202,7 +204,7 @@ public struct FieldDate: View {
                     Spacer(minLength: Space.small)
                     format(date)
                         .font(.body.monospacedDigit())
-                        .foregroundStyle(isPicking ? Color(accent.base) : Color(.inkMuted))
+                        .foregroundStyle(isPicking ? Color(accent.base, scheme: scheme) : Color(.inkMuted, scheme: scheme))
                 }
                 .frame(minHeight: Size.hitTarget)
                 .contentShape(Rectangle())
@@ -213,7 +215,7 @@ public struct FieldDate: View {
                 DatePicker(selection: $date, displayedComponents: components) { title }
                     .datePickerStyle(.graphical)
                     .labelsHidden()
-                    .tint(Color(accent.base))
+                    .tint(Color(accent.base, scheme: scheme))
             }
         }
     }
@@ -222,6 +224,7 @@ public struct FieldDate: View {
 /// A list of short entries to keep (names, aliases, tags): each removable, and a field at the end
 /// to add another. Stateless: the entries and the draft being typed are the app's.
 public struct EntryList: View {
+    @Environment(\.vitralScheme) private var scheme
     let entries: [String]
     @Binding var draft: String
     let placeholder: LocalizedStringKey
@@ -264,7 +267,7 @@ public struct EntryList: View {
                 Button(role: .destructive) { onRemove(index) } label: {
                     Image(systemName: "minus.circle")
                         .font(.title3)
-                        .foregroundStyle(Color(.danger))
+                        .foregroundStyle(Color(.danger, scheme: scheme))
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(removeLabel(entry))
@@ -277,7 +280,7 @@ public struct EntryList: View {
                 .onSubmit { if canAdd { onAdd() } }
             Button(addTitle) { onAdd() }
                 .disabled(!canAdd)
-                .tint(Color(accent.base))
+                .tint(Color(accent.base, scheme: scheme))
         }
         .frame(minHeight: Size.hitTarget)
     }
@@ -328,6 +331,7 @@ public struct ChoiceGrid<Value: Hashable & Sendable, Cell: View>: View {
 
 /// A colour to choose from a grid of discs, the chosen one ticked.
 public struct SwatchPicker<Value: Hashable & Sendable>: View {
+    @Environment(\.vitralScheme) private var scheme
     @Binding var selection: Value
     let options: [Value]
     let diameter: Double
@@ -355,7 +359,7 @@ public struct SwatchPicker<Value: Hashable & Sendable>: View {
         ChoiceGrid(selection: $selection, options: options, minimumWidth: diameter + Space.small, label: label) { option, isChosen in
             Circle()
                 .fill(colour(option))
-                .overlay(Circle().strokeBorder(Color(.hairline), lineWidth: 1))
+                .overlay(Circle().strokeBorder(Color(.hairline, scheme: scheme), lineWidth: 1))
                 .overlay {
                     if isChosen {
                         Image(systemName: "checkmark")
@@ -371,6 +375,7 @@ public struct SwatchPicker<Value: Hashable & Sendable>: View {
 /// A picture to choose from a grid: each option's icon over its name, the chosen one on a wash of
 /// the accent.
 public struct IconPicker<Value: Hashable & Sendable, Icon: View>: View {
+    @Environment(\.vitralScheme) private var scheme
     @Binding var selection: Value
     let options: [Value]
     let minimumWidth: Double
@@ -407,7 +412,7 @@ public struct IconPicker<Value: Hashable & Sendable, Icon: View>: View {
             .frame(maxWidth: .infinity)
             .background(
                 RoundedRectangle(cornerRadius: Space.small)
-                    .fill(isChosen ? Color(accent.base).opacity(0.18) : .clear)
+                    .fill(isChosen ? Color(accent.base, scheme: scheme).opacity(0.18) : .clear)
             )
         }
     }

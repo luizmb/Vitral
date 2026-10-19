@@ -5,7 +5,7 @@ import VitralTokens
 
 public extension View {
     func foregroundStyle(_ token: ColorToken) -> some View {
-        foregroundStyle(Color(token))
+        foregroundStyle(TokenColor(token))
     }
 
     func font(_ token: TypeToken) -> some View {
@@ -35,7 +35,7 @@ public extension View {
 
     /// A flat fill behind the content, cut to a rounded rectangle with continuous corners.
     func surface(_ fill: ColorToken, cornerRadius: Double = Radius.medium) -> some View {
-        background(Color(fill), in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+        background(TokenColor(fill), in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
     }
 }
 
@@ -76,6 +76,7 @@ struct GlassLayer<S: Shape>: ViewModifier {
     let shape: S
 
     @Environment(\.rendersGlass) private var rendersGlass
+    @Environment(\.vitralScheme) private var scheme
 
     // One path for every variant: a branch around `glassEffect` blanked whole
     // `GlassEffectContainer`s. `sheer` is the system's identity glass with Vitral's layer behind;
@@ -84,7 +85,7 @@ struct GlassLayer<S: Shape>: ViewModifier {
         content
             .background { SheerGlass(tint: glass.tint, shape: shape).opacity(glass.variant == .sheer ? 1 : 0) }
             .background { PlainSurface(tint: glass.tint, shape: shape).opacity(rendersGlass ? 0 : 1) }
-            .glassEffect(rendersGlass ? .token(glass) : .identity, in: shape)
+            .glassEffect(rendersGlass ? .token(glass, scheme: scheme) : .identity, in: shape)
             // Glass is a surface: all of it takes touches, not just what's drawn on it. A plain
             // button holding a card would otherwise answer only on its text, and a tap on the
             // card's empty glass would fall through to whatever is behind.
@@ -95,32 +96,34 @@ struct GlassLayer<S: Shape>: ViewModifier {
 /// What glass is drawn as where it can't be: the backdrop's colour, raised a little, its tint over
 /// it and a hairline round it.
 struct PlainSurface<S: Shape>: View {
+    @Environment(\.vitralScheme) private var scheme
     let tint: ColorToken?
     let shape: S
 
     var body: some View {
         // Opaque, as frosted glass reads: the backdrop's colour, raised a touch.
         shape
-            .fill(Color(.backdrop))
-            .overlay { shape.fill(Color(.neutralSurface)) }
-            .overlay { shape.fill(Color(tint ?? ColorToken.fixedWhite.opacity(0))) }
-            .overlay { shape.stroke(Color(.hairline), lineWidth: 1) }
+            .fill(Color(.backdrop, scheme: scheme))
+            .overlay { shape.fill(Color(.neutralSurface, scheme: scheme)) }
+            .overlay { shape.fill(Color(tint ?? ColorToken.fixedWhite.opacity(0), scheme: scheme)) }
+            .overlay { shape.stroke(Color(.hairline, scheme: scheme), lineWidth: 1) }
             .allowsHitTesting(false)
     }
 }
 
 /// Glass that blurs nothing: crystal clear, its tint (if any) and light catching its top.
 struct SheerGlass<S: Shape>: View {
+    @Environment(\.vitralScheme) private var scheme
     let tint: ColorToken?
     let shape: S
 
     var body: some View {
         shape
-            .fill(Color(tint ?? ColorToken.fixedWhite.opacity(0)))
+            .fill(Color(tint ?? ColorToken.fixedWhite.opacity(0), scheme: scheme))
             .overlay {
                 shape.fill(
                     LinearGradient(
-                        colors: [Color(ColorToken.fixedWhite.opacity(0.12)), .clear],
+                        colors: [Color(ColorToken.fixedWhite.opacity(0.12), scheme: scheme), .clear],
                         startPoint: .top,
                         endPoint: UnitPoint(x: 0.5, y: 0.4)
                     )

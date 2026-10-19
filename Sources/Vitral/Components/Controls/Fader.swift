@@ -442,6 +442,7 @@ public struct GlassFaderStyle: FaderStyle, Sendable {
 }
 
 struct GlassFader: View {
+    @Environment(\.vitralScheme) private var scheme
     let style: GlassFaderStyle
     let configuration: FaderConfiguration
 
@@ -477,7 +478,7 @@ struct GlassFader: View {
         Capsule()
             .fill(gradientFill(frame))
             .frame(width: frame.size(along: frame.length, across: style.trackThickness).width, height: frame.size(along: frame.length, across: style.trackThickness).height)
-            .overlay { Capsule().strokeBorder(Color(.hairline), lineWidth: 0.5) }
+            .overlay { Capsule().strokeBorder(Color(.hairline, scheme: scheme), lineWidth: 0.5) }
             .glassSurface(.clear, cornerRadius: style.trackThickness / 2)
             .position(configuration.axis == .horizontal
                 ? CGPoint(x: frame.length / 2, y: frame.size.height / 2 + trackOffset)
@@ -488,12 +489,12 @@ struct GlassFader: View {
         style.gradient.map { colours in
             AnyShapeStyle(
                 LinearGradient(
-                    colors: colours.map { Color($0) },
+                    colors: colours.map { Color($0, scheme: scheme) },
                     startPoint: configuration.axis == .horizontal ? .leading : .bottom,
                     endPoint: configuration.axis == .horizontal ? .trailing : .top
                 )
             )
-        } ?? AnyShapeStyle(Color(.hairline))
+        } ?? AnyShapeStyle(Color(.hairline, scheme: scheme))
     }
 
     /// Where the fill starts and ends: from the origin (the lowest, or the centre) to the value.
@@ -531,7 +532,7 @@ struct GlassFader: View {
     func marks(_ frame: TrackFrame, count: Int) -> some View {
         ForEach(0 ..< max(count, 2), id: \.self) { index in
             Rectangle()
-                .fill(Color(style.markColour))
+                .fill(Color(style.markColour, scheme: scheme))
                 .frame(
                     width: frame.size(along: 1, across: index % 5 == 0 ? 8 : 5).width,
                     height: frame.size(along: 1, across: index % 5 == 0 ? 8 : 5).height
@@ -545,7 +546,7 @@ struct GlassFader: View {
             (style.numberFormat ?? configuration.format)(mark)
                 .font(.caption2.weight(.medium))
                 .monospacedDigit()
-                .foregroundStyle(Color(style.numberColour))
+                .foregroundStyle(Color(style.numberColour, scheme: scheme))
                 .fixedSize()
                 .position(frame.point(configuration.scale.fraction(of: mark), across: trackOffset + 26))
         }
@@ -557,13 +558,13 @@ struct GlassFader: View {
         case .round:
             FinishedShape(finish: thumbFinish, shape: Circle())
                 .frame(width: 28, height: 28)
-                .shadow(color: Color(.scrim), radius: 4, y: 2)
+                .shadow(color: Color(.scrim, scheme: scheme), radius: 4, y: 2)
                 .scaleEffect(configuration.isDragging ? 1.12 : 1)
                 .position(frame.point(configuration.fraction, across: trackOffset))
         case .capsule:
             FinishedShape(finish: thumbFinish, shape: Capsule())
                 .frame(width: frame.size(along: 22, across: 34).width, height: frame.size(along: 22, across: 34).height)
-                .shadow(color: Color(.scrim), radius: 4, y: 2)
+                .shadow(color: Color(.scrim, scheme: scheme), radius: 4, y: 2)
                 .position(frame.point(configuration.fraction, across: trackOffset))
         case .none:
             EmptyView()
@@ -612,6 +613,7 @@ public struct ConsoleFaderStyle: FaderStyle, Sendable {
 }
 
 struct ConsoleFader: View {
+    @Environment(\.vitralScheme) private var scheme
     let style: ConsoleFaderStyle
     let configuration: FaderConfiguration
 
@@ -620,9 +622,9 @@ struct ConsoleFader: View {
             let frame = TrackFrame(size: proxy.size, axis: configuration.axis, thumbLength: style.thumbLength)
             ZStack(alignment: .topLeading) {
                 RoundedRectangle(cornerRadius: 2)
-                    .fill(Color(style.slotColour))
+                    .fill(Color(style.slotColour, scheme: scheme))
                     .frame(width: frame.size(along: frame.length - 8, across: 4).width, height: frame.size(along: frame.length - 8, across: 4).height)
-                    .overlay { RoundedRectangle(cornerRadius: 2).strokeBorder(Color(.chromeShadow), lineWidth: 0.5) }
+                    .overlay { RoundedRectangle(cornerRadius: 2).strokeBorder(Color(.chromeShadow, scheme: scheme), lineWidth: 0.5) }
                     .position(frame.point(0.5, across: -10))
                 ForEach(style.ticks, id: \.self) { tick in
                     tickMark(frame, tick: tick)
@@ -637,13 +639,13 @@ struct ConsoleFader: View {
     func tickMark(_ frame: TrackFrame, tick: Double) -> some View {
         ZStack {
             Rectangle()
-                .fill(Color(style.scaleColour))
+                .fill(Color(style.scaleColour, scheme: scheme))
                 .frame(width: frame.size(along: 1, across: tick == style.unity ? 10 : 6).width, height: frame.size(along: 1, across: tick == style.unity ? 10 : 6).height)
                 .position(frame.point(configuration.scale.fraction(of: tick), across: 20))
             (style.tickFormat ?? configuration.format)(tick)
                 .font(.caption2.weight(tick == style.unity ? .bold : .medium))
                 .monospacedDigit()
-                .foregroundStyle(Color(style.scaleColour))
+                .foregroundStyle(Color(style.scaleColour, scheme: scheme))
                 .fixedSize()
                 // Starting just past the tick, not centred on a point: a wider label (−12) would
                 // otherwise run under the tick and lose its sign.
@@ -658,24 +660,24 @@ struct ConsoleFader: View {
             RoundedRectangle(cornerRadius: 4)
                 .fill(
                     LinearGradient(
-                        colors: [Color(.chromeHighlight), Color(.chromeMid), Color(.chromeShadow)],
+                        colors: [Color(.chromeHighlight, scheme: scheme), Color(.chromeMid, scheme: scheme), Color(.chromeShadow, scheme: scheme)],
                         startPoint: .top,
                         endPoint: .bottom
                     )
                 )
             VStack(spacing: 3) {
                 ForEach(0 ..< 5, id: \.self) { _ in
-                    Rectangle().fill(Color(ColorToken.chromeShadow.opacity(0.6))).frame(height: 1)
+                    Rectangle().fill(Color(ColorToken.chromeShadow.opacity(0.6), scheme: scheme)).frame(height: 1)
                 }
             }
             .padding(.vertical, 5)
             .rotationEffect(.degrees(configuration.axis == .horizontal ? 90 : 0))
             Rectangle()
-                .fill(Color(style.lineColour))
+                .fill(Color(style.lineColour, scheme: scheme))
                 .frame(width: configuration.axis == .horizontal ? 2 : nil, height: configuration.axis == .vertical ? 2 : nil)
         }
         .clipShape(RoundedRectangle(cornerRadius: 4))
-        .shadow(color: Color(.scrim), radius: 3, y: 2)
+        .shadow(color: Color(.scrim, scheme: scheme), radius: 3, y: 2)
         .scaleEffect(configuration.isDragging ? 1.04 : 1)
     }
 }

@@ -914,7 +914,7 @@ enum GeneratedSamples {
                 VStack(spacing: Space.small) {
                     Knob(value: model.fader("panel\(name)", 5), scale: ValueScale(0 ... 10, precision: 1), format: model.formats.number(1), startAngle: -150, endAngle: 150, label: Text(LocalizedStringKey(name)))
                         .frame(width: 96)
-                    Text(LocalizedStringKey(name)).font(TypeToken.detail.weight(.semibold)).foregroundStyle(Color(.fixedCream))
+                    Text(LocalizedStringKey(name)).font(TypeToken.detail.weight(.semibold)).foregroundStyle(TokenColor(.fixedCream))
                 }
             }
         }

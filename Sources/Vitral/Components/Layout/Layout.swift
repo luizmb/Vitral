@@ -3,6 +3,7 @@ import VitralTokens
 
 /// A divider a hair thick, across (`.horizontal`) or upright (`.vertical`).
 public struct Hairline: View {
+    @Environment(\.vitralScheme) private var scheme
     let axis: Axis
 
     public init(_ axis: Axis = .horizontal) {
@@ -11,7 +12,7 @@ public struct Hairline: View {
 
     public var body: some View {
         Rectangle()
-            .fill(Color(.hairline))
+            .fill(Color(.hairline, scheme: scheme))
             .frame(width: axis == .vertical ? Size.hairline : nil, height: axis == .horizontal ? Size.hairline : nil)
     }
 }

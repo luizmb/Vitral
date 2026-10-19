@@ -22,9 +22,24 @@ struct GalleryApp: App {
             .overlay(item: model.shownSample, dismiss: { model.shownSample = nil }) { sample in
                 SampleCodePanel(sample: sample) { model.shownSample = nil }
             }
-            .appearance(model.appearance)
+            .modifier(GalleryScheme(appearance: model.appearance))
             .environment(model)
             .environment(\.locale, model.locale)
         }
+    }
+}
+
+/// The scheme the Gallery draws in: its switch, resolved against the device's appearance.
+///
+/// The Gallery is a demo and this is its boundary, so it reads the device here. An app doesn't: the
+/// device's appearance reaches it through its world into its state, and its view state hands the
+/// resolved scheme to `.scheme(_:)`.
+struct GalleryScheme: ViewModifier {
+    let appearance: Appearance
+
+    @Environment(\.colorScheme) private var device
+
+    func body(content: Content) -> some View {
+        content.scheme(appearance.resolved(device: device))
     }
 }

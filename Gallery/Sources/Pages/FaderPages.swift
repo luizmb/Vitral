@@ -158,10 +158,10 @@ struct MixerDesk: View {
                     model.formats.decibels(1)(model.fader("level\(channel)", 1).wrappedValue) + Text(verbatim: " dB")
                         .font(.caption2.weight(.semibold))
                         .monospacedDigit()
-                        .foregroundStyle(Color(.fixedWhite))
+                        .foregroundStyle(TokenColor(.fixedWhite))
                     Text(LocalizedStringKey(channel))
                         .font(TypeToken.detail.weight(.semibold))
-                        .foregroundStyle(Color(.fixedWhite))
+                        .foregroundStyle(TokenColor(.fixedWhite))
                 }
                 .padding(.vertical, Space.medium)
                 .frame(maxWidth: .infinity)

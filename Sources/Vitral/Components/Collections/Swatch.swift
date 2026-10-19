@@ -4,6 +4,7 @@ import VitralTokens
 /// A sample of a colour: a filled circle with a fine ring, so light colours still show on light
 /// glass. An optional label (initials, a number) sits on it.
 public struct Swatch: View {
+    @Environment(\.vitralScheme) private var scheme
     let color: ColorToken
     let label: Text?
     let diameter: Double
@@ -16,8 +17,8 @@ public struct Swatch: View {
 
     public var body: some View {
         Circle()
-            .fill(Color(color))
-            .overlay(Circle().strokeBorder(Color(.hairline), lineWidth: 1))
+            .fill(Color(color, scheme: scheme))
+            .overlay(Circle().strokeBorder(Color(.hairline, scheme: scheme), lineWidth: 1))
             .overlay {
                 label
                     // A big swatch is an icon: its initials grow with it.
@@ -34,6 +35,7 @@ public struct Swatch: View {
 
 /// Where a swatch would be: a dashed circle, for an empty stack.
 public struct SwatchPlaceholder: View {
+    @Environment(\.vitralScheme) private var scheme
     let diameter: Double
 
     public init(diameter: Double = Size.swatch) {
@@ -42,7 +44,7 @@ public struct SwatchPlaceholder: View {
 
     public var body: some View {
         Circle()
-            .strokeBorder(Color(.outline), style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
+            .strokeBorder(Color(.outline, scheme: scheme), style: StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
             .frame(width: diameter, height: diameter)
             .accessibilityHidden(true)
     }

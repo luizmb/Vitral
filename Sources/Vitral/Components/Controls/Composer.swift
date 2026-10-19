@@ -5,6 +5,7 @@ import VitralTokens
 /// the send button (a microphone, an attachment), and the send button, a spinner while `isBusy`.
 /// On a glass capsule. Stateless: the draft is the binding's; sending is the caller's.
 public struct Composer<Accessory: View>: View {
+    @Environment(\.vitralScheme) private var scheme
     let placeholder: LocalizedStringKey
     @Binding var text: String
     let isEditable: Bool
@@ -63,7 +64,7 @@ public struct Composer<Accessory: View>: View {
                     }
                 }
                 .frame(width: Size.controlSmall, height: Size.controlSmall)
-                .background(Circle().fill(Color(canSend ? accent.base : .inkFaint)))
+                .background(Circle().fill(Color(canSend ? accent.base : .inkFaint, scheme: scheme)))
             }
             .buttonStyle(.plain)
             .disabled(!canSend)

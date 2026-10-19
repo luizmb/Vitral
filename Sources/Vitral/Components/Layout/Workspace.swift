@@ -90,6 +90,7 @@ public struct WorkspacePanel<Body: View> {
 ///
 /// Panels shouldn't hold a `NavigationStack`: inside a column it takes over the app's.
 public struct Workspace<Leading: View, Content: View, Trailing: View, Bottom: View>: View {
+    @Environment(\.vitralScheme) private var scheme
     let mode: WorkspaceMode?
     let exclusive: Bool
     let closeLabel: LocalizedStringKey
@@ -297,7 +298,7 @@ public struct Workspace<Leading: View, Content: View, Trailing: View, Bottom: Vi
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             .clipShape(RoundedRectangle(cornerRadius: Radius.sheet, style: .continuous))
             .glassSurface(.regular, cornerRadius: Radius.sheet)
-            .shadow(color: Color(.scrim), radius: Space.large, y: Space.extraSmall)
+            .shadow(color: Color(.scrim, scheme: scheme), radius: Space.large, y: Space.extraSmall)
     }
 
     /// A panel in the sheet, with a close button over it: an iPhone on its side shows the sheet

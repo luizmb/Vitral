@@ -33,6 +33,7 @@ public enum TagStyle: Hashable, Sendable {
 
 /// A short label on a capsule, with an optional icon: a category, a property, a count.
 public struct Tag: View {
+    @Environment(\.vitralScheme) private var scheme
     let text: Text
     let icon: Image?
     let style: TagStyle
@@ -57,7 +58,7 @@ public struct Tag: View {
         .lineLimit(1)
         .padding(.horizontal, Space.medium)
         .padding(.vertical, Space.extraSmall)
-        .background(Color(style.background), in: Capsule())
+        .background(Color(style.background, scheme: scheme), in: Capsule())
     }
 }
 

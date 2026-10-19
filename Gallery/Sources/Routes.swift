@@ -113,7 +113,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .images: "Illustrations for empty and error states"
         case .textures: "Every repeating pattern, by glass"
         case .wallpapers: "Full-size: generated, and photos an app copies in"
-        case .appearance: "AppearancePicker, .appearance(_:)"
+        case .appearance: "AppearancePicker, .scheme(_:)"
         case .tints: "Tint, .accent(.counter)"
         case .finishes: "FinishToken: glass, a fill, a sheen"
         case .code: "CodeBlock, SyntaxTheme, .code"

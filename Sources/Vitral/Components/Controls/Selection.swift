@@ -4,6 +4,7 @@ import VitralTokens
 /// The mark of a choice: filled with the accent and a check when selected, an outline otherwise.
 /// Round for one-of-many (radio), square for each-on-its-own (checkbox).
 public struct SelectionMark: View {
+    @Environment(\.vitralScheme) private var scheme
     public enum Shape: Hashable, Sendable {
         case round, square
     }
@@ -26,13 +27,13 @@ public struct SelectionMark: View {
         ZStack {
             if isSelected {
                 outline
-                    .fill(LinearGradient(colors: [Color(accent.top), Color(accent.bottom)], startPoint: .top, endPoint: .bottom))
-                    .shadow(color: Color(accent.glow), radius: 5, y: 2)
+                    .fill(LinearGradient(colors: [Color(accent.top, scheme: scheme), Color(accent.bottom, scheme: scheme)], startPoint: .top, endPoint: .bottom))
+                    .shadow(color: Color(accent.glow, scheme: scheme), radius: 5, y: 2)
                 Image(.checkmark)
                     .font(.caption.weight(.bold))
                     .foregroundStyle(.onAccent)
             } else {
-                outline.strokeBorder(Color(.outline), lineWidth: 1.5)
+                outline.strokeBorder(Color(.outline, scheme: scheme), lineWidth: 1.5)
             }
         }
         .frame(width: Size.selectionMark, height: Size.selectionMark)
@@ -70,6 +71,7 @@ public struct Checkbox: View {
 /// A setting that takes effect at once: the system switch, in the accent, with an optional line
 /// under the title saying what it does.
 public struct ToggleSwitch: View {
+    @Environment(\.vitralScheme) private var scheme
     let title: Text
     let detail: Text?
     @Binding var isOn: Bool
@@ -98,7 +100,7 @@ public struct ToggleSwitch: View {
             }
         }
         .toggleStyle(.switch)
-        .tint(Color(accent.base))
+        .tint(Color(accent.base, scheme: scheme))
         .frame(minHeight: Size.hitTarget)
     }
 }

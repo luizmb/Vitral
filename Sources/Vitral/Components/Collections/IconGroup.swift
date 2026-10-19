@@ -231,6 +231,7 @@ struct IconTileButtonStyle: ButtonStyle {
 
 /// The tile where the next icon would go: a dashed circle with a plus, and its title.
 public struct IconTileAdd: View {
+    @Environment(\.vitralScheme) private var scheme
     let title: Text
     let icon: Image
     let action: @MainActor () -> Void
@@ -245,7 +246,7 @@ public struct IconTileAdd: View {
         Button(action: action) {
             VStack(spacing: Space.extraSmall) {
                 Circle()
-                    .strokeBorder(Color(.outline), style: StrokeStyle(lineWidth: 1.5, dash: [5, 4]))
+                    .strokeBorder(Color(.outline, scheme: scheme), style: StrokeStyle(lineWidth: 1.5, dash: [5, 4]))
                     .frame(width: Size.icon, height: Size.icon)
                     .overlay(icon.font(.title3).foregroundStyle(.inkMuted))
                 title

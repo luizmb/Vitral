@@ -52,6 +52,7 @@ public enum FieldStatus: Sendable {
 /// What every field sits in: glass at control height, an optional icon before the input and an
 /// optional suffix after it, and its status (colours, icon, messages).
 public struct FieldContainer<Input: View>: View {
+    @Environment(\.vitralScheme) private var scheme
     let icon: Image?
     let suffix: Text?
     let status: FieldStatus
@@ -88,7 +89,7 @@ public struct FieldContainer<Input: View>: View {
             .overlay {
                 status.style.map { style in
                     RoundedRectangle(cornerRadius: Radius.medium, style: .continuous)
-                        .strokeBorder(Color(style.foreground), lineWidth: 1.5)
+                        .strokeBorder(Color(style.foreground, scheme: scheme), lineWidth: 1.5)
                 }
             }
             FieldMessages(status: status)

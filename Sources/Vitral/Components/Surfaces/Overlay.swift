@@ -30,6 +30,7 @@ public struct Obscuring: Hashable, Sendable {
 /// `.overlay(isPresented:)` modifier also blurs). The content is as big as it wants to be; the
 /// overlay only places it.
 public struct Overlay<Content: View>: View {
+    @Environment(\.vitralScheme) private var scheme
     let placement: Alignment
     let glass: GlassToken
     let obscuring: Obscuring
@@ -56,7 +57,7 @@ public struct Overlay<Content: View>: View {
             Rectangle()
                 .fill(.clear)
                 .glassLayer(glass, in: Rectangle())
-                .overlay { Color(ColorToken.fixedBlack.opacity(obscuring.dim)) }
+                .overlay { Color(ColorToken.fixedBlack.opacity(obscuring.dim), scheme: scheme) }
                 .ignoresSafeArea()
                 // Swallows touches: what's underneath isn't to be used now.
                 .contentShape(Rectangle())

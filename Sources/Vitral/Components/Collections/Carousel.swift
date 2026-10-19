@@ -82,6 +82,7 @@ public struct Carousel<Item: Identifiable, Content: View>: View where Item.ID: S
 /// dots on a glass capsule. Stateless: the page is the binding's, set with animation so the
 /// carousel follows.
 public struct PageDots<ID: Hashable & Sendable>: View {
+    @Environment(\.vitralScheme) private var scheme
     @Binding var selection: ID?
     let ids: [ID]
     let pageLabel: (Int, Int) -> Text
@@ -113,7 +114,7 @@ public struct PageDots<ID: Hashable & Sendable>: View {
             ForEach(Array(ids.enumerated()), id: \.offset) { page, id in
                 Button { select(page) } label: {
                     Circle()
-                        .fill(id == selection ? Color(accent.base) : Color(.inkFaint))
+                        .fill(id == selection ? Color(accent.base, scheme: scheme) : Color(.inkFaint, scheme: scheme))
                         .frame(width: Space.small, height: Space.small)
                         .padding(Space.extraSmall)
                         .contentShape(Circle())
@@ -165,10 +166,13 @@ struct NativePageControl: UIViewRepresentable {
         // assignment re-lays it out (and the colours are new objects every time).
         if control.numberOfPages != count { control.numberOfPages = count }
         if control.currentPage != current { control.currentPage = current }
-        if context.coordinator.colours != [currentColour, otherColour] {
-            context.coordinator.colours = [currentColour, otherColour]
-            control.currentPageIndicatorTintColor = UIColor(Color(currentColour))
-            control.pageIndicatorTintColor = UIColor(Color(otherColour))
+        // In the scheme the app set (`.scheme(_:)`), resolved here: UIKit is given plain colours.
+        let isDark = context.environment.vitralScheme == .dark
+        let colours = [currentColour.resolved(isDark: isDark), otherColour.resolved(isDark: isDark)]
+        if context.coordinator.colours != colours {
+            context.coordinator.colours = colours
+            control.currentPageIndicatorTintColor = UIColor(colours[0])
+            control.pageIndicatorTintColor = UIColor(colours[1])
         }
     }
 
@@ -177,7 +181,7 @@ struct NativePageControl: UIViewRepresentable {
     @MainActor
     final class Relay: NSObject {
         var onChange: @MainActor (Int) -> Void
-        var colours: [ColorToken] = []
+        var colours: [RGBA] = []
 
         init(onChange: @escaping @MainActor (Int) -> Void) {
             self.onChange = onChange
