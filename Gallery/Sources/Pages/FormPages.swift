@@ -27,6 +27,12 @@ struct FormsPage: View {
                         .padding(.horizontal, Space.large)
                 }
             }
+            Sample("FieldNumber: a number, in its format, with a unit") {
+                PanelList {
+                    FieldNumber("Tempo", value: $model.formTempo, format: .number.precision(.fractionLength(0 ... 2)), suffix: Text("BPM"))
+                        .padding(.horizontal, Space.large)
+                }
+            }
             Sample("FieldStepper: its label says the value") {
                 PanelList {
                     FieldStepper(Text(verbatim: "Division \(model.formDivision)"), value: $model.formDivision, in: 1 ... 4)

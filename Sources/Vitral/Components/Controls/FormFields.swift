@@ -80,6 +80,55 @@ public extension FieldValue where Value == Text {
     }
 }
 
+/// A number to type, on one line: the title, the number (in `format`, so a tempo reads to two
+/// places rather than six), and an optional unit after it.
+public struct FieldNumber: View {
+    let title: Text
+    @Binding var value: Double
+    let format: FloatingPointFormatStyle<Double>
+    let suffix: Text?
+    let onEndEditing: @MainActor () -> Void
+
+    public init(
+        _ title: LocalizedStringKey,
+        value: Binding<Double>,
+        format: FloatingPointFormatStyle<Double> = .number,
+        suffix: Text? = nil,
+        onEndEditing: @escaping @MainActor () -> Void = {}
+    ) {
+        self.init(Text(title), value: value, format: format, suffix: suffix, onEndEditing: onEndEditing)
+    }
+
+    public init(
+        _ title: Text,
+        value: Binding<Double>,
+        format: FloatingPointFormatStyle<Double> = .number,
+        suffix: Text? = nil,
+        onEndEditing: @escaping @MainActor () -> Void = {}
+    ) {
+        self.title = title
+        self._value = value
+        self.format = format
+        self.suffix = suffix
+        self.onEndEditing = onEndEditing
+    }
+
+    public var body: some View {
+        HStack(spacing: Space.small) {
+            title.font(.body).foregroundStyle(.ink)
+            Spacer(minLength: Space.small)
+            TextField(value: $value, format: format) { title }
+                .font(.body.monospacedDigit())
+                .multilineTextAlignment(.trailing)
+                .frame(maxWidth: 110)
+                .keyboard(.decimal)
+                .onSubmit { onEndEditing() }
+            suffix.map { suffix in suffix.font(.body).foregroundStyle(.inkMuted) }
+        }
+        .frame(minHeight: Size.hitTarget)
+    }
+}
+
 /// A number stepped up and down, on one line: its label (which usually says the value) and the
 /// minus and plus.
 public struct FieldStepper<Value: Strideable>: View {

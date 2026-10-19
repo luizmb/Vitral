@@ -127,7 +127,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .buttons: "ButtonPrimary, ButtonSecondary, ActionBar"
         case .pickers: "SegmentedControlGlass, RadioList, StepperJump"
         case .fields: "FieldText, FieldSecure, FieldSearch"
-        case .forms: "FieldPicker, FieldValue, FieldStepper, FieldDate, EntryList, SwatchPicker, IconPicker"
+        case .forms: "FieldPicker, FieldValue, FieldNumber, FieldStepper, FieldDate, EntryList, SwatchPicker, IconPicker"
         case .banners: "Banner, in three tones"
         case .selection: "Checkbox, ToggleSwitch, SelectionMark"
         case .lists: "Panel, PanelList, Row, SectionLabel"

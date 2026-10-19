@@ -40,6 +40,7 @@ final class GalleryModel {
     var faders: [String: Double] = [:]
     var formChannels = "Stereo"
     var formDivision = 2
+    var formTempo = 120.5
     var formDate = Date(timeIntervalSinceReferenceDate: 800_000_000)
     var formEntries = ["Metronome", "Tempo", "Count In"]
     var formDraft = ""

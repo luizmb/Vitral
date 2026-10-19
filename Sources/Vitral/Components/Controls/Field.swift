@@ -127,9 +127,12 @@ public struct FieldText: View {
     let suffix: Text?
     let keyboard: FieldKeyboard
     let isMonospaced: Bool
+    let axis: Axis
     let status: FieldStatus
     let onEndEditing: @MainActor () -> Void
 
+    /// - Parameter axis: `.vertical` grows the field line by line for longer text (a lyric, a
+    ///   note); Return then ends the line rather than the editing.
     public init(
         _ placeholder: LocalizedStringKey,
         text: Binding<String>,
@@ -137,9 +140,11 @@ public struct FieldText: View {
         suffix: Text? = nil,
         keyboard: FieldKeyboard = .text,
         isMonospaced: Bool = false,
+        axis: Axis = .horizontal,
         status: FieldStatus = .normal,
         onEndEditing: @escaping @MainActor () -> Void = {}
     ) {
+        self.axis = axis
         self.status = status
         self.placeholder = placeholder
         self._text = text
@@ -152,9 +157,15 @@ public struct FieldText: View {
 
     public var body: some View {
         FieldContainer(icon: icon, suffix: suffix, status: status) {
-            TextField(placeholder, text: $text, onEditingChanged: { editing in if !editing { onEndEditing() } })
-                .fontDesign(isMonospaced ? .monospaced : .default)
-                .keyboard(keyboard)
+            Group {
+                if axis == .vertical {
+                    TextField(placeholder, text: $text, axis: .vertical)
+                } else {
+                    TextField(placeholder, text: $text, onEditingChanged: { editing in if !editing { onEndEditing() } })
+                }
+            }
+            .fontDesign(isMonospaced ? .monospaced : .default)
+            .keyboard(keyboard)
         }
     }
 }

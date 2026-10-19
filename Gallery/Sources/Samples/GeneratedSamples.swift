@@ -664,6 +664,12 @@ enum GeneratedSamples {
                 .padding(.horizontal, Space.large)
         }
         """#,
+        #"FormPages.swift#FieldNumber: a number, in its format, with a unit"#: #"""
+        PanelList {
+            FieldNumber("Tempo", value: $model.formTempo, format: .number.precision(.fractionLength(0 ... 2)), suffix: Text("BPM"))
+                .padding(.horizontal, Space.large)
+        }
+        """#,
         #"FormPages.swift#FieldStepper: its label says the value"#: #"""
         PanelList {
             FieldStepper(Text(verbatim: "Division \(model.formDivision)"), value: $model.formDivision, in: 1 ... 4)
