@@ -1,0 +1,128 @@
+name: Promote Version to TestFlight
+
+# Apart from release.yml's tag promotion, and manual: every tag already ships a GitHub
+# release (the library's); putting the Gallery on TestFlight is a bigger step (real signing,
+# a real upload) that stays an explicit choice every time.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to upload (e.g. 1.2.3) — must already be tagged v<version>'
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  upload-testflight:
+    name: Archive, sign, and upload the Gallery v${{ inputs.version }} to TestFlight
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - name: Validate version format
+        run: |
+          VERSION="${{ inputs.version }}"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid version format: $VERSION — expected X.Y.Z"
+            exit 1
+          fi
+
+      - name: Verify tag exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v${{ inputs.version }}"
+          if ! gh api "repos/${{ github.repository }}/git/refs/tags/$TAG" > /dev/null 2>&1; then
+            echo "::error::Tag $TAG not found — run 'Promote RC to Release' first"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          ref: v${{ inputs.version }}
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_26.5.app
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: xcodegen generate
+        working-directory: Gallery
+        run: xcodegen generate 2>&1
+
+      - uses: ./.github/actions/gallery-signing
+        with:
+          certificate-p12: ${{ secrets.DISTRIBUTION_CERTIFICATE_P12 }}
+          certificate-password: ${{ secrets.DISTRIBUTION_CERTIFICATE_PASSWORD }}
+          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
+          api-key-p8: ${{ secrets.APPSTORE_API_KEY_P8 }}
+          api-issuer-id: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+          development-team: ${{ secrets.DEVELOPMENT_TEAM }}
+
+      # Archive, then export straight to App Store Connect: with method app-store-connect and
+      # destination upload, the export is the upload, authenticated by the same API key.
+      - name: Archive and upload to TestFlight
+        env:
+          API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+          DEVELOPMENT_TEAM: ${{ secrets.DEVELOPMENT_TEAM }}
+        run: |
+          set -euo pipefail
+          cat > "$RUNNER_TEMP/exportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store-connect</string>
+              <key>teamID</key>
+              <string>${DEVELOPMENT_TEAM}</string>
+              <key>destination</key>
+              <string>upload</string>
+              <key>signingStyle</key>
+              <string>manual</string>
+              <key>provisioningProfiles</key>
+              <dict>
+                  <key>lu.ios.vitral.gallery</key>
+                  <string>VitralGallery AppStore Distribution</string>
+              </dict>
+          </dict>
+          </plist>
+          PLIST
+
+          xcodebuild archive \
+            -project Gallery/VitralGallery.xcodeproj \
+            -scheme Gallery \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/VitralGallery.xcarchive" \
+            -skipMacroValidation \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$HOME/.appstoreconnect/private_keys/AuthKey_${API_KEY_ID}.p8" \
+            -authenticationKeyID "$API_KEY_ID" \
+            -authenticationKeyIssuerID "$API_ISSUER_ID"
+
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/VitralGallery.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/exportOptions.plist" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$HOME/.appstoreconnect/private_keys/AuthKey_${API_KEY_ID}.p8" \
+            -authenticationKeyID "$API_KEY_ID" \
+            -authenticationKeyIssuerID "$API_ISSUER_ID"
+
+      - name: Clean up signing keychain and API key
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/signing.keychain-db" 2>/dev/null || true
+          rm -rf ~/.appstoreconnect
+
+      - name: Notify status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "::notice::Gallery v${{ inputs.version }} uploaded to TestFlight — processing on App Store Connect can take a few minutes"
+          else
+            echo "::error::TestFlight upload failed for v${{ inputs.version }} — see the failed step above"
+          fi

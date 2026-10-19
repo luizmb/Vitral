@@ -5,3 +5,4 @@
 xcuserdata/
 DerivedData/
 Gallery/*.xcodeproj
+Gallery/Config/Local.xcconfig

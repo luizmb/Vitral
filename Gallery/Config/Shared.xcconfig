@@ -1,0 +1,10 @@
+// Checked in. DEVELOPMENT_TEAM defaults to empty so a fresh clone never needs a real team id:
+// the CI builds that don't sign use CODE_SIGNING_ALLOWED=NO, and the signed RC/TestFlight builds
+// write a real value into Local.xcconfig at build time from a secret (see release.yml and
+// promote-testflight.yml), the same file local development uses.
+DEVELOPMENT_TEAM =
+// Here rather than in project.yml: a buildSettings value always beats an xcconfig, so the
+// signed jobs couldn't switch to Manual through Local.xcconfig otherwise. #include? comes
+// after, so its values win when the file exists (it silently does nothing when it doesn't).
+CODE_SIGN_STYLE = Automatic
+#include? "Local.xcconfig"
