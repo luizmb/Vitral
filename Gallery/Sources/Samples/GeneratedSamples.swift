@@ -68,6 +68,20 @@ enum GeneratedSamples {
             }
         }
         """#,
+        #"ComponentPages.swift#ButtonLabel: a custom button's content"#: #"""
+        Panel {
+            VStack(alignment: .leading, spacing: Space.medium) {
+                Button {} label: {
+                    ButtonLabel(Text(verbatim: "Plain, sized as the rest"), icon: Image(.play), size: .medium)
+                }
+                .buttonStyle(.plain)
+                Button {} label: {
+                    ButtonLabel(Text(verbatim: "Busy"), size: .medium, isBusy: true)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        """#,
         #"ComponentPages.swift#ToggleButtonLatched: a desk's mute and solo"#: #"""
         Panel {
             HStack(spacing: Space.small) {
@@ -174,6 +188,14 @@ enum GeneratedSamples {
                 SwatchStack([.accent, .accentTop, .warning, .danger, .inkMuted, .ink, .inkFaint, .accentBottom])
                 SwatchStack(items: [SwatchItem(.accent, label: "HH"), SwatchItem(.danger, label: "BB"), SwatchItem(.warning, label: "TN")], diameter: 38)
                 SwatchStack(items: [], diameter: 38)
+            }
+        }
+        """#,
+        #"ComponentPages.swift#SwatchPlaceholder: where a swatch would be"#: #"""
+        Panel {
+            HStack(spacing: Space.small) {
+                SwatchPlaceholder()
+                SwatchPlaceholder(diameter: 38)
             }
         }
         """#,
@@ -290,6 +312,17 @@ enum GeneratedSamples {
             FieldSecure("Personal access token", text: .constant("ghp_secret"))
         }
         """#,
+        #"ComponentPages.swift#FieldContainer and FieldMessages: a field of your own"#: #"""
+        Panel {
+            VStack(alignment: .leading, spacing: Space.medium) {
+                FieldContainer(icon: Image(systemName: "calendar"), status: .warning(Text(verbatim: "That's a Sunday."))) {
+                    DatePicker("Date", selection: .constant(Date(timeIntervalSinceReferenceDate: 0)), displayedComponents: .date)
+                        .labelsHidden()
+                }
+                FieldMessages(status: .error([Text(verbatim: "Must be a number."), Text(verbatim: "Must be positive.")]))
+            }
+        }
+        """#,
         #"ComponentPages.swift#FieldSearch"#: #"""
         Panel {
             VStack(spacing: Space.medium) {
@@ -328,6 +361,11 @@ enum GeneratedSamples {
             EmptyState("Nothing selected", message: Text("Tap a track to edit it here."), icon: Image(systemName: "hand.tap"))
         }
         """#,
+        #"ComponentPages.swift#SymbolArtwork: a symbol standing in for an illustration"#: #"""
+        Panel {
+            SymbolArtwork(Image(systemName: "music.note.list"))
+        }
+        """#,
         #"ComponentPages.swift#ErrorScreen with retry"#: #"""
         Panel {
             ErrorScreen("Couldn't sync", message: Text("GitHub didn't answer for \(30) seconds."), illustration: .offline) {}
@@ -358,6 +396,22 @@ enum GeneratedSamples {
                 Tag("Locked while syncing", icon: Image(.lock), style: .tint(.blue))
             }
             .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+        """#,
+        #"ComponentPages.swift#EdgeFade: frosting where content runs under a bar"#: #"""
+        Panel {
+            ZStack {
+                VStack(alignment: .leading, spacing: Space.small) {
+                    ForEach(1...9, id: \.self) { line in
+                        Text(verbatim: "Line \(line) of a canvas that runs under the bars")
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                EdgeFade(.top, beyond: 48)
+                EdgeFade(.bottom, beyond: 48)
+            }
+            .frame(height: 200)
+            .clipped()
+        }
         """#,
         #"ComponentPages.swift#Overlay(placement: .bottom)"#: #"""
         OverlaySample(title: "Inhalation", subtitle: "Twelve compartments")
@@ -632,6 +686,16 @@ enum GeneratedSamples {
             interaction: .vertical(dragStart: $model.knobVolumeStart),
             style: GlassKnobStyle(marks: 11, showsValue: true),
             label: Text("Volume")
+        )
+        """#,
+        #"KnobPages.swift#A pan: double tap centres it"#: #"""
+        Knob(
+            value: $model.knobPan,
+            scale: ValueScale(-100 ... 100, precision: 0),
+            interaction: .vertical(dragStart: $model.knobPanStart),
+            style: GlassKnobStyle(marks: 21, showsValue: true),
+            resetValue: 0,
+            label: Text("Pan")
         )
         """#,
         #"KnobPages.swift#A texture in the middle"#: #"""

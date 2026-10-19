@@ -24,6 +24,8 @@ final class GalleryModel {
     var knobGain = 0.4
     var knobVolume = 0.6
     var knobVolumeStart: Double?
+    var knobPan = 30.0
+    var knobPanStart: Double?
     var knobTexture = 0.3
     var knobMarshall = 7.0
     var knobFender = 6.0
