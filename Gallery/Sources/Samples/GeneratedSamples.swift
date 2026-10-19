@@ -674,9 +674,9 @@ enum GeneratedSamples {
                 .padding(.horizontal, Space.large)
         }
         """#,
-        #"FormPages.swift#FieldNumber: a number, in its format, with a unit"#: #"""
+        #"FormPages.swift#FieldNumber: a number as the app writes it, with a unit"#: #"""
         PanelList {
-            FieldNumber("Tempo", value: $model.formTempo, format: .number.precision(.fractionLength(0 ... 2)).locale(model.locale), suffix: Text("BPM"))
+            FieldNumber("Tempo", text: model.formTempoText, suffix: Text("BPM"))
                 .padding(.horizontal, Space.large)
         }
         """#,

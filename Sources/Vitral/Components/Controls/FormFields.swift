@@ -81,36 +81,33 @@ public extension FieldValue where Value == Text {
     }
 }
 
-/// A number to type, on one line: the title, the number, and an optional unit after it. `format`
-/// both writes and reads it, so it is the app's, in the app's locale (`.number.locale(locale)`):
-/// 1.5 typed in English is 1,5 in Portuguese.
-public struct FieldNumber<Format: ParseableFormatStyle>: View where Format.FormatInput == Double, Format.FormatOutput == String {
+/// A number to type, on one line: the title, the number, and an optional unit after it. The text
+/// is the app's both ways: it writes the value in its own locale (1.5 in English, 1,5 in
+/// Portuguese) and reads back what was typed, keeping the draft until `onEndEditing`, so nothing
+/// is rewritten under the cursor. Vitral neither formats nor parses it.
+public struct FieldNumber: View {
     let title: Text
-    @Binding var value: Double
-    let format: Format
+    @Binding var text: String
     let suffix: Text?
     let onEndEditing: @MainActor () -> Void
 
     public init(
         _ title: LocalizedStringKey,
-        value: Binding<Double>,
-        format: Format,
+        text: Binding<String>,
         suffix: Text? = nil,
         onEndEditing: @escaping @MainActor () -> Void = {}
     ) {
-        self.init(Text(title), value: value, format: format, suffix: suffix, onEndEditing: onEndEditing)
+        self.init(Text(title), text: text, suffix: suffix, onEndEditing: onEndEditing)
     }
 
     public init(
         _ title: Text,
-        value: Binding<Double>,
-        format: Format,
+        text: Binding<String>,
         suffix: Text? = nil,
         onEndEditing: @escaping @MainActor () -> Void = {}
     ) {
         self.title = title
-        self._value = value
-        self.format = format
+        self._text = text
         self.suffix = suffix
         self.onEndEditing = onEndEditing
     }
@@ -119,7 +116,7 @@ public struct FieldNumber<Format: ParseableFormatStyle>: View where Format.Forma
         HStack(spacing: Space.small) {
             title.font(.body).foregroundStyle(.ink)
             Spacer(minLength: Space.small)
-            TextField(value: $value, format: format) { title }
+            TextField(text: $text) { title }
                 .font(.body.monospacedDigit())
                 .multilineTextAlignment(.trailing)
                 .frame(maxWidth: 110)

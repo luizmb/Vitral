@@ -45,6 +45,8 @@ final class GalleryModel {
     var formChannels = "Stereo"
     var formDivision = 2
     var formTempo = 120.5
+    /// What is being typed into the tempo field, until it is done: nil shows the value as written.
+    var formTempoDraft: String?
     var formDate = Date(timeIntervalSinceReferenceDate: 800_000_000)
     var formEntries = ["Metronome", "Tempo", "Count In"]
     var formDraft = ""
@@ -77,6 +79,18 @@ final class GalleryModel {
     /// Where a fader's drag started, kept by name while it lasts.
     func faderStart(_ name: String) -> Binding<Double?> {
         Binding(get: { self.faderStarts[name] }, set: { self.faderStarts[name] = $0 })
+    }
+
+    /// The tempo field's text: the draft while typing, else the value in the gallery's locale.
+    /// Typing that reads as a number moves the value; leaving the field drops the draft.
+    var formTempoText: Binding<String> {
+        Binding(
+            get: { self.formTempoDraft ?? self.formTempo.formatted(.number.precision(.fractionLength(0 ... 2)).locale(self.locale)) },
+            set: { text in
+                self.formTempoDraft = text
+                if let value = try? Double(text, format: .number.locale(self.locale)) { self.formTempo = value }
+            }
+        )
     }
 
     // What the list reports, applied here as a store's reducer would.
