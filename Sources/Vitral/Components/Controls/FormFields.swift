@@ -40,6 +40,46 @@ public struct FieldPicker<Value: Hashable & Sendable>: View {
     }
 }
 
+/// A value to read, on one line: the title, and the value (or any trailing content) after it. For
+/// what a form shows but doesn't edit here: a port, a count, a file's name.
+public struct FieldValue<Value: View>: View {
+    let title: Text
+    let value: Value
+
+    public init(_ title: LocalizedStringKey, @ViewBuilder value: () -> Value) {
+        self.init(Text(title), value: value)
+    }
+
+    public init(_ title: Text, @ViewBuilder value: () -> Value) {
+        self.title = title
+        self.value = value()
+    }
+
+    public var body: some View {
+        HStack(spacing: Space.medium) {
+            title.font(.body).foregroundStyle(.ink)
+            Spacer(minLength: Space.small)
+            value
+                .font(.body)
+                .foregroundStyle(.inkMuted)
+                .multilineTextAlignment(.trailing)
+        }
+        .frame(minHeight: Size.hitTarget)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+public extension FieldValue where Value == Text {
+    /// A title and a text value.
+    init(_ title: LocalizedStringKey, value: Text) {
+        self.init(Text(title)) { value }
+    }
+
+    init(_ title: Text, value: Text) {
+        self.init(title) { value }
+    }
+}
+
 /// A number stepped up and down, on one line: its label (which usually says the value) and the
 /// minus and plus.
 public struct FieldStepper<Value: Strideable>: View {

@@ -19,6 +19,14 @@ struct FormsPage: View {
                     .padding(.horizontal, Space.large)
                 }
             }
+            Sample("FieldValue: a value to read") {
+                PanelList {
+                    FieldValue("Port", value: Text(verbatim: "10111"))
+                        .padding(.horizontal, Space.large)
+                    FieldValue("File") { Text(verbatim: "Kick.wav").monospaced() }
+                        .padding(.horizontal, Space.large)
+                }
+            }
             Sample("FieldStepper: its label says the value") {
                 PanelList {
                     FieldStepper(Text(verbatim: "Division \(model.formDivision)"), value: $model.formDivision, in: 1 ... 4)
