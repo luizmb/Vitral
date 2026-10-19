@@ -21,6 +21,16 @@ struct KnobsPage: View {
                         label: Text("Volume")
                     )
                 }
+                KnobSample("A pan: double tap centres it") {
+                    Knob(
+                        value: $model.knobPan,
+                        scale: ValueScale(-100 ... 100, precision: 0),
+                        interaction: .vertical(dragStart: $model.knobPanStart),
+                        style: GlassKnobStyle(marks: 21, showsValue: true),
+                        resetValue: 0,
+                        label: Text("Pan")
+                    )
+                }
                 KnobSample("A texture in the middle") {
                     Knob(
                         value: $model.knobTexture,

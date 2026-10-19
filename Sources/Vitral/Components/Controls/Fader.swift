@@ -240,7 +240,9 @@ public struct Fader: View {
                 // Side by side, so the drag (and the thumb under the finger) answers at once;
                 // waiting to rule out a double tap held every press back.
                 .gesture(drag(length: axis == .horizontal ? proxy.size.width : proxy.size.height))
-                .simultaneousGesture(TapGesture(count: 2).onEnded { reset() })
+                // Only a control given a `resetValue` has double-tap semantics; without one there is
+                // nothing to recognise, and a quick second touch is just a touch.
+                .simultaneousGesture(TapGesture(count: 2).onEnded { reset() }, including: resetValue == nil ? .none : .all)
         }
         .frame(width: axis == .vertical ? style.breadth : nil, height: axis == .horizontal ? style.breadth : nil)
         .frame(maxWidth: axis == .horizontal ? .infinity : nil, maxHeight: axis == .vertical ? .infinity : nil)
@@ -273,8 +275,13 @@ public struct Fader: View {
     func drag(length: Double) -> some Gesture {
         DragGesture(minimumDistance: 0)
             .onChanged { drag in
+                // A finger that has only wobbled is still tapping: written on landing (where an
+                // absolute fader goes) and past the slop, never in between, so a double tap's
+                // reset isn't overwritten by the jitter of its second touch.
+                let moved = TrackGeometry.isDragging(dx: drag.translation.width, dy: drag.translation.height)
                 switch interaction {
                 case .absolute:
+                    guard moved || drag.translation == .zero else { return }
                     value = value(
                         at: TrackGeometry.fraction(
                             at: axis == .horizontal ? drag.location.x : drag.location.y,
@@ -285,9 +292,10 @@ public struct Fader: View {
                     )
                 case let .relative(dragStart):
                     if dragStart.wrappedValue == nil { dragStart.wrappedValue = value }
-                    // Written only once the finger has moved: a touch that stays put (a tap, the
-                    // second of a double tap) would write back where it started, over a reset.
-                    if drag.translation != .zero {
+                    // Written only once the finger has moved past the slop: a touch that stays put
+                    // (a tap, the second of a double tap) would write back where it started, over
+                    // a reset.
+                    if moved {
                         value = value(
                             at: scale.fraction(of: dragStart.wrappedValue ?? value)
                                 + (axis == .horizontal ? drag.translation.width : -drag.translation.height)

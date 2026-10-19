@@ -167,7 +167,9 @@ public struct Knob: View {
             .frame(width: proxy.size.width, height: proxy.size.height)
             .contentShape(Circle())
             .gesture(drag(in: proxy.size))
-            .simultaneousGesture(TapGesture(count: 2).onEnded { reset() })
+            // Only a control given a `resetValue` has double-tap semantics; without one there is
+            // nothing to recognise, and a quick second touch is just a touch.
+            .simultaneousGesture(TapGesture(count: 2).onEnded { reset() }, including: resetValue == nil ? .none : .all)
         }
         .aspectRatio(1, contentMode: .fit)
         .accessibilityElement()
@@ -194,8 +196,12 @@ public struct Knob: View {
     func drag(in size: CGSize) -> some Gesture {
         DragGesture(minimumDistance: 0)
             .onChanged { drag in
+                // As a fader: written on landing and past the slop, never for a tap's wobble, so a
+                // double tap's reset stands.
+                let moved = TrackGeometry.isDragging(dx: drag.translation.width, dy: drag.translation.height)
                 switch interaction {
                 case .circular:
+                    guard moved || drag.translation == .zero else { return }
                     value = scale.value(
                         at: DialGeometry.fraction(
                             forAngle: DialGeometry.angle(dx: drag.location.x - size.width / 2, dy: drag.location.y - size.height / 2),
@@ -205,8 +211,9 @@ public struct Knob: View {
                     )
                 case let .vertical(dragStart, travel):
                     if dragStart.wrappedValue == nil { dragStart.wrappedValue = value }
-                    // Written only once the finger has moved, so a double tap's reset stands.
-                    if drag.translation != .zero {
+                    // Written only once the finger has moved past the slop, so a double tap's
+                    // reset stands.
+                    if moved {
                         value = scale.dragged(from: dragStart.wrappedValue ?? value, by: -drag.translation.height, over: travel)
                     }
                 }

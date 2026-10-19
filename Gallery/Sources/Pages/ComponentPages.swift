@@ -37,6 +37,20 @@ struct ButtonsPage: View {
                     }
                 }
             }
+            Sample("ButtonLabel: a custom button's content") {
+                Panel {
+                    VStack(alignment: .leading, spacing: Space.medium) {
+                        Button {} label: {
+                            ButtonLabel(Text(verbatim: "Plain, sized as the rest"), icon: Image(.play), size: .medium)
+                        }
+                        .buttonStyle(.plain)
+                        Button {} label: {
+                            ButtonLabel(Text(verbatim: "Busy"), size: .medium, isBusy: true)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
             Sample("ToggleButtonLatched: a desk's mute and solo") {
                 Panel {
                     HStack(spacing: Space.small) {
@@ -164,6 +178,14 @@ struct TagsPage: View {
                         SwatchStack([.accent, .accentTop, .warning, .danger, .inkMuted, .ink, .inkFaint, .accentBottom])
                         SwatchStack(items: [SwatchItem(.accent, label: "HH"), SwatchItem(.danger, label: "BB"), SwatchItem(.warning, label: "TN")], diameter: 38)
                         SwatchStack(items: [], diameter: 38)
+                    }
+                }
+            }
+            Sample("SwatchPlaceholder: where a swatch would be") {
+                Panel {
+                    HStack(spacing: Space.small) {
+                        SwatchPlaceholder()
+                        SwatchPlaceholder(diameter: 38)
                     }
                 }
             }
@@ -309,6 +331,17 @@ struct FieldsPage: View {
                     FieldSecure("Personal access token", text: .constant("ghp_secret"))
                 }
             }
+            Sample("FieldContainer and FieldMessages: a field of your own") {
+                Panel {
+                    VStack(alignment: .leading, spacing: Space.medium) {
+                        FieldContainer(icon: Image(systemName: "calendar"), status: .warning(Text(verbatim: "That's a Sunday."))) {
+                            DatePicker("Date", selection: .constant(Date(timeIntervalSinceReferenceDate: 0)), displayedComponents: .date)
+                                .labelsHidden()
+                        }
+                        FieldMessages(status: .error([Text(verbatim: "Must be a number."), Text(verbatim: "Must be positive.")]))
+                    }
+                }
+            }
             Sample("FieldSearch") {
                 Panel {
                     VStack(spacing: Space.medium) {
@@ -361,6 +394,11 @@ struct EmptyStatesPage: View {
                     EmptyState("Nothing selected", message: Text("Tap a track to edit it here."), icon: Image(systemName: "hand.tap"))
                 }
             }
+            Sample("SymbolArtwork: a symbol standing in for an illustration") {
+                Panel {
+                    SymbolArtwork(Image(systemName: "music.note.list"))
+                }
+            }
             Sample("ErrorScreen with retry") {
                 Panel {
                     ErrorScreen("Couldn't sync", message: Text("GitHub didn't answer for \(30) seconds."), illustration: .offline) {}
@@ -406,6 +444,22 @@ struct OverlaysPage: View {
                         Tag("Locked while syncing", icon: Image(.lock), style: .tint(.blue))
                     }
                     .clipShape(RoundedRectangle(cornerRadius: Radius.card, style: .continuous))
+            }
+            Sample("EdgeFade: frosting where content runs under a bar") {
+                Panel {
+                    ZStack {
+                        VStack(alignment: .leading, spacing: Space.small) {
+                            ForEach(1...9, id: \.self) { line in
+                                Text(verbatim: "Line \(line) of a canvas that runs under the bars")
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        EdgeFade(.top, beyond: 48)
+                        EdgeFade(.bottom, beyond: 48)
+                    }
+                    .frame(height: 200)
+                    .clipped()
+                }
             }
             Sample("Overlay(placement: .bottom)") {
                 OverlaySample(title: "Inhalation", subtitle: "Twelve compartments")
