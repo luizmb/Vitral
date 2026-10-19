@@ -38,6 +38,14 @@ final class GalleryModel {
     var jogRotation = 0.0
     var jogTouch: Double?
     var faders: [String: Double] = [:]
+    var formChannels = "Stereo"
+    var formDivision = 2
+    var formDate = Date(timeIntervalSinceReferenceDate: 800_000_000)
+    var formEntries = ["Metronome", "Tempo", "Count In"]
+    var formDraft = ""
+    var formColour = "teal"
+    var formIcon = "music.mic"
+    var formToggle = true
     var faderStarts: [String: Double] = [:]
     var iconPage = 0
     var chatDraft = ""

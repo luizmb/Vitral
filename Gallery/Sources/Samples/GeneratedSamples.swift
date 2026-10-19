@@ -65,6 +65,7 @@ enum GeneratedSamples {
                 ButtonSecondary("Small", size: .small) {}
                 ButtonSecondary("Pulling", fillsWidth: true, isBusy: true) {}
                 ButtonSecondary("Disabled", fillsWidth: true) {}.disabled(true)
+                ButtonSecondary("Delete bus", icon: Image(systemName: "trash"), fillsWidth: true, role: .destructive) {}
             }
         }
         """#,
@@ -112,6 +113,8 @@ enum GeneratedSamples {
         PanelList {
             ToggleSwitch("Logarithmic axis", isOn: .constant(true)).padding(.horizontal, Space.large)
             ToggleSwitch("Show grid", isOn: .constant(false)).padding(.horizontal, Space.large)
+            ToggleSwitch("The click goes here", detail: Text("A default only: a song can send its own."), isOn: .constant(true))
+                .padding(.horizontal, Space.large)
         }
         """#,
         #"ComponentPages.swift#SelectionMark"#: #"""
@@ -196,6 +199,16 @@ enum GeneratedSamples {
             HStack(spacing: Space.small) {
                 SwatchPlaceholder()
                 SwatchPlaceholder(diameter: 38)
+            }
+        }
+        """#,
+        #"ComponentPages.swift#Badge: a monogram, an emoji, a picture or a glyph on a disc"#: #"""
+        Panel {
+            HStack(spacing: Space.medium) {
+                Badge(.monogram("Hanna Huth"), diameter: 44)
+                Badge(.emoji("🥁"), colour: .washAmber, diameter: 44)
+                Badge(.image(Image(systemName: "photo.artframe")), colour: .washTeal, diameter: 44)
+                Badge(.glyph(Image(systemName: "music.mic")), fill: .red, diameter: 44, gradient: true)
             }
         }
         """#,
@@ -632,6 +645,70 @@ enum GeneratedSamples {
             }
         }
         .controlFinish(.aqua(.accent))
+        """#,
+        #"FormPages.swift#FieldPicker: a menu of options"#: #"""
+        PanelList {
+            FieldPicker("Channels", selection: $model.formChannels, options: [
+                ChoiceOption("Mono", title: "Mono"),
+                ChoiceOption("Stereo", title: "Stereo"),
+                ChoiceOption("Left only", title: "Left only"),
+            ])
+            .padding(.horizontal, Space.large)
+        }
+        """#,
+        #"FormPages.swift#FieldStepper: its label says the value"#: #"""
+        PanelList {
+            FieldStepper(Text(verbatim: "Division \(model.formDivision)"), value: $model.formDivision, in: 1 ... 4)
+                .padding(.horizontal, Space.large)
+        }
+        """#,
+        #"FormPages.swift#FieldDate"#: #"""
+        PanelList {
+            FieldDate("Published", date: $model.formDate)
+                .padding(.horizontal, Space.large)
+        }
+        """#,
+        #"FormPages.swift#EntryList: entries to remove, and one to add"#: #"""
+        PanelList {
+            EntryList(
+                entries: model.formEntries,
+                draft: $model.formDraft,
+                placeholder: "Another name",
+                onRemove: { model.formEntries.remove(at: $0) },
+                onAdd: {
+                    model.formEntries.append(model.formDraft.trimmingCharacters(in: .whitespaces))
+                    model.formDraft = ""
+                }
+            )
+            .padding(.horizontal, Space.large)
+        }
+        """#,
+        #"FormPages.swift#SwatchPicker"#: #"""
+        Panel {
+            SwatchPicker(
+                selection: $model.formColour,
+                options: ["red", "orange", "yellow", "green", "teal", "blue", "indigo", "purple"],
+                colour: { FormsPage.colours[$0] ?? .gray },
+                label: { Text(verbatim: $0) }
+            )
+        }
+        """#,
+        #"FormPages.swift#IconPicker, with badges"#: #"""
+        Panel {
+            IconPicker(
+                selection: $model.formIcon,
+                options: ["music.mic", "pianokeys", "guitars", "metronome", "speaker.wave.2", "headphones"],
+                badge: { Badge(.glyph(Image(systemName: $0)), fill: .indigo, diameter: 30, gradient: true) },
+                title: { Text(verbatim: $0.split(separator: ".").first.map(String.init) ?? $0) }
+            )
+        }
+        """#,
+        #"FormPages.swift#Row, titled with an app's own name"#: #"""
+        PanelList {
+            Row(Text(verbatim: "Guitar Lead"), subtitle: Text("Stereo"), detail: Text("Pair 6")) {
+                Badge(.glyph(Image(systemName: "guitars")), fill: .orange, diameter: 38, gradient: true)
+            }
+        }
         """#,
         #"IconGroupPages.swift#IconGroup with a header, page dots and a footer"#: #"""
         IconGroup(DemoIcon.all, page: $model.iconPage) { icon in
