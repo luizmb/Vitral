@@ -3,7 +3,9 @@ import VitralTokens
 
 /// How a fader is moved.
 public enum FaderInteraction {
-    /// The thumb goes where the finger is: a touch anywhere on the track sets the value.
+    /// The thumb goes where the finger is: a touch anywhere on the track sets the value. On a
+    /// fader with a `resetValue`, a tap doesn't move it (it may be half a double tap); a drag
+    /// still takes the thumb to the finger.
     case absolute
     /// The thumb moves by as much as the finger does, wherever on the track the drag starts, as a
     /// desk's fader cap is pushed. The value the drag started from is kept in `dragStart` (the
@@ -275,13 +277,14 @@ public struct Fader: View {
     func drag(length: Double) -> some Gesture {
         DragGesture(minimumDistance: 0)
             .onChanged { drag in
-                // A finger that has only wobbled is still tapping: written on landing (where an
-                // absolute fader goes) and past the slop, never in between, so a double tap's
-                // reset isn't overwritten by the jitter of its second touch.
+                // A finger that has only wobbled is still tapping, and only a drag past the slop
+                // writes. An absolute fader also goes where a tap lands, unless it resets on a
+                // double tap: on a device the second touch reaches the drag after the double tap
+                // is recognised, so its landing would write the finger back over the reset.
                 let moved = TrackGeometry.isDragging(dx: drag.translation.width, dy: drag.translation.height)
                 switch interaction {
                 case .absolute:
-                    guard moved || drag.translation == .zero else { return }
+                    guard moved || (drag.translation == .zero && resetValue == nil) else { return }
                     value = value(
                         at: TrackGeometry.fraction(
                             at: axis == .horizontal ? drag.location.x : drag.location.y,
