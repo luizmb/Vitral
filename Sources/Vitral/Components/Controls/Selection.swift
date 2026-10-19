@@ -67,23 +67,35 @@ public struct Checkbox: View {
     }
 }
 
-/// A setting that takes effect at once: the system switch, in the accent.
+/// A setting that takes effect at once: the system switch, in the accent, with an optional line
+/// under the title saying what it does.
 public struct ToggleSwitch: View {
-    let title: LocalizedStringKey
+    let title: Text
+    let detail: Text?
     @Binding var isOn: Bool
 
     @Environment(\.accent) private var accent
 
-    public init(_ title: LocalizedStringKey, isOn: Binding<Bool>) {
+    public init(_ title: LocalizedStringKey, detail: Text? = nil, isOn: Binding<Bool>) {
+        self.init(Text(title), detail: detail, isOn: isOn)
+    }
+
+    public init(_ title: Text, detail: Text? = nil, isOn: Binding<Bool>) {
         self.title = title
+        self.detail = detail
         self._isOn = isOn
     }
 
     public var body: some View {
         Toggle(isOn: $isOn) {
-            Text(title)
-                .font(.body)
-                .foregroundStyle(.ink)
+            VStack(alignment: .leading, spacing: Space.hairline) {
+                title
+                    .font(.body)
+                    .foregroundStyle(.ink)
+                detail.map { detail in
+                    detail.font(.detail).foregroundStyle(.inkMuted)
+                }
+            }
         }
         .toggleStyle(.switch)
         .tint(Color(accent.base))

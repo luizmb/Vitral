@@ -2,7 +2,8 @@ import SwiftUI
 import VitralTokens
 
 /// A name's initials on a disc of its own stable colour (`ColorToken.stable(for:)`), for things
-/// with no picture: a band, a person, a project. Give `colour` to choose it instead.
+/// with no picture: a band, a person, a project. Give `colour` to choose it instead. The same as
+/// `Badge(.monogram(name))`.
 public struct Monogram: View {
     let name: String
     let colour: ColorToken?
@@ -15,7 +16,7 @@ public struct Monogram: View {
     }
 
     public var body: some View {
-        Swatch(colour ?? .stable(for: name), label: Text(verbatim: Initials.of(name)), diameter: diameter)
+        Badge(.monogram(name), colour: colour, diameter: diameter)
     }
 }
 

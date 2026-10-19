@@ -121,6 +121,7 @@ public struct ButtonPrimary: View {
 public struct ButtonSecondary: View {
     let label: ButtonLabel
     let finish: FinishToken?
+    let role: ButtonRole?
     let action: @MainActor () -> Void
 
     @Environment(\.controlFinish) private var controlFinish
@@ -133,10 +134,12 @@ public struct ButtonSecondary: View {
         fillsWidth: Bool = false,
         isBusy: Bool = false,
         finish: FinishToken? = nil,
+        role: ButtonRole? = nil,
         action: @escaping @MainActor () -> Void
     ) {
         self.label = ButtonLabel(title, icon: icon, size: size, fillsWidth: fillsWidth, isBusy: isBusy)
         self.finish = finish
+        self.role = role
         self.action = action
     }
 
@@ -147,10 +150,12 @@ public struct ButtonSecondary: View {
         fillsWidth: Bool = false,
         isBusy: Bool = false,
         finish: FinishToken? = nil,
+        role: ButtonRole? = nil,
         action: @escaping @MainActor () -> Void
     ) {
         self.label = ButtonLabel(title, icon: icon, size: size, fillsWidth: fillsWidth, isBusy: isBusy)
         self.finish = finish
+        self.role = role
         self.action = action
     }
 
@@ -165,14 +170,15 @@ public struct ButtonSecondary: View {
 
     public var body: some View {
         if let finish = resolvedFinish {
-            Button(action: action) { label }
+            Button(role: role, action: action) { label }
                 .disabled(label.isBusy)
                 .buttonStyle(FinishButtonStyle(finish: finish))
+                .modifier(DestructiveTint(isOn: role == .destructive))
         } else {
-            Button(action: action) { label }
+            Button(role: role, action: action) { label }
                 .disabled(label.isBusy)
                 .buttonStyle(.glass)
-                .foregroundStyle(.ink)
+                .foregroundStyle(role == .destructive ? Color(.danger) : Color(.ink))
         }
     }
 }
@@ -204,5 +210,14 @@ struct FinishButtonStyle: ButtonStyle {
             // buttons answer: a button's pressed state comes late in a scroll view (it waits to see
             // whether the touch is a scroll). Without glass, clear interactive glass answers.
             .glassEffect(finish.isGlass ? .identity : Glass.clear.interactive(), in: Capsule())
+    }
+}
+
+/// A destructive action's label in the danger colour; anything else as the finish draws it.
+struct DestructiveTint: ViewModifier {
+    let isOn: Bool
+
+    func body(content: Content) -> some View {
+        if isOn { content.foregroundStyle(Color(.danger)) } else { content }
     }
 }

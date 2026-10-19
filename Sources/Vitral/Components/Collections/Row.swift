@@ -17,8 +17,8 @@ public enum RowState: Hashable, Sendable {
 /// trailing detail and trailing part, and an optional chevron. Optional parts are added
 /// builder-style (`.trailing { }`, `.disclosure()`, `.rowState(_:)`).
 public struct Row<Leading: View, Trailing: View>: View {
-    let title: LocalizedStringKey
-    let subtitle: LocalizedStringKey?
+    let title: Text
+    let subtitle: Text?
     let detail: Text?
     let showsDisclosure: Bool
     let state: RowState
@@ -28,8 +28,8 @@ public struct Row<Leading: View, Trailing: View>: View {
     @Environment(\.accent) private var accent
 
     init(
-        title: LocalizedStringKey,
-        subtitle: LocalizedStringKey?,
+        title: Text,
+        subtitle: Text?,
         detail: Text?,
         showsDisclosure: Bool,
         state: RowState,
@@ -49,11 +49,11 @@ public struct Row<Leading: View, Trailing: View>: View {
         HStack(spacing: Space.medium) {
             leading
             VStack(alignment: .leading, spacing: Space.hairline) {
-                Text(title)
+                title
                     .font(state == .selected ? .bodyStrong : .body)
                     .foregroundStyle(.ink)
                 subtitle.map { subtitle in
-                    Text(subtitle)
+                    subtitle
                         .font(.detail)
                         .foregroundStyle(.inkMuted)
                 }
@@ -116,12 +116,28 @@ public extension Row where Trailing == EmptyView {
         showsDisclosure: Bool = false,
         @ViewBuilder leading: () -> Leading
     ) {
+        self.init(Text(title), subtitle: subtitle.map { Text($0) }, detail: detail, showsDisclosure: showsDisclosure, leading: leading)
+    }
+
+    /// A row titled with `Text`: for a title that is the app's data (a name), shown as it is.
+    init(
+        _ title: Text,
+        subtitle: Text? = nil,
+        detail: Text? = nil,
+        showsDisclosure: Bool = false,
+        @ViewBuilder leading: () -> Leading
+    ) {
         self.init(title: title, subtitle: subtitle, detail: detail, showsDisclosure: showsDisclosure, state: .normal, leading: leading(), trailing: EmptyView())
     }
 }
 
 public extension Row where Leading == EmptyView, Trailing == EmptyView {
     init(_ title: LocalizedStringKey, subtitle: LocalizedStringKey? = nil, detail: Text? = nil, showsDisclosure: Bool = false) {
+        self.init(title, subtitle: subtitle, detail: detail, showsDisclosure: showsDisclosure) { EmptyView() }
+    }
+
+    /// A row titled with `Text`, with nothing before it.
+    init(_ title: Text, subtitle: Text? = nil, detail: Text? = nil, showsDisclosure: Bool = false) {
         self.init(title, subtitle: subtitle, detail: detail, showsDisclosure: showsDisclosure) { EmptyView() }
     }
 }

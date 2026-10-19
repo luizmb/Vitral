@@ -5,14 +5,20 @@ import VitralTokens
 /// accessibility label is what VoiceOver says, so icon-only options still have a name.
 public struct ChoiceOption<Value: Hashable & Sendable>: Identifiable {
     public let value: Value
-    public let title: LocalizedStringKey?
+    public let title: Text?
     public let icon: Image?
     public let detail: Text?
-    public let accessibilityLabel: LocalizedStringKey
+    public let accessibilityLabel: Text
 
     public var id: Value { value }
 
     public init(_ value: Value, title: LocalizedStringKey, icon: Image? = nil, detail: Text? = nil) {
+        self.init(value, title: Text(title), icon: icon, detail: detail)
+    }
+
+    /// An option titled with a `Text`: for a title that is the app's data (a device's name), which
+    /// is shown as it is rather than looked up.
+    public init(_ value: Value, title: Text, icon: Image? = nil, detail: Text? = nil) {
         self.value = value
         self.title = title
         self.icon = icon
@@ -25,7 +31,7 @@ public struct ChoiceOption<Value: Hashable & Sendable>: Identifiable {
         self.title = nil
         self.icon = icon
         self.detail = nil
-        self.accessibilityLabel = accessibilityLabel
+        self.accessibilityLabel = Text(accessibilityLabel)
     }
 }
 
@@ -66,7 +72,7 @@ public struct Segment<Value: Hashable & Sendable>: View {
         Button(action: action) {
             HStack(spacing: Space.extraSmall) {
                 option.icon
-                option.title.map { Text($0) }
+                option.title
             }
             .font(TypeToken.controlSmall.weight(isSelected ? .semibold : .medium))
             .foregroundStyle(isSelected ? .ink : .inkMuted)
@@ -80,7 +86,7 @@ public struct Segment<Value: Hashable & Sendable>: View {
             .contentShape(Capsule())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(Text(option.accessibilityLabel))
+        .accessibilityLabel(option.accessibilityLabel)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
@@ -122,7 +128,7 @@ public struct RadioRow<Value: Hashable & Sendable>: View {
             HStack(spacing: Space.medium) {
                 SelectionMark(isSelected: isSelected)
                 option.icon
-                option.title.map { Text($0) }
+                option.title
                     .font(isSelected ? .bodyStrong : .body)
                     .foregroundStyle(.ink)
                 Spacer(minLength: Space.small)
@@ -137,7 +143,7 @@ public struct RadioRow<Value: Hashable & Sendable>: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(Text(option.accessibilityLabel))
+        .accessibilityLabel(option.accessibilityLabel)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }

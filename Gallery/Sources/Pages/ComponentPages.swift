@@ -34,6 +34,7 @@ struct ButtonsPage: View {
                         ButtonSecondary("Small", size: .small) {}
                         ButtonSecondary("Pulling", fillsWidth: true, isBusy: true) {}
                         ButtonSecondary("Disabled", fillsWidth: true) {}.disabled(true)
+                        ButtonSecondary("Delete bus", icon: Image(systemName: "trash"), fillsWidth: true, role: .destructive) {}
                     }
                 }
             }
@@ -88,6 +89,8 @@ struct SelectionPage: View {
                 PanelList {
                     ToggleSwitch("Logarithmic axis", isOn: .constant(true)).padding(.horizontal, Space.large)
                     ToggleSwitch("Show grid", isOn: .constant(false)).padding(.horizontal, Space.large)
+                    ToggleSwitch("The click goes here", detail: Text("A default only: a song can send its own."), isOn: .constant(true))
+                        .padding(.horizontal, Space.large)
                 }
             }
             Sample("SelectionMark") {
@@ -186,6 +189,16 @@ struct TagsPage: View {
                     HStack(spacing: Space.small) {
                         SwatchPlaceholder()
                         SwatchPlaceholder(diameter: 38)
+                    }
+                }
+            }
+            Sample("Badge: a monogram, an emoji, a picture or a glyph on a disc") {
+                Panel {
+                    HStack(spacing: Space.medium) {
+                        Badge(.monogram("Hanna Huth"), diameter: 44)
+                        Badge(.emoji("🥁"), colour: .washAmber, diameter: 44)
+                        Badge(.image(Image(systemName: "photo.artframe")), colour: .washTeal, diameter: 44)
+                        Badge(.glyph(Image(systemName: "music.mic")), fill: .red, diameter: 44, gradient: true)
                     }
                 }
             }

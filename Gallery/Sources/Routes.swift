@@ -35,7 +35,7 @@ enum GallerySection: String, CaseIterable, Hashable {
         case .tokens: [.colours, .spacing, .radii, .sizes, .type, .materials]
         case .resources: [.icons, .images, .textures, .wallpapers]
         case .surfaces: [.finishes, .tints, .appearance, .backdrops, .overlays]
-        case .controls: [.buttons, .selection, .pickers, .fields, .knobs, .faders]
+        case .controls: [.buttons, .selection, .pickers, .fields, .forms, .knobs, .faders]
         case .collections: [.lists, .glassList, .cards, .iconGroups, .carousel, .tags, .conversation]
         case .feedback: [.banners, .emptyStates, .progress]
         case .layout: [.workspace, .code]
@@ -60,7 +60,7 @@ enum GallerySection: String, CaseIterable, Hashable {
 enum GalleryPage: String, CaseIterable, Hashable {
     case colours, spacing, radii, sizes, type, materials
     case icons, images, textures, wallpapers
-    case appearance, tints, finishes, code, carousel, iconGroups, glassList, conversation, knobs, faders, backdrops, buttons, selection, pickers, fields, banners, lists, tags, cards, emptyStates, progress, overlays, workspace
+    case appearance, tints, finishes, code, carousel, iconGroups, glassList, conversation, knobs, faders, backdrops, buttons, selection, pickers, fields, forms, banners, lists, tags, cards, emptyStates, progress, overlays, workspace
 
     var title: LocalizedStringKey {
         switch self {
@@ -89,6 +89,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .selection: "Checkboxes and toggles"
         case .pickers: "Pickers"
         case .fields: "Fields"
+        case .forms: "Forms"
         case .banners: "Banners"
         case .lists: "Panels and rows"
         case .tags: "Tags and swatches"
@@ -126,6 +127,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .buttons: "ButtonPrimary, ButtonSecondary, ActionBar"
         case .pickers: "SegmentedControlGlass, RadioList, StepperJump"
         case .fields: "FieldText, FieldSecure, FieldSearch"
+        case .forms: "FieldPicker, FieldStepper, FieldDate, EntryList, SwatchPicker, IconPicker"
         case .banners: "Banner, in three tones"
         case .selection: "Checkbox, ToggleSwitch, SelectionMark"
         case .lists: "Panel, PanelList, Row, SectionLabel"
@@ -161,6 +163,7 @@ enum GalleryPage: String, CaseIterable, Hashable {
         case .glassList: GlassListPage()
         case .knobs: KnobsPage()
         case .faders: FadersPage()
+        case .forms: FormsPage()
         case .backdrops: BackdropsPage()
         case .buttons: ButtonsPage()
         case .selection: SelectionPage()
