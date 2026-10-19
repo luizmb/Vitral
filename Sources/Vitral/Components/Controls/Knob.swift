@@ -167,7 +167,9 @@ public struct Knob: View {
             .frame(width: proxy.size.width, height: proxy.size.height)
             .contentShape(Circle())
             .gesture(drag(in: proxy.size))
-            .simultaneousGesture(TapGesture(count: 2).onEnded { reset() })
+            // Only a control given a `resetValue` has double-tap semantics; without one there is
+            // nothing to recognise, and a quick second touch is just a touch.
+            .simultaneousGesture(TapGesture(count: 2).onEnded { reset() }, including: resetValue == nil ? .none : .all)
         }
         .aspectRatio(1, contentMode: .fit)
         .accessibilityElement()

@@ -240,7 +240,9 @@ public struct Fader: View {
                 // Side by side, so the drag (and the thumb under the finger) answers at once;
                 // waiting to rule out a double tap held every press back.
                 .gesture(drag(length: axis == .horizontal ? proxy.size.width : proxy.size.height))
-                .simultaneousGesture(TapGesture(count: 2).onEnded { reset() })
+                // Only a control given a `resetValue` has double-tap semantics; without one there is
+                // nothing to recognise, and a quick second touch is just a touch.
+                .simultaneousGesture(TapGesture(count: 2).onEnded { reset() }, including: resetValue == nil ? .none : .all)
         }
         .frame(width: axis == .vertical ? style.breadth : nil, height: axis == .horizontal ? style.breadth : nil)
         .frame(maxWidth: axis == .horizontal ? .infinity : nil, maxHeight: axis == .vertical ? .infinity : nil)
