@@ -37,6 +37,7 @@ public struct FieldPicker<Value: Hashable & Sendable>: View {
             .pickerStyle(.menu)
             .tint(Color(accent.base, scheme: scheme))
         }
+        .padding(.vertical, Space.small)
         .frame(minHeight: Size.hitTarget)
     }
 }
@@ -65,6 +66,7 @@ public struct FieldValue<Value: View>: View {
                 .foregroundStyle(.inkMuted)
                 .multilineTextAlignment(.trailing)
         }
+        .padding(.vertical, Space.small)
         .frame(minHeight: Size.hitTarget)
         .accessibilityElement(children: .combine)
     }
@@ -124,6 +126,7 @@ public struct FieldNumber: View {
                 .onSubmit { onEndEditing() }
             suffix.map { suffix in suffix.font(.body).foregroundStyle(.inkMuted) }
         }
+        .padding(.vertical, Space.small)
         .frame(minHeight: Size.hitTarget)
     }
 }
@@ -151,6 +154,7 @@ public struct FieldStepper<Value: Strideable>: View {
         Stepper(value: $value, in: range, step: step) {
             label.font(.body).foregroundStyle(.ink).monospacedDigit()
         }
+        .padding(.vertical, Space.small)
         .frame(minHeight: Size.hitTarget)
     }
 }
@@ -203,6 +207,7 @@ public struct FieldDate: View {
                         .font(.body.monospacedDigit())
                         .foregroundStyle(isPicking ? Color(accent.base, scheme: scheme) : Color(.inkMuted, scheme: scheme))
                 }
+                .padding(.vertical, Space.small)
                 .frame(minHeight: Size.hitTarget)
                 .contentShape(Rectangle())
             }
@@ -269,6 +274,7 @@ public struct EntryList: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel(removeLabel(entry))
             }
+            .padding(.vertical, Space.small)
             .frame(minHeight: Size.hitTarget)
         }
         HStack(spacing: Space.medium) {
@@ -279,6 +285,7 @@ public struct EntryList: View {
                 .disabled(!canAdd)
                 .tint(Color(accent.base, scheme: scheme))
         }
+        .padding(.vertical, Space.small)
         .frame(minHeight: Size.hitTarget)
     }
 }

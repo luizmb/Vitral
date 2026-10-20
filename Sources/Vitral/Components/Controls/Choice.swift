@@ -140,6 +140,7 @@ public struct RadioRow<Value: Hashable & Sendable>: View {
                     .foregroundStyle(.inkFaint)
             }
             .padding(.horizontal, Space.large)
+            .padding(.vertical, Space.small)
             .frame(minHeight: Size.hitTarget + Space.small)
             .background(isSelected ? Color(.selectedSurface, scheme: scheme).opacity(0.5) : .clear)
             .contentShape(Rectangle())

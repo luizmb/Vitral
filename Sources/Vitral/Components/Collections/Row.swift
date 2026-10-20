@@ -72,6 +72,7 @@ public struct Row<Leading: View, Trailing: View>: View {
             }
         }
         .padding(.horizontal, Space.large)
+        .padding(.vertical, Space.small)
         .frame(minHeight: Size.hitTarget + Space.small)
         .background(wash.map { Color($0, scheme: scheme) })
         .opacity(state == .dimmed ? 0.45 : 1)
