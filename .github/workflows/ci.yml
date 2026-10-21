@@ -26,7 +26,7 @@ jobs:
       # Gallery and runs it.
       - run: >
           xcodebuild test -project VitralGallery.xcodeproj -scheme Gallery
-          -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max' -skipMacroValidation
+          -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max' -skipMacroValidation CODE_SIGNING_ALLOWED=NO
         working-directory: Gallery
         env:
           TEST_RUNNER_CI: "true"

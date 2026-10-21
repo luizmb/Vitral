@@ -25,6 +25,10 @@ targets:
     dependencies:
       - package: Vitral
         product: Vitral
+    # Signing comes from the xcconfig (team, style), so the release jobs can override it.
+    configFiles:
+      Debug: Config/Shared.xcconfig
+      Release: Config/Shared.xcconfig
     # Each sample's ⓘ shows its code, copied out of the pages before every build so it can't drift.
     # A clean environment, because the build's (an iOS SDK) would make the script compile for iOS.
     preBuildScripts:
@@ -47,7 +51,8 @@ targets:
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
-        CODE_SIGN_IDENTITY: ""
+        # TestFlight asks: the Gallery uses no encryption beyond the system's.
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
 
   # Hosted in the Gallery app: glass only renders in a real window, which a package test target
   # doesn't have.

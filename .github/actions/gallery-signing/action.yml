@@ -1,0 +1,86 @@
+name: Gallery signing
+description: >
+  Everything the Gallery needs to be signed for the App Store on a fresh runner: the
+  distribution certificate in a keychain of its own, the App Store Connect API key where Xcode
+  looks for it, the provisioning profile installed (made first if the account has none), and
+  the signing settings in Gallery/Config/Local.xcconfig. Undo with the cleanup step in each
+  workflow.
+
+inputs:
+  certificate-p12:
+    required: true
+  certificate-password:
+    required: true
+  api-key-id:
+    required: true
+  api-key-p8:
+    required: true
+  api-issuer-id:
+    required: true
+  development-team:
+    required: true
+
+runs:
+  using: composite
+  steps:
+    # Imported rather than left to -allowProvisioningUpdates: Apple caps distribution
+    # certificates per team, so CI reuses one pinned certificate instead of minting one a run.
+    - name: Import distribution certificate
+      shell: bash
+      env:
+        CERTIFICATE_P12: ${{ inputs.certificate-p12 }}
+        CERTIFICATE_PASSWORD: ${{ inputs.certificate-password }}
+      run: |
+        set -euo pipefail
+        KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
+        KEYCHAIN_PATH="$RUNNER_TEMP/signing.keychain-db"
+        echo "$CERTIFICATE_P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+        security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+        security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+        security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+        security import "$RUNNER_TEMP/cert.p12" -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+        security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+        security list-keychain -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | sed 's/"//g')
+        # The serial, to find the same certificate on the account when a profile is made.
+        # OpenSSL 3 needs -legacy for Keychain-exported .p12 files; LibreSSL doesn't know it.
+        PEM=$(openssl pkcs12 -in "$RUNNER_TEMP/cert.p12" -passin env:CERTIFICATE_PASSWORD -nokeys -legacy 2>/dev/null \
+          || openssl pkcs12 -in "$RUNNER_TEMP/cert.p12" -passin env:CERTIFICATE_PASSWORD -nokeys)
+        SERIAL=$(echo "$PEM" | openssl x509 -noout -serial | cut -d= -f2)
+        echo "CERT_SERIAL=$SERIAL" >> "$GITHUB_ENV"
+        rm "$RUNNER_TEMP/cert.p12"
+
+    - name: Set up App Store Connect API key
+      shell: bash
+      env:
+        API_KEY_ID: ${{ inputs.api-key-id }}
+        API_KEY_P8: ${{ inputs.api-key-p8 }}
+      run: |
+        set -euo pipefail
+        mkdir -p ~/.appstoreconnect/private_keys
+        echo "$API_KEY_P8" | base64 --decode > ~/.appstoreconnect/private_keys/AuthKey_${API_KEY_ID}.p8
+
+    - name: Install App Store provisioning profile
+      shell: bash
+      env:
+        API_KEY_ID: ${{ inputs.api-key-id }}
+        API_ISSUER_ID: ${{ inputs.api-issuer-id }}
+        BUNDLE_ID: lu.ios.vitral.gallery
+        PROFILE_NAME: VitralGallery AppStore Distribution
+      run: |
+        set -euo pipefail
+        pip3 install --quiet --break-system-packages pyjwt cryptography requests
+        python3 .github/scripts/install_profile.py
+
+    # In Local.xcconfig, not as xcodebuild command-line overrides: those reach the whole build
+    # graph, packages included, which have no team and fail once forced into Manual signing.
+    - name: Write CI-only signing config
+      shell: bash
+      env:
+        DEVELOPMENT_TEAM: ${{ inputs.development-team }}
+      run: |
+        cat >> Gallery/Config/Local.xcconfig <<XCCONFIG
+        DEVELOPMENT_TEAM = ${DEVELOPMENT_TEAM}
+        CODE_SIGN_STYLE = Manual
+        CODE_SIGN_IDENTITY = Apple Distribution
+        PROVISIONING_PROFILE_SPECIFIER = VitralGallery AppStore Distribution
+        XCCONFIG

@@ -1,0 +1,76 @@
+name: Create Release Candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number (e.g. 1.2.3)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  create-rc:
+    name: Create release/${{ inputs.version }}
+    runs-on: ubuntu-latest
+    steps:
+      # A push with the default GITHUB_TOKEN doesn't start other workflows (GitHub's
+      # anti-recursion rule), so the release/* branch below would never start release.yml's
+      # RC build. PAT_TOKEN (a fine-grained PAT for this repo, Contents: read/write) does.
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Validate version format
+        run: |
+          VERSION="${{ inputs.version }}"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid version format: $VERSION — expected X.Y.Z"
+            exit 1
+          fi
+
+      - name: Ensure branch does not already exist
+        run: |
+          BRANCH="release/${{ inputs.version }}"
+          if git ls-remote --exit-code --heads origin "$BRANCH" > /dev/null 2>&1; then
+            echo "::error::Branch $BRANCH already exists"
+            exit 1
+          fi
+
+      # Vitral is a library and an app: the package's version is the tag, and the Gallery
+      # (the app on TestFlight) carries the same version, with a build number that only ever
+      # grows. Both are bumped on main before branching, so main and the eventual tag agree.
+      # Any doc that pins the package with `from: "X.Y.Z"` follows too.
+      - name: Bump versions to ${{ inputs.version }} (Gallery + docs)
+        run: |
+          VER="${{ inputs.version }}"
+          PROJECT_YML="Gallery/project.yml"
+          CURRENT_BUILD=$(grep -m1 'CURRENT_PROJECT_VERSION: "' "$PROJECT_YML" | grep -o '[0-9]\+')
+          NEXT_BUILD=$((CURRENT_BUILD + 1))
+          perl -pi -e "s/MARKETING_VERSION: \"[0-9]+(\.[0-9]+)*\"/MARKETING_VERSION: \"${VER}\"/g" "$PROJECT_YML"
+          perl -pi -e "s/CURRENT_PROJECT_VERSION: \"[0-9]+\"/CURRENT_PROJECT_VERSION: \"${NEXT_BUILD}\"/g" "$PROJECT_YML"
+
+          FILES=$(grep -rl "Vitral\.git" README.md Sources 2>/dev/null || true)
+          for f in $FILES; do
+            perl -0777 -pi -e "s{(Vitral\.git\"[^)]*?from:\s*\")[0-9]+\.[0-9]+\.[0-9]+}{\${1}${VER}}g" "$f"
+          done
+
+          if git diff --quiet; then
+            echo "::notice::versions already ${VER} (build ${NEXT_BUILD})"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -am "chore: bump version to ${VER} (Gallery build ${NEXT_BUILD})"
+            git push origin HEAD:main
+            echo "::notice::version bumped to ${VER} (Gallery build ${NEXT_BUILD})"
+          fi
+
+      - name: Create and push release branch
+        run: |
+          BRANCH="release/${{ inputs.version }}"
+          git checkout -b "$BRANCH"
+          git push origin "$BRANCH"
+          echo "::notice::Branch $BRANCH created — RC build started automatically"

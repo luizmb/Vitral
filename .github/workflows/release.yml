@@ -1,0 +1,151 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - 'release/*'
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  # ============================================================================
+  # RELEASE CANDIDATE BUILD - Triggered on release/* branches
+  # ============================================================================
+
+  # The library: VitralTokens is the part that builds everywhere (Linux, the stand-in for
+  # Windows and Android here); Vitral itself is SwiftUI, so Apple only.
+  rc-test-linux:
+    name: RC - Test tokens (Linux)
+    if: startsWith(github.ref, 'refs/heads/release/')
+    runs-on: ubuntu-latest
+    container: swift:6.3
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: swift test
+
+  # The library on Apple, and the app: the package's tests, the Gallery built and its tests
+  # run, then the Gallery signed for the App Store, so a bad certificate, profile or team
+  # fails the RC rather than the TestFlight upload after the tag.
+  rc-test:
+    name: RC - Test & Sign Gallery
+    if: startsWith(github.ref, 'refs/heads/release/')
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_26.5.app
+
+      - name: swift test
+        run: swift test 2>&1
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: xcodegen generate
+        working-directory: Gallery
+        run: xcodegen generate 2>&1
+
+      # Snapshot references only compare on the machine that recorded them, so the suite is
+      # skipped here (TEST_RUNNER_CI reaches the test process as CI); this still builds the
+      # Gallery and runs it.
+      - name: xcodebuild test Gallery
+        working-directory: Gallery
+        env:
+          TEST_RUNNER_CI: "true"
+        run: >
+          xcodebuild test -project VitralGallery.xcodeproj -scheme Gallery
+          -destination 'platform=iOS Simulator,name=iPhone 17 Pro Max'
+          -skipMacroValidation CODE_SIGNING_ALLOWED=NO 2>&1
+
+      - uses: ./.github/actions/gallery-signing
+        with:
+          certificate-p12: ${{ secrets.DISTRIBUTION_CERTIFICATE_P12 }}
+          certificate-password: ${{ secrets.DISTRIBUTION_CERTIFICATE_PASSWORD }}
+          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
+          api-key-p8: ${{ secrets.APPSTORE_API_KEY_P8 }}
+          api-issuer-id: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+          development-team: ${{ secrets.DEVELOPMENT_TEAM }}
+
+      - name: xcodebuild Gallery (signed)
+        env:
+          API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+        run: |
+          xcodebuild build \
+            -project Gallery/VitralGallery.xcodeproj \
+            -scheme Gallery \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -skipMacroValidation \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$HOME/.appstoreconnect/private_keys/AuthKey_${API_KEY_ID}.p8" \
+            -authenticationKeyID "$API_KEY_ID" \
+            -authenticationKeyIssuerID "$API_ISSUER_ID" \
+            2>&1
+
+      - name: Clean up signing keychain and API key
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/signing.keychain-db" 2>/dev/null || true
+          rm -rf ~/.appstoreconnect
+
+  rc-notify-status:
+    name: RC - Notify Status
+    if: startsWith(github.ref, 'refs/heads/release/') && always()
+    runs-on: ubuntu-latest
+    needs: [rc-test-linux, rc-test]
+    steps:
+      - name: Success Notification
+        if: needs.rc-test.result == 'success' && needs.rc-test-linux.result == 'success'
+        run: |
+          echo "::notice::Release Candidate ${GITHUB_REF_NAME#release/} is ready for promotion"
+          echo "Run 'Promote RC to Release' when ready, then 'Promote Version to TestFlight' for the Gallery."
+
+      - name: Failure Notification
+        if: needs.rc-test.result != 'success' || needs.rc-test-linux.result != 'success'
+        run: |
+          echo "::error::Release Candidate build failed — review failed jobs and push fixes to ${{ github.ref_name }}"
+          exit 1
+
+  # ============================================================================
+  # RELEASE PROMOTION - Triggered on version tags (vX.Y.Z)
+  # ============================================================================
+
+  create-release:
+    name: Promote - Create Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate Tag Format
+        run: |
+          TAG="${{ github.ref_name }}"
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid tag format: $TAG — expected vX.Y.Z"
+            exit 1
+          fi
+
+      - name: Create Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ github.ref_name }}"
+          PREV_TAG=$(git describe --tags --abbrev=0 "${TAG}^" 2>/dev/null || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            NOTES="Initial release"
+          else
+            NOTES="## Changes
+
+          $(git log "${PREV_TAG}..${TAG}" --oneline)"
+          fi
+          gh release create "$TAG" --title "Vitral $TAG" --notes "$NOTES"
+          echo "::notice::Release $TAG published: ${{ github.server_url }}/${{ github.repository }}/releases/tag/$TAG"
