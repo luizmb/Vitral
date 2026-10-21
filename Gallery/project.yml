@@ -43,12 +43,16 @@ targets:
         # identity; inheriting hands the choice back to Shared.xcconfig / Local.xcconfig.
         CODE_SIGN_IDENTITY: $(inherited)
         PRODUCT_BUNDLE_IDENTIFIER: lu.ios.vitral.gallery
+        # App Store Connect rejects names another app already has (ITMS-90129): "Gallery" and
+        # "Vitral" both are. The module stays Gallery, so the code and tests don't change.
+        PRODUCT_NAME: VitralGallery
+        PRODUCT_MODULE_NAME: Gallery
         MARKETING_VERSION: "0.5.0"
         CURRENT_PROJECT_VERSION: "2"
         SWIFT_VERSION: "6.0"
         TARGETED_DEVICE_FAMILY: "1,2"
         GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_KEY_CFBundleDisplayName: Vitral
+        INFOPLIST_KEY_CFBundleDisplayName: Vitral Gallery
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
@@ -76,7 +80,7 @@ targets:
       base:
         SWIFT_VERSION: "6.0"
         GENERATE_INFOPLIST_FILE: YES
-        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/Gallery.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Gallery"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/VitralGallery.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/VitralGallery"
         BUNDLE_LOADER: "$(TEST_HOST)"
         CODE_SIGN_IDENTITY: ""
 
