@@ -84,6 +84,7 @@ public struct FieldContainer<Input: View>: View {
                 }
             }
             .padding(.horizontal, Space.medium + Space.extraSmall)
+            .padding(.vertical, Space.small)
             .frame(minHeight: Size.hitTarget)
             .glassSurface(glass.tinted(status.style?.background ?? glass.tint), cornerRadius: Radius.medium)
             .overlay {

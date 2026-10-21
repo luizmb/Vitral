@@ -60,6 +60,7 @@ public struct Checkbox: View {
                     .font(.body)
                     .foregroundStyle(.ink)
             }
+            .padding(.vertical, Space.small)
             .frame(minHeight: Size.hitTarget)
             .contentShape(Rectangle())
         }
@@ -101,6 +102,7 @@ public struct ToggleSwitch: View {
         }
         .toggleStyle(.switch)
         .tint(Color(accent.base, scheme: scheme))
+        .padding(.vertical, Space.small)
         .frame(minHeight: Size.hitTarget)
     }
 }

@@ -37,6 +37,7 @@ public struct FieldPicker<Value: Hashable & Sendable>: View {
             .pickerStyle(.menu)
             .tint(Color(accent.base, scheme: scheme))
         }
+        .padding(.vertical, Space.small)
         .frame(minHeight: Size.hitTarget)
     }
 }
@@ -65,6 +66,7 @@ public struct FieldValue<Value: View>: View {
                 .foregroundStyle(.inkMuted)
                 .multilineTextAlignment(.trailing)
         }
+        .padding(.vertical, Space.small)
         .frame(minHeight: Size.hitTarget)
         .accessibilityElement(children: .combine)
     }
@@ -81,36 +83,33 @@ public extension FieldValue where Value == Text {
     }
 }
 
-/// A number to type, on one line: the title, the number, and an optional unit after it. `format`
-/// both writes and reads it, so it is the app's, in the app's locale (`.number.locale(locale)`):
-/// 1.5 typed in English is 1,5 in Portuguese.
-public struct FieldNumber<Format: ParseableFormatStyle>: View where Format.FormatInput == Double, Format.FormatOutput == String {
+/// A number to type, on one line: the title, the number, and an optional unit after it. The text
+/// is the app's both ways: it writes the value in its own locale (1.5 in English, 1,5 in
+/// Portuguese) and reads back what was typed, keeping the draft until `onEndEditing`, so nothing
+/// is rewritten under the cursor. Vitral neither formats nor parses it.
+public struct FieldNumber: View {
     let title: Text
-    @Binding var value: Double
-    let format: Format
+    @Binding var text: String
     let suffix: Text?
     let onEndEditing: @MainActor () -> Void
 
     public init(
         _ title: LocalizedStringKey,
-        value: Binding<Double>,
-        format: Format,
+        text: Binding<String>,
         suffix: Text? = nil,
         onEndEditing: @escaping @MainActor () -> Void = {}
     ) {
-        self.init(Text(title), value: value, format: format, suffix: suffix, onEndEditing: onEndEditing)
+        self.init(Text(title), text: text, suffix: suffix, onEndEditing: onEndEditing)
     }
 
     public init(
         _ title: Text,
-        value: Binding<Double>,
-        format: Format,
+        text: Binding<String>,
         suffix: Text? = nil,
         onEndEditing: @escaping @MainActor () -> Void = {}
     ) {
         self.title = title
-        self._value = value
-        self.format = format
+        self._text = text
         self.suffix = suffix
         self.onEndEditing = onEndEditing
     }
@@ -119,7 +118,7 @@ public struct FieldNumber<Format: ParseableFormatStyle>: View where Format.Forma
         HStack(spacing: Space.small) {
             title.font(.body).foregroundStyle(.ink)
             Spacer(minLength: Space.small)
-            TextField(value: $value, format: format) { title }
+            TextField(text: $text) { title }
                 .font(.body.monospacedDigit())
                 .multilineTextAlignment(.trailing)
                 .frame(maxWidth: 110)
@@ -127,6 +126,7 @@ public struct FieldNumber<Format: ParseableFormatStyle>: View where Format.Forma
                 .onSubmit { onEndEditing() }
             suffix.map { suffix in suffix.font(.body).foregroundStyle(.inkMuted) }
         }
+        .padding(.vertical, Space.small)
         .frame(minHeight: Size.hitTarget)
     }
 }
@@ -154,6 +154,7 @@ public struct FieldStepper<Value: Strideable>: View {
         Stepper(value: $value, in: range, step: step) {
             label.font(.body).foregroundStyle(.ink).monospacedDigit()
         }
+        .padding(.vertical, Space.small)
         .frame(minHeight: Size.hitTarget)
     }
 }
@@ -206,6 +207,7 @@ public struct FieldDate: View {
                         .font(.body.monospacedDigit())
                         .foregroundStyle(isPicking ? Color(accent.base, scheme: scheme) : Color(.inkMuted, scheme: scheme))
                 }
+                .padding(.vertical, Space.small)
                 .frame(minHeight: Size.hitTarget)
                 .contentShape(Rectangle())
             }
@@ -272,6 +274,7 @@ public struct EntryList: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel(removeLabel(entry))
             }
+            .padding(.vertical, Space.small)
             .frame(minHeight: Size.hitTarget)
         }
         HStack(spacing: Space.medium) {
@@ -282,6 +285,7 @@ public struct EntryList: View {
                 .disabled(!canAdd)
                 .tint(Color(accent.base, scheme: scheme))
         }
+        .padding(.vertical, Space.small)
         .frame(minHeight: Size.hitTarget)
     }
 }
