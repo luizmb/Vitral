@@ -70,14 +70,19 @@ public struct PanelList<Content: View>: View {
 
 /// An uppercase header over a group.
 public struct SectionLabel: View {
-    let title: LocalizedStringKey
+    let title: Text
 
     public init(_ title: LocalizedStringKey) {
+        self.init(Text(title))
+    }
+
+    /// With text already made: a name to show as it is (`Text(verbatim:)`), or styled text.
+    public init(_ title: Text) {
         self.title = title
     }
 
     public var body: some View {
-        Text(title)
+        title
             .font(.sectionLabel)
             .textCase(.uppercase)
             .kerning(0.5)
@@ -90,12 +95,21 @@ public struct SectionLabel: View {
 /// A titled group: a section label over its content, and an optional accessory at the label's
 /// end (an info button, a count).
 public struct LabelledGroup<Content: View, Accessory: View>: View {
-    let title: LocalizedStringKey
+    let title: Text
     let accessory: Accessory
     let content: Content
 
     public init(
         _ title: LocalizedStringKey,
+        @ViewBuilder accessory: () -> Accessory = { EmptyView() },
+        @ViewBuilder content: () -> Content
+    ) {
+        self.init(Text(title), accessory: accessory, content: content)
+    }
+
+    /// With text already made: a name to show as it is (`Text(verbatim:)`), or styled text.
+    public init(
+        _ title: Text,
         @ViewBuilder accessory: () -> Accessory = { EmptyView() },
         @ViewBuilder content: () -> Content
     ) {
@@ -119,11 +133,16 @@ public struct LabelledGroup<Content: View, Accessory: View>: View {
 /// A screen's scrolling column over its backdrop (graph paper unless told otherwise), its title in
 /// the navigation bar.
 public struct Page<Content: View>: View {
-    let title: LocalizedStringKey
+    let title: Text
     let backdrop: BackdropStyle
     let content: Content
 
     public init(_ title: LocalizedStringKey, backdrop: BackdropStyle = .grid(), @ViewBuilder content: () -> Content) {
+        self.init(Text(title), backdrop: backdrop, content: content)
+    }
+
+    /// With text already made: a name to show as it is (`Text(verbatim:)`), or styled text.
+    public init(_ title: Text, backdrop: BackdropStyle = .grid(), @ViewBuilder content: () -> Content) {
         self.title = title
         self.backdrop = backdrop
         self.content = content()
@@ -140,6 +159,6 @@ public struct Page<Content: View>: View {
             .frame(maxWidth: .infinity)
         }
         .background { Backdrop(backdrop) }
-        .navigationTitle(Text(title))
+        .navigationTitle(title)
     }
 }

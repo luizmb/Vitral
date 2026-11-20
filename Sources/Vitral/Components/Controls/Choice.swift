@@ -27,11 +27,16 @@ public struct ChoiceOption<Value: Hashable & Sendable>: Identifiable {
     }
 
     public init(_ value: Value, icon: Image, accessibilityLabel: LocalizedStringKey) {
+        self.init(value, icon: icon, accessibilityLabel: Text(accessibilityLabel))
+    }
+
+    /// An icon-only option whose VoiceOver name is already made (`Text(verbatim:)`, or styled).
+    public init(_ value: Value, icon: Image, accessibilityLabel: Text) {
         self.value = value
         self.title = nil
         self.icon = icon
         self.detail = nil
-        self.accessibilityLabel = Text(accessibilityLabel)
+        self.accessibilityLabel = accessibilityLabel
     }
 }
 

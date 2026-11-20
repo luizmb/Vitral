@@ -229,8 +229,8 @@ public struct EntryList: View {
     @Environment(\.vitralScheme) private var scheme
     let entries: [String]
     @Binding var draft: String
-    let placeholder: LocalizedStringKey
-    let addTitle: LocalizedStringKey
+    let placeholder: Text
+    let addTitle: Text
     let removeLabel: (String) -> Text
     let onRemove: (Int) -> Void
     let onAdd: () -> Void
@@ -246,6 +246,27 @@ public struct EntryList: View {
         draft: Binding<String>,
         placeholder: LocalizedStringKey,
         addTitle: LocalizedStringKey,
+        removeLabel: @escaping (String) -> Text,
+        onRemove: @escaping (Int) -> Void,
+        onAdd: @escaping () -> Void
+    ) {
+        self.init(
+            entries: entries,
+            draft: draft,
+            placeholder: Text(placeholder),
+            addTitle: Text(addTitle),
+            removeLabel: removeLabel,
+            onRemove: onRemove,
+            onAdd: onAdd
+        )
+    }
+
+    /// With text already made: shown as it is (`Text(verbatim:)`), or styled text.
+    public init(
+        entries: [String],
+        draft: Binding<String>,
+        placeholder: Text,
+        addTitle: Text,
         removeLabel: @escaping (String) -> Text,
         onRemove: @escaping (Int) -> Void,
         onAdd: @escaping () -> Void
@@ -278,10 +299,10 @@ public struct EntryList: View {
             .frame(minHeight: Size.hitTarget)
         }
         HStack(spacing: Space.medium) {
-            TextField(placeholder, text: $draft)
+            TextField(text: $draft, prompt: placeholder) { placeholder }
                 .font(.body)
                 .onSubmit { if canAdd { onAdd() } }
-            Button(addTitle) { onAdd() }
+            Button { onAdd() } label: { addTitle }
                 .disabled(!canAdd)
                 .tint(Color(accent.base, scheme: scheme))
         }

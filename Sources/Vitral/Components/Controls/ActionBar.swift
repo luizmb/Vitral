@@ -27,9 +27,9 @@ public struct ActionBar<Content: View>: View {
 /// One action of an `ActionBar`: an icon with an optional title, in the accent, or in the danger
 /// colour for a destructive one.
 public struct ActionBarButton: View {
-    let title: LocalizedStringKey?
+    let title: Text?
     let icon: Image
-    let accessibilityLabel: LocalizedStringKey
+    let accessibilityLabel: Text
     let role: ButtonRole?
     let isBusy: Bool
     let action: @MainActor () -> Void
@@ -44,6 +44,37 @@ public struct ActionBarButton: View {
         accessibilityLabel: LocalizedStringKey,
         role: ButtonRole? = nil,
         isBusy: Bool = false,
+        action: @escaping @MainActor () -> Void
+    ) {
+        self.init(
+            textTitle: title.map { Text($0) },
+            icon: icon,
+            accessibilityLabel: Text(accessibilityLabel),
+            role: role,
+            isBusy: isBusy,
+            action: action
+        )
+    }
+
+    /// With text already made: shown as it is (`Text(verbatim:)`), or styled text.
+    /// - Parameter accessibilityLabel: what VoiceOver says.
+    public init(
+        _ title: Text? = nil,
+        icon: Image,
+        accessibilityLabel: Text,
+        role: ButtonRole? = nil,
+        isBusy: Bool = false,
+        action: @escaping @MainActor () -> Void
+    ) {
+        self.init(textTitle: title, icon: icon, accessibilityLabel: accessibilityLabel, role: role, isBusy: isBusy, action: action)
+    }
+
+    init(
+        textTitle title: Text?,
+        icon: Image,
+        accessibilityLabel: Text,
+        role: ButtonRole?,
+        isBusy: Bool,
         action: @escaping @MainActor () -> Void
     ) {
         self.isBusy = isBusy
@@ -62,7 +93,7 @@ public struct ActionBarButton: View {
                 } else {
                     icon.font(.subheadline.weight(.medium))
                 }
-                title.map { Text($0).font(.controlSmall).lineLimit(1).minimumScaleFactor(0.8) }
+                title.map { $0.font(.controlSmall).lineLimit(1).minimumScaleFactor(0.8) }
             }
             .foregroundStyle(role == .destructive ? .danger : accent.base)
             .frame(maxWidth: title == nil ? nil : .infinity)
@@ -71,6 +102,6 @@ public struct ActionBarButton: View {
         }
         .buttonStyle(.plain)
         .disabled(isBusy)
-        .accessibilityLabel(Text(accessibilityLabel))
+        .accessibilityLabel(accessibilityLabel)
     }
 }

@@ -9,15 +9,25 @@ public struct AppearancePicker: View {
     }
 
     @Binding var selection: Appearance
-    let systemLabel: LocalizedStringKey
-    let lightLabel: LocalizedStringKey
-    let darkLabel: LocalizedStringKey
+    let systemLabel: Text
+    let lightLabel: Text
+    let darkLabel: Text
 
     public init(
         selection: Binding<Appearance>,
         systemLabel: LocalizedStringKey,
         lightLabel: LocalizedStringKey,
         darkLabel: LocalizedStringKey
+    ) {
+        self.init(selection: selection, systemLabel: Text(systemLabel), lightLabel: Text(lightLabel), darkLabel: Text(darkLabel))
+    }
+
+    /// With labels already made: shown as they are (`Text(verbatim:)`), or styled text.
+    public init(
+        selection: Binding<Appearance>,
+        systemLabel: Text,
+        lightLabel: Text,
+        darkLabel: Text
     ) {
         self._selection = selection
         self.systemLabel = systemLabel

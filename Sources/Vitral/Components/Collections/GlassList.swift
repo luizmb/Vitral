@@ -95,7 +95,7 @@ public enum GlassRows: Hashable, Sendable {
 /// A section of a `GlassList`: a header (its title, and an optional trailing part such as a count
 /// or a button) over rows on the veil, edge to edge unless `rows` says `.padded`.
 public struct GlassSection<Trailing: View, Content: View>: View {
-    let title: LocalizedStringKey?
+    let title: Text?
     let rows: GlassRows
     let trailing: Trailing
     let content: Content
@@ -103,6 +103,25 @@ public struct GlassSection<Trailing: View, Content: View>: View {
     public init(
         _ title: LocalizedStringKey? = nil,
         rows: GlassRows = .edgeToEdge,
+        @ViewBuilder trailing: () -> Trailing,
+        @ViewBuilder content: () -> Content
+    ) {
+        self.init(textTitle: title.map { Text($0) }, rows: rows, trailing: trailing, content: content)
+    }
+
+    /// With a title already made: shown as it is (`Text(verbatim:)`), or styled text.
+    public init(
+        _ title: Text?,
+        rows: GlassRows = .edgeToEdge,
+        @ViewBuilder trailing: () -> Trailing,
+        @ViewBuilder content: () -> Content
+    ) {
+        self.init(textTitle: title, rows: rows, trailing: trailing, content: content)
+    }
+
+    init(
+        textTitle title: Text?,
+        rows: GlassRows,
         @ViewBuilder trailing: () -> Trailing,
         @ViewBuilder content: () -> Content
     ) {
@@ -134,6 +153,11 @@ public extension GlassSection where Trailing == EmptyView {
     init(_ title: LocalizedStringKey? = nil, rows: GlassRows = .edgeToEdge, @ViewBuilder content: () -> Content) {
         self.init(title, rows: rows, trailing: { EmptyView() }, content: content)
     }
+
+    /// With a title already made: shown as it is (`Text(verbatim:)`), or styled text.
+    init(_ title: Text?, rows: GlassRows = .edgeToEdge, @ViewBuilder content: () -> Content) {
+        self.init(title, rows: rows, trailing: { EmptyView() }, content: content)
+    }
 }
 
 /// Rows on the environment's glass, placed as `rows` says, with hairline separators. Edge to edge
@@ -163,7 +187,7 @@ struct GlassRowBackground: View {
 
 /// Something to do to a row, offered by swiping it and in its context menu.
 public struct RowAction {
-    let title: LocalizedStringKey
+    let title: Text
     let icon: Image?
     let role: ButtonRole?
     let tint: ColorToken?
@@ -171,6 +195,17 @@ public struct RowAction {
 
     public init(
         _ title: LocalizedStringKey,
+        icon: Image? = nil,
+        role: ButtonRole? = nil,
+        tint: ColorToken? = nil,
+        action: @escaping @MainActor () -> Void
+    ) {
+        self.init(Text(title), icon: icon, role: role, tint: tint, action: action)
+    }
+
+    /// With a title already made: shown as it is (`Text(verbatim:)`), or styled text.
+    public init(
+        _ title: Text,
         icon: Image? = nil,
         role: ButtonRole? = nil,
         tint: ColorToken? = nil,
@@ -210,9 +245,9 @@ struct RowActionButton: View {
             action.action()
         } label: {
             if let icon = action.icon {
-                Label { Text(action.title) } icon: { icon }
+                Label { action.title } icon: { icon }
             } else {
-                Text(action.title)
+                action.title
             }
         }
     }

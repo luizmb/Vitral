@@ -93,7 +93,7 @@ public struct Workspace<Leading: View, Content: View, Trailing: View, Bottom: Vi
     @Environment(\.vitralScheme) private var scheme
     let mode: WorkspaceMode?
     let exclusive: Bool
-    let closeLabel: LocalizedStringKey
+    let closeLabel: Text
     let content: Content
     let leading: WorkspacePanel<Leading>?
     let trailing: WorkspacePanel<Trailing>?
@@ -318,7 +318,7 @@ public struct Workspace<Leading: View, Content: View, Trailing: View, Bottom: Vi
                     }
                     .buttonStyle(.glass)
                     .buttonBorderShape(.circle)
-                    .accessibilityLabel(Text(closeLabel))
+                    .accessibilityLabel(closeLabel)
                 }
                 .padding(.horizontal, Space.medium)
                 .padding(.top, Space.medium)
@@ -382,6 +382,11 @@ public extension Workspace where Leading == EmptyView, Trailing == EmptyView, Bo
     ///     Sheets are always one at a time: iOS shows one sheet at a time, even on an iPad.
     ///   - closeLabel: what VoiceOver says for the close button on a panel's sheet.
     init(mode: WorkspaceMode? = nil, exclusive: Bool = false, closeLabel: LocalizedStringKey, @ViewBuilder content: () -> Content) {
+        self.init(mode: mode, exclusive: exclusive, closeLabel: Text(closeLabel), content: content)
+    }
+
+    /// With the close label already made: said as it is (`Text(verbatim:)`).
+    init(mode: WorkspaceMode? = nil, exclusive: Bool = false, closeLabel: Text, @ViewBuilder content: () -> Content) {
         self.mode = mode
         self.exclusive = exclusive
         self.closeLabel = closeLabel
@@ -490,13 +495,18 @@ public extension Workspace {
 public struct PanelToggle: View {
     let side: PanelSide
     @Binding var isPresented: Bool
-    let label: LocalizedStringKey
+    let label: Text
 
     @Environment(\.panelAnimation) private var animation
     @Environment(\.accent) private var accent
 
     /// - Parameter label: what VoiceOver says.
     public init(_ side: PanelSide, isPresented: Binding<Bool>, label: LocalizedStringKey) {
+        self.init(side, isPresented: isPresented, label: Text(label))
+    }
+
+    /// - Parameter label: what VoiceOver says, already made (`Text(verbatim:)`).
+    public init(_ side: PanelSide, isPresented: Binding<Bool>, label: Text) {
         self.side = side
         self._isPresented = isPresented
         self.label = label
@@ -518,7 +528,7 @@ public struct PanelToggle: View {
                 .symbolVariant(isPresented ? .fill : .none)
                 .foregroundStyle(isPresented ? accent.base : .ink)
         }
-        .accessibilityLabel(Text(label))
+        .accessibilityLabel(label)
         .accessibilityAddTraits(isPresented ? .isSelected : [])
     }
 }
@@ -540,6 +550,20 @@ public extension View {
         leading: (isPresented: Binding<Bool>, label: LocalizedStringKey)? = nil,
         trailing: (isPresented: Binding<Bool>, label: LocalizedStringKey)? = nil,
         bottom: (isPresented: Binding<Bool>, label: LocalizedStringKey)? = nil
+    ) -> some View {
+        workspaceToolbar(
+            leading: leading.map { ($0.isPresented, Text($0.label)) },
+            trailing: trailing.map { ($0.isPresented, Text($0.label)) },
+            bottom: bottom.map { ($0.isPresented, Text($0.label)) }
+        )
+    }
+
+    /// A `PanelToggle` for each panel given, with what VoiceOver says for it already made
+    /// (`Text(verbatim:)`).
+    func workspaceToolbar(
+        leading: (isPresented: Binding<Bool>, label: Text)?,
+        trailing: (isPresented: Binding<Bool>, label: Text)?,
+        bottom: (isPresented: Binding<Bool>, label: Text)?
     ) -> some View {
         toolbar {
             if let leading {

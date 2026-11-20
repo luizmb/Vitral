@@ -6,11 +6,11 @@ import VitralTokens
 /// On a glass capsule. Stateless: the draft is the binding's; sending is the caller's.
 public struct Composer<Accessory: View>: View {
     @Environment(\.vitralScheme) private var scheme
-    let placeholder: LocalizedStringKey
+    let placeholder: Text
     @Binding var text: String
     let isEditable: Bool
     let isBusy: Bool
-    let sendLabel: LocalizedStringKey
+    let sendLabel: Text
     let accessory: Accessory
     let send: @MainActor () -> Void
 
@@ -29,6 +29,27 @@ public struct Composer<Accessory: View>: View {
         @ViewBuilder accessory: () -> Accessory = { EmptyView() },
         send: @escaping @MainActor () -> Void
     ) {
+        self.init(
+            Text(placeholder),
+            text: text,
+            isEditable: isEditable,
+            isBusy: isBusy,
+            sendLabel: Text(sendLabel),
+            accessory: accessory,
+            send: send
+        )
+    }
+
+    /// With text already made: shown as it is (`Text(verbatim:)`), or styled text.
+    public init(
+        _ placeholder: Text,
+        text: Binding<String>,
+        isEditable: Bool = true,
+        isBusy: Bool = false,
+        sendLabel: Text,
+        @ViewBuilder accessory: () -> Accessory = { EmptyView() },
+        send: @escaping @MainActor () -> Void
+    ) {
         self.placeholder = placeholder
         self._text = text
         self.isEditable = isEditable
@@ -44,7 +65,7 @@ public struct Composer<Accessory: View>: View {
 
     public var body: some View {
         HStack(alignment: .bottom, spacing: Space.small) {
-            TextField(placeholder, text: $text, axis: .vertical)
+            TextField(text: $text, prompt: placeholder, axis: .vertical) { placeholder }
                 .lineLimit(1 ... 4)
                 .textFieldStyle(.plain)
                 .foregroundStyle(.ink)
@@ -68,7 +89,7 @@ public struct Composer<Accessory: View>: View {
             }
             .buttonStyle(.plain)
             .disabled(!canSend)
-            .accessibilityLabel(Text(sendLabel))
+            .accessibilityLabel(sendLabel)
         }
         .padding(.leading, Space.large)
         .padding(.trailing, Space.extraSmall)

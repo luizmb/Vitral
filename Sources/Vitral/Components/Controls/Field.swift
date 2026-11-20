@@ -123,7 +123,7 @@ public struct FieldMessages: View {
 /// A line of text to type. `onEndEditing` fires when the field loses focus: the place to format
 /// (and validate) what was typed, so nothing is rewritten under the cursor while typing.
 public struct FieldText: View {
-    let placeholder: LocalizedStringKey
+    let placeholder: Text
     @Binding var text: String
     let icon: Image?
     let suffix: Text?
@@ -132,11 +132,37 @@ public struct FieldText: View {
     let axis: Axis
     let status: FieldStatus
     let onEndEditing: @MainActor () -> Void
+    @FocusState private var isFocused: Bool
 
     /// - Parameter axis: `.vertical` grows the field line by line for longer text (a lyric, a
     ///   note); Return then ends the line rather than the editing.
     public init(
         _ placeholder: LocalizedStringKey,
+        text: Binding<String>,
+        icon: Image? = nil,
+        suffix: Text? = nil,
+        keyboard: FieldKeyboard = .text,
+        isMonospaced: Bool = false,
+        axis: Axis = .horizontal,
+        status: FieldStatus = .normal,
+        onEndEditing: @escaping @MainActor () -> Void = {}
+    ) {
+        self.init(
+            Text(placeholder),
+            text: text,
+            icon: icon,
+            suffix: suffix,
+            keyboard: keyboard,
+            isMonospaced: isMonospaced,
+            axis: axis,
+            status: status,
+            onEndEditing: onEndEditing
+        )
+    }
+
+    /// With a placeholder already made: text to show as it is (`Text(verbatim:)`), or styled text.
+    public init(
+        _ placeholder: Text,
         text: Binding<String>,
         icon: Image? = nil,
         suffix: Text? = nil,
@@ -161,9 +187,11 @@ public struct FieldText: View {
         FieldContainer(icon: icon, suffix: suffix, status: status) {
             Group {
                 if axis == .vertical {
-                    TextField(placeholder, text: $text, axis: .vertical)
+                    TextField(text: $text, prompt: placeholder, axis: .vertical) { placeholder }
                 } else {
-                    TextField(placeholder, text: $text, onEditingChanged: { editing in if !editing { onEndEditing() } })
+                    TextField(text: $text, prompt: placeholder) { placeholder }
+                        .focused($isFocused)
+                        .onChange(of: isFocused) { _, focused in if !focused { onEndEditing() } }
                 }
             }
             .fontDesign(isMonospaced ? .monospaced : .default)
@@ -174,12 +202,17 @@ public struct FieldText: View {
 
 /// A secret to type: the characters are hidden.
 public struct FieldSecure: View {
-    let placeholder: LocalizedStringKey
+    let placeholder: Text
     @Binding var text: String
     let icon: Image?
     let status: FieldStatus
 
     public init(_ placeholder: LocalizedStringKey, text: Binding<String>, icon: Image? = Image(.lock), status: FieldStatus = .normal) {
+        self.init(Text(placeholder), text: text, icon: icon, status: status)
+    }
+
+    /// With a placeholder already made: text to show as it is (`Text(verbatim:)`), or styled text.
+    public init(_ placeholder: Text, text: Binding<String>, icon: Image? = Image(.lock), status: FieldStatus = .normal) {
         self.placeholder = placeholder
         self._text = text
         self.icon = icon
@@ -188,7 +221,7 @@ public struct FieldSecure: View {
 
     public var body: some View {
         FieldContainer(icon: icon, status: status) {
-            SecureField(placeholder, text: $text)
+            SecureField(text: $text, prompt: placeholder) { placeholder }
                 .textContentType(.password)
         }
     }
@@ -197,12 +230,18 @@ public struct FieldSecure: View {
 /// A search query: a magnifying glass before it, and a button that clears it once there's
 /// something to clear.
 public struct FieldSearch: View {
-    let placeholder: LocalizedStringKey
+    let placeholder: Text
     @Binding var text: String
-    let clearLabel: LocalizedStringKey
+    let clearLabel: Text
 
     /// - Parameter clearLabel: what VoiceOver says for the clear button.
     public init(_ placeholder: LocalizedStringKey, text: Binding<String>, clearLabel: LocalizedStringKey) {
+        self.init(Text(placeholder), text: text, clearLabel: Text(clearLabel))
+    }
+
+    /// With text already made: shown as it is (`Text(verbatim:)`), or styled text.
+    /// - Parameter clearLabel: what VoiceOver says for the clear button.
+    public init(_ placeholder: Text, text: Binding<String>, clearLabel: Text) {
         self.placeholder = placeholder
         self._text = text
         self.clearLabel = clearLabel
@@ -211,7 +250,7 @@ public struct FieldSearch: View {
     public var body: some View {
         FieldContainer(icon: Image(.search)) {
             HStack(spacing: Space.small) {
-                TextField(placeholder, text: $text)
+                TextField(text: $text, prompt: placeholder) { placeholder }
                     .autocorrectionDisabled()
                     .submitLabel(.search)
                 if !text.isEmpty {
@@ -219,7 +258,7 @@ public struct FieldSearch: View {
                         Image(.clear).foregroundStyle(.inkFaint)
                     }
                     .buttonStyle(.borderless)
-                    .accessibilityLabel(Text(clearLabel))
+                    .accessibilityLabel(clearLabel)
                 }
             }
         }
