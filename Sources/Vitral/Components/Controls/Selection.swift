@@ -44,10 +44,15 @@ public struct SelectionMark: View {
 /// An option that's on or off by itself: a square mark and its label. Reads as a toggle to
 /// VoiceOver.
 public struct Checkbox: View {
-    let title: LocalizedStringKey
+    let title: Text
     @Binding var isOn: Bool
 
     public init(_ title: LocalizedStringKey, isOn: Binding<Bool>) {
+        self.init(Text(title), isOn: isOn)
+    }
+
+    /// With text already made: shown as it is (`Text(verbatim:)`), or styled text.
+    public init(_ title: Text, isOn: Binding<Bool>) {
         self.title = title
         self._isOn = isOn
     }
@@ -56,7 +61,7 @@ public struct Checkbox: View {
         Button { isOn.toggle() } label: {
             HStack(spacing: Space.medium) {
                 SelectionMark(isSelected: isOn, shape: .square)
-                Text(title)
+                title
                     .font(.body)
                     .foregroundStyle(.ink)
             }
@@ -65,7 +70,7 @@ public struct Checkbox: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityRepresentation { Toggle(title, isOn: $isOn) }
+        .accessibilityRepresentation { Toggle(isOn: $isOn) { title } }
     }
 }
 

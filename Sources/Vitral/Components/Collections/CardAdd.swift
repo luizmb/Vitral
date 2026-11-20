@@ -5,11 +5,16 @@ import VitralTokens
 /// grid among the cards it adds to.
 public struct CardAdd: View {
     @Environment(\.vitralScheme) private var scheme
-    let title: LocalizedStringKey
+    let title: Text
     let icon: Image
     let action: @MainActor () -> Void
 
     public init(_ title: LocalizedStringKey, icon: Image = Image(.add), action: @escaping @MainActor () -> Void) {
+        self.init(Text(title), icon: icon, action: action)
+    }
+
+    /// With a title already made: shown as it is (`Text(verbatim:)`), or styled text.
+    public init(_ title: Text, icon: Image = Image(.add), action: @escaping @MainActor () -> Void) {
         self.title = title
         self.icon = icon
         self.action = action
@@ -22,7 +27,7 @@ public struct CardAdd: View {
                     .font(.title2)
                     .frame(width: Size.controlLarge + Space.medium, height: Size.controlLarge + Space.medium)
                     .overlay(Circle().strokeBorder(Color(.outline, scheme: scheme), style: StrokeStyle(lineWidth: 1.5, dash: [4, 3])))
-                Text(title).font(.bodyStrong)
+                title.font(.bodyStrong)
             }
             .foregroundStyle(.inkMuted)
             .frame(maxWidth: .infinity, minHeight: 132)

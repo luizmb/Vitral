@@ -6,7 +6,7 @@ import VitralTokens
 /// this says what's going on.
 public struct EmptyState<Artwork: View, Actions: View>: View {
     let artwork: Artwork
-    let title: LocalizedStringKey
+    let title: Text
     let message: Text?
     let actions: Actions
 
@@ -14,7 +14,7 @@ public struct EmptyState<Artwork: View, Actions: View>: View {
         VStack(spacing: Space.medium) {
             artwork.accessibilityHidden(true)
             VStack(spacing: Space.extraSmall) {
-                Text(title)
+                title
                     .font(.title)
                     .foregroundStyle(.ink)
                     .accessibilityAddTraits(.isHeader)
@@ -39,12 +39,22 @@ public struct EmptyState<Artwork: View, Actions: View>: View {
 public extension EmptyState where Actions == EmptyView {
     /// With one of Vitral's illustrations.
     init(_ title: LocalizedStringKey, message: Text? = nil, illustration: Illustration = .empty) where Artwork == IllustrationView {
+        self.init(Text(title), message: message, illustration: illustration)
+    }
+
+    /// With one of Vitral's illustrations, and a title already made (`Text(verbatim:)`, or styled).
+    init(_ title: Text, message: Text? = nil, illustration: Illustration = .empty) where Artwork == IllustrationView {
         self.init(artwork: IllustrationView(illustration), title: title, message: message, actions: EmptyView())
     }
 
     /// With a symbol (any SF Symbol, or a glyph), for tighter spaces (a side column, an inspector)
     /// or a state Vitral has no illustration for.
     init(_ title: LocalizedStringKey, message: Text? = nil, icon: Image) where Artwork == SymbolArtwork {
+        self.init(Text(title), message: message, icon: icon)
+    }
+
+    /// With a symbol, and a title already made (`Text(verbatim:)`, or styled).
+    init(_ title: Text, message: Text? = nil, icon: Image) where Artwork == SymbolArtwork {
         self.init(artwork: SymbolArtwork(icon), title: title, message: message, actions: EmptyView())
     }
 }
@@ -83,10 +93,10 @@ public struct SymbolArtwork: View {
 /// Something went wrong: the broken-pane illustration, what happened, and a way to try again when
 /// there is one.
 public struct ErrorScreen: View {
-    let title: LocalizedStringKey
+    let title: Text
     let message: Text?
     let illustration: Illustration
-    let retry: (title: LocalizedStringKey, action: @MainActor () -> Void)?
+    let retry: (title: Text, action: @MainActor () -> Void)?
 
     /// - Parameters:
     ///   - message: what happened, in the reader's terms. `Text` so it can carry values
@@ -97,6 +107,16 @@ public struct ErrorScreen: View {
         message: Text? = nil,
         illustration: Illustration = .error,
         retry: (title: LocalizedStringKey, action: @MainActor () -> Void)? = nil
+    ) {
+        self.init(Text(title), message: message, illustration: illustration, retry: retry.map { (Text($0.title), $0.action) })
+    }
+
+    /// With text already made: titles to show as they are (`Text(verbatim:)`), or styled text.
+    public init(
+        _ title: Text,
+        message: Text? = nil,
+        illustration: Illustration = .error,
+        retry: (title: Text, action: @MainActor () -> Void)? = nil
     ) {
         self.title = title
         self.message = message

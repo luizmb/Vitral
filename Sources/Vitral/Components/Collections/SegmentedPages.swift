@@ -5,6 +5,13 @@ import VitralTokens
 public protocol PageKind: Hashable, CaseIterable, Sendable where AllCases: RandomAccessCollection {
     var icon: Image { get }
     var title: LocalizedStringKey { get }
+    /// The name as shown. Defaults to `Text(title)`; return `Text(verbatim:)` for a name that is
+    /// already written out (resolved by the app for its locale).
+    var titleText: Text { get }
+}
+
+public extension PageKind {
+    var titleText: Text { Text(title) }
 }
 
 /// Pages with their segments on top, Xcode's inspector way: tap a segment or swipe the pages, and
@@ -27,7 +34,7 @@ public struct SegmentedPages<Page: PageKind, Content: View>: View {
             SegmentedControlGlass(
                 selection: Binding(get: { selection }, set: { page in withAnimation { selection = page } }),
                 options: Page.allCases.map { kind in
-                    showsTitles ? ChoiceOption(kind, title: kind.title, icon: kind.icon) : ChoiceOption(kind, icon: kind.icon, accessibilityLabel: kind.title)
+                    showsTitles ? ChoiceOption(kind, title: kind.titleText, icon: kind.icon) : ChoiceOption(kind, icon: kind.icon, accessibilityLabel: kind.titleText)
                 }
             )
             .padding(Space.medium)

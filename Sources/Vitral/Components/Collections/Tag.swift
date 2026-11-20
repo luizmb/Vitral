@@ -148,4 +148,9 @@ public extension TagCloud {
     init(_ titles: [LocalizedStringKey]) where Content == ForEach<[(offset: Int, element: LocalizedStringKey)], Int, Tag> {
         self.init { ForEach(Array(titles.enumerated()), id: \.offset) { Tag($0.element) } }
     }
+
+    /// One tag per title already made: shown as it is (`Text(verbatim:)`), or styled text.
+    init(_ titles: [Text]) where Content == ForEach<[(offset: Int, element: Text)], Int, Tag> {
+        self.init { ForEach(Array(titles.enumerated()), id: \.offset) { Tag($0.element) } }
+    }
 }
