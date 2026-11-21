@@ -25,6 +25,11 @@ final class GalleryModel {
     var compartments = DemoCompartment.all
     var selectedCompartment: DemoCompartment.ID?
     var editMode = EditMode.inactive
+    /// The Control events page: values the app changes only in answer to the controls' events.
+    var eventKnob = 0.3
+    var eventFader = 0.5
+    var eventLog: [String] = []
+    var eventMessages = 0
     var knobGain = 0.4
     var knobVolume = 0.6
     var knobVolumeStart: Double?
