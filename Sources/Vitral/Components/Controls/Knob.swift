@@ -74,6 +74,11 @@ public extension View {
 /// big as its frame, square. It looks as `style` says, else as the environment's `.knobStyle`.
 /// A double tap returns it to `resetValue` (a pan's centre). `onEditingEnded` is called when an
 /// edit is done (the finger lifts, a double tap resets, VoiceOver adjusts).
+///
+/// Or give it a plain `value` and `onEvent` instead: it then reports what happens to it as
+/// ``ControlEvent``s (pressed, changed, released, cancelled, reset requested, stepped) and changes
+/// nothing itself — for a value a remote device also changes, where the app has to know when the
+/// user's hand is on the control and send one message per gesture.
 public struct Knob: View {
     @Binding var value: Double
     let scale: ValueScale
@@ -82,11 +87,14 @@ public struct Knob: View {
     let startAngle: Double
     let endAngle: Double
     let style: AnyKnobStyle?
-    let resetValue: Double?
-    let onEditingEnded: () -> Void
+    /// A double tap means something (a reset): a tap's landing then doesn't write.
+    let recognizesDoubleTap: Bool
+    let emit: (ControlEvent<Double>) -> Void
     let label: Text
 
     @Environment(\.knobStyle) private var environmentStyle
+    /// Whether a finger is down and has changed the value: bookkeeping for the events, not the value.
+    @State private var touch = ControlTouch.idle
 
     /// - Parameters:
     ///   - format: how the value reads, in the readout and to VoiceOver: the app's, in its locale
@@ -108,7 +116,8 @@ public struct Knob: View {
     ) {
         self.init(
             value: value, scale: scale, format: format, interaction: interaction, startAngle: startAngle, endAngle: endAngle,
-            anyStyle: AnyKnobStyle(style), resetValue: resetValue, onEditingEnded: onEditingEnded, label: label
+            anyStyle: AnyKnobStyle(style), recognizesDoubleTap: resetValue != nil,
+            emit: writingEvents(to: value, resetValue: resetValue, onEditingEnded: onEditingEnded), label: label
         )
     }
 
@@ -126,7 +135,51 @@ public struct Knob: View {
     ) {
         self.init(
             value: value, scale: scale, format: format, interaction: interaction, startAngle: startAngle, endAngle: endAngle,
-            anyStyle: nil, resetValue: resetValue, onEditingEnded: onEditingEnded, label: label
+            anyStyle: nil, recognizesDoubleTap: resetValue != nil,
+            emit: writingEvents(to: value, resetValue: resetValue, onEditingEnded: onEditingEnded), label: label
+        )
+    }
+
+    /// A knob that reports what happens to it and changes nothing itself.
+    ///
+    /// - Parameters:
+    ///   - value: what it shows; the app changes it in answer to the events.
+    ///   - resetsOnDoubleTap: a double tap reports ``ControlEvent/resetRequested`` (and a tap's landing
+    ///     doesn't count as a change, being possibly half of one).
+    ///   - onEvent: each ``ControlEvent``, as it happens.
+    public init(
+        value: Double,
+        scale: ValueScale = ValueScale(),
+        format: @escaping @Sendable (Double) -> Text,
+        interaction: KnobInteraction = .circular,
+        startAngle: Double = -135,
+        endAngle: Double = 135,
+        style: some KnobStyle & Sendable,
+        resetsOnDoubleTap: Bool = false,
+        label: Text,
+        onEvent: @escaping (ControlEvent<Double>) -> Void
+    ) {
+        self.init(
+            value: .constant(value), scale: scale, format: format, interaction: interaction, startAngle: startAngle, endAngle: endAngle,
+            anyStyle: AnyKnobStyle(style), recognizesDoubleTap: resetsOnDoubleTap, emit: onEvent, label: label
+        )
+    }
+
+    /// A knob in the environment's style that reports what happens to it and changes nothing itself.
+    public init(
+        value: Double,
+        scale: ValueScale = ValueScale(),
+        format: @escaping @Sendable (Double) -> Text,
+        interaction: KnobInteraction = .circular,
+        startAngle: Double = -135,
+        endAngle: Double = 135,
+        resetsOnDoubleTap: Bool = false,
+        label: Text,
+        onEvent: @escaping (ControlEvent<Double>) -> Void
+    ) {
+        self.init(
+            value: .constant(value), scale: scale, format: format, interaction: interaction, startAngle: startAngle, endAngle: endAngle,
+            anyStyle: nil, recognizesDoubleTap: resetsOnDoubleTap, emit: onEvent, label: label
         )
     }
 
@@ -138,8 +191,8 @@ public struct Knob: View {
         startAngle: Double,
         endAngle: Double,
         anyStyle: AnyKnobStyle?,
-        resetValue: Double?,
-        onEditingEnded: @escaping () -> Void,
+        recognizesDoubleTap: Bool,
+        emit: @escaping (ControlEvent<Double>) -> Void,
         label: Text
     ) {
         self._value = value
@@ -149,8 +202,8 @@ public struct Knob: View {
         self.startAngle = startAngle
         self.endAngle = endAngle
         self.style = anyStyle
-        self.resetValue = resetValue
-        self.onEditingEnded = onEditingEnded
+        self.recognizesDoubleTap = recognizesDoubleTap
+        self.emit = emit
         self.label = label
     }
 
@@ -179,7 +232,7 @@ public struct Knob: View {
             .gesture(drag(in: proxy.size))
             // Only a control given a `resetValue` has double-tap semantics; without one there is
             // nothing to recognise, and a quick second touch is just a touch.
-            .simultaneousGesture(TapGesture(count: 2).onEnded { reset() }, including: resetValue == nil ? .none : .all)
+            .simultaneousGesture(TapGesture(count: 2).onEnded { emit(.resetRequested) }, including: recognizesDoubleTap ? .all : .none)
         }
         .aspectRatio(1, contentMode: .fit)
         .accessibilityElement()
@@ -187,50 +240,48 @@ public struct Knob: View {
         .accessibilityValue(format(value))
         .accessibilityAdjustableAction { direction in
             switch direction {
-            case .increment: value = scale.stepped(value, by: 1)
-            case .decrement: value = scale.stepped(value, by: -1)
+            case .increment: emit(.stepped(scale.stepped(value, by: 1)))
+            case .decrement: emit(.stepped(scale.stepped(value, by: -1)))
             @unknown default: break
             }
-            onEditingEnded()
         }
     }
 
-    /// Back to `resetValue`, as one whole edit.
-    func reset() {
-        if let resetValue {
-            value = resetValue
-            onEditingEnded()
-        }
+    /// Advances the touch and reports its event, if any.
+    func report(_ step: (ControlTouch, ControlEvent<Double>?)) {
+        touch = step.0
+        step.1.map(emit)
     }
 
     func drag(in size: CGSize) -> some Gesture {
         DragGesture(minimumDistance: 0)
             .onChanged { drag in
+                report(touch.touching())
                 // As a fader: only a drag past the slop writes, and a tap's landing too unless the
                 // knob resets on a double tap (whose second touch arrives after the reset).
                 let moved = TrackGeometry.isDragging(dx: drag.translation.width, dy: drag.translation.height)
                 switch interaction {
                 case .circular:
-                    guard moved || (drag.translation == .zero && resetValue == nil) else { return }
-                    value = scale.value(
+                    guard moved || (drag.translation == .zero && !recognizesDoubleTap) else { return }
+                    report(touch.changing(to: scale.value(
                         at: DialGeometry.fraction(
                             forAngle: DialGeometry.angle(dx: drag.location.x - size.width / 2, dy: drag.location.y - size.height / 2),
                             start: startAngle,
                             end: endAngle
                         )
-                    )
+                    )))
                 case let .vertical(dragStart, travel):
                     if dragStart.wrappedValue == nil { dragStart.wrappedValue = value }
                     // Written only once the finger has moved past the slop, so a double tap's
                     // reset stands.
                     if moved {
-                        value = scale.dragged(from: dragStart.wrappedValue ?? value, by: -drag.translation.height, over: travel)
+                        report(touch.changing(to: scale.dragged(from: dragStart.wrappedValue ?? value, by: -drag.translation.height, over: travel)))
                     }
                 }
             }
             .onEnded { _ in
                 if case let .vertical(dragStart, _) = interaction { dragStart.wrappedValue = nil }
-                onEditingEnded()
+                report(touch.lifting())
             }
     }
 }

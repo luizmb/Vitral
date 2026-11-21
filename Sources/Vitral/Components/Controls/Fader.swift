@@ -90,6 +90,9 @@ public extension View {
 /// values it passes near (0 dB, the centre); a double tap returns it to `resetValue`. Stateless:
 /// the value is the binding's. `onEditingEnded` is called when an edit is done (the finger lifts,
 /// a double tap resets, VoiceOver adjusts): the moment to commit it, or to mark an undo step.
+///
+/// Or give it a plain `value` and `onEvent` instead: it then reports what happens to it as
+/// ``ControlEvent``s and changes nothing itself — for a value a remote device also changes.
 public struct Fader: View {
     @Binding var value: Double
     let scale: ValueScale
@@ -98,14 +101,17 @@ public struct Fader: View {
     let interaction: FaderInteraction
     let centre: Double?
     let detents: [Double]
-    let resetValue: Double?
+    /// A double tap means something (a reset): a tap's landing then doesn't write.
+    let recognizesDoubleTap: Bool
     let title: Text?
     let labels: FaderLabelPlacement
     let given: AnyFaderStyle?
-    let onEditingEnded: () -> Void
+    let emit: (ControlEvent<Double>) -> Void
     let label: Text
 
     @Environment(\.faderStyle) private var environmentStyle
+    /// Whether a finger is down and has changed the value: bookkeeping for the events, not the value.
+    @State private var touch = ControlTouch.idle
 
     /// The style given, else the environment's.
     var style: AnyFaderStyle { given ?? environmentStyle }
@@ -132,7 +138,8 @@ public struct Fader: View {
     ) {
         self.init(
             value: value, scale: scale, format: format, axis: axis, interaction: interaction, centre: centre, detents: detents,
-            resetValue: resetValue, title: title, labels: labels, given: AnyFaderStyle(style), onEditingEnded: onEditingEnded, label: label
+            recognizesDoubleTap: resetValue != nil, title: title, labels: labels, given: AnyFaderStyle(style),
+            emit: writingEvents(to: value, resetValue: resetValue, onEditingEnded: onEditingEnded), label: label
         )
     }
 
@@ -153,7 +160,57 @@ public struct Fader: View {
     ) {
         self.init(
             value: value, scale: scale, format: format, axis: axis, interaction: interaction, centre: centre, detents: detents,
-            resetValue: resetValue, title: title, labels: labels, given: nil, onEditingEnded: onEditingEnded, label: label
+            recognizesDoubleTap: resetValue != nil, title: title, labels: labels, given: nil,
+            emit: writingEvents(to: value, resetValue: resetValue, onEditingEnded: onEditingEnded), label: label
+        )
+    }
+
+    /// A fader that reports what happens to it and changes nothing itself.
+    ///
+    /// - Parameters:
+    ///   - value: what it shows; the app changes it in answer to the events.
+    ///   - resetsOnDoubleTap: a double tap reports ``ControlEvent/resetRequested`` (and a tap's landing
+    ///     doesn't count as a change, being possibly half of one).
+    ///   - onEvent: each ``ControlEvent``, as it happens.
+    public init(
+        value: Double,
+        scale: ValueScale = ValueScale(),
+        format: @escaping @Sendable (Double) -> Text,
+        axis: Axis = .horizontal,
+        interaction: FaderInteraction = .absolute,
+        centre: Double? = nil,
+        detents: [Double] = [],
+        resetsOnDoubleTap: Bool = false,
+        title: Text? = nil,
+        labels: FaderLabelPlacement = .none,
+        style: some FaderStyle & Sendable,
+        label: Text,
+        onEvent: @escaping (ControlEvent<Double>) -> Void
+    ) {
+        self.init(
+            value: .constant(value), scale: scale, format: format, axis: axis, interaction: interaction, centre: centre, detents: detents,
+            recognizesDoubleTap: resetsOnDoubleTap, title: title, labels: labels, given: AnyFaderStyle(style), emit: onEvent, label: label
+        )
+    }
+
+    /// A fader in the environment's style that reports what happens to it and changes nothing itself.
+    public init(
+        value: Double,
+        scale: ValueScale = ValueScale(),
+        format: @escaping @Sendable (Double) -> Text,
+        axis: Axis = .horizontal,
+        interaction: FaderInteraction = .absolute,
+        centre: Double? = nil,
+        detents: [Double] = [],
+        resetsOnDoubleTap: Bool = false,
+        title: Text? = nil,
+        labels: FaderLabelPlacement = .none,
+        label: Text,
+        onEvent: @escaping (ControlEvent<Double>) -> Void
+    ) {
+        self.init(
+            value: .constant(value), scale: scale, format: format, axis: axis, interaction: interaction, centre: centre, detents: detents,
+            recognizesDoubleTap: resetsOnDoubleTap, title: title, labels: labels, given: nil, emit: onEvent, label: label
         )
     }
 
@@ -165,11 +222,11 @@ public struct Fader: View {
         interaction: FaderInteraction,
         centre: Double?,
         detents: [Double],
-        resetValue: Double?,
+        recognizesDoubleTap: Bool,
         title: Text?,
         labels: FaderLabelPlacement,
         given: AnyFaderStyle?,
-        onEditingEnded: @escaping () -> Void,
+        emit: @escaping (ControlEvent<Double>) -> Void,
         label: Text
     ) {
         self._value = value
@@ -179,11 +236,11 @@ public struct Fader: View {
         self.interaction = interaction
         self.centre = centre
         self.detents = detents
-        self.resetValue = resetValue
+        self.recognizesDoubleTap = recognizesDoubleTap
         self.title = title
         self.labels = labels
         self.given = given
-        self.onEditingEnded = onEditingEnded
+        self.emit = emit
         self.label = label
     }
 
@@ -254,7 +311,7 @@ public struct Fader: View {
                 .gesture(drag(length: axis == .horizontal ? proxy.size.width : proxy.size.height))
                 // Only a control given a `resetValue` has double-tap semantics; without one there is
                 // nothing to recognise, and a quick second touch is just a touch.
-                .simultaneousGesture(TapGesture(count: 2).onEnded { reset() }, including: resetValue == nil ? .none : .all)
+                .simultaneousGesture(TapGesture(count: 2).onEnded { emit(.resetRequested) }, including: recognizesDoubleTap ? .all : .none)
         }
         .frame(width: axis == .vertical ? style.breadth : nil, height: axis == .horizontal ? style.breadth : nil)
         .frame(maxWidth: axis == .horizontal ? .infinity : nil, maxHeight: axis == .vertical ? .infinity : nil)
@@ -263,20 +320,17 @@ public struct Fader: View {
         .accessibilityValue(format(value))
         .accessibilityAdjustableAction { direction in
             switch direction {
-            case .increment: value = scale.stepped(value, by: 1)
-            case .decrement: value = scale.stepped(value, by: -1)
+            case .increment: emit(.stepped(scale.stepped(value, by: 1)))
+            case .decrement: emit(.stepped(scale.stepped(value, by: -1)))
             @unknown default: break
             }
-            onEditingEnded()
         }
     }
 
-    /// Back to `resetValue`, as one whole edit.
-    func reset() {
-        if let resetValue {
-            value = resetValue
-            onEditingEnded()
-        }
+    /// Advances the touch and reports its event, if any.
+    func report(_ step: (ControlTouch, ControlEvent<Double>?)) {
+        touch = step.0
+        step.1.map(emit)
     }
 
     /// The value for `fraction`, pulled onto a detent when close.
@@ -287,6 +341,7 @@ public struct Fader: View {
     func drag(length: Double) -> some Gesture {
         DragGesture(minimumDistance: 0)
             .onChanged { drag in
+                report(touch.touching())
                 // A finger that has only wobbled is still tapping, and only a drag past the slop
                 // writes. An absolute fader also goes where a tap lands, unless it resets on a
                 // double tap: on a device the second touch reaches the drag after the double tap
@@ -294,32 +349,32 @@ public struct Fader: View {
                 let moved = TrackGeometry.isDragging(dx: drag.translation.width, dy: drag.translation.height)
                 switch interaction {
                 case .absolute:
-                    guard moved || (drag.translation == .zero && resetValue == nil) else { return }
-                    value = value(
+                    guard moved || (drag.translation == .zero && !recognizesDoubleTap) else { return }
+                    report(touch.changing(to: value(
                         at: TrackGeometry.fraction(
                             at: axis == .horizontal ? drag.location.x : drag.location.y,
                             length: length,
                             thumb: style.thumbLength,
                             reversed: axis == .vertical
                         )
-                    )
+                    )))
                 case let .relative(dragStart):
                     if dragStart.wrappedValue == nil { dragStart.wrappedValue = value }
                     // Written only once the finger has moved past the slop: a touch that stays put
                     // (a tap, the second of a double tap) would write back where it started, over
                     // a reset.
                     if moved {
-                        value = value(
+                        report(touch.changing(to: value(
                             at: scale.fraction(of: dragStart.wrappedValue ?? value)
                                 + (axis == .horizontal ? drag.translation.width : -drag.translation.height)
                                 / TrackGeometry.travel(length: length, thumb: style.thumbLength)
-                        )
+                        )))
                     }
                 }
             }
             .onEnded { _ in
                 if case let .relative(dragStart) = interaction { dragStart.wrappedValue = nil }
-                onEditingEnded()
+                report(touch.lifting())
             }
     }
 }
